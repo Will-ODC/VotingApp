@@ -1,0 +1,23 @@
+<h1>Community Decisions</h1>
+
+<% if (polls.length === 0) { %>
+    <p class="no-polls">No active community decisions at the moment.</p>
+    <% if (user) { %>
+        <a href="/polls/create" class="btn btn-primary">Propose the first initiative!</a>
+    <% } %>
+<% } else { %>
+    <div class="polls-grid">
+        <% polls.forEach(poll => { %>
+            <div class="poll-card">
+                <h3><a href="/polls/<%= poll.id %>"><%= poll.title %></a></h3>
+                <p class="poll-description"><%= poll.description %></p>
+                <div class="poll-meta">
+                    <span>Participants: <%= poll.vote_count %></span>
+                    <% if (poll.closes_at) { %>
+                        <span>Ends: <%= new Date(poll.closes_at).toLocaleDateString() %></span>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+<% } %>

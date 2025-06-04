@@ -1,0 +1,55 @@
+
+<div class="poll-view">
+    <h1><%= poll.title %></h1>
+    <p class="poll-description"><%= poll.description %></p>
+    
+    <div class="poll-meta">
+        <span>Proposed by: <%= poll.creator_name %></span>
+        <span>Total participants: <%= totalVotes %></span>
+        <% if (poll.closes_at) { %>
+            <span>Ends: <%= new Date(poll.closes_at).toLocaleDateString() %></span>
+        <% } %>
+    </div>
+    
+    <% if (!user) { %>
+        <div class="alert alert-info">
+            Please <a href="/auth/login">login</a> to participate in this decision.
+        </div>
+    <% } else if (hasVoted) { %>
+        <div class="alert alert-success">
+            Thank you for participating in this community decision.
+        </div>
+    <% } %>
+    
+    <div class="poll-options">
+        <% if (!hasVoted && user) { %>
+            <form action="/polls/<%= poll.id %>/vote" method="POST">
+                <% options.forEach(option => { %>
+                    <div class="option">
+                        <label>
+                            <input type="radio" name="optionId" value="<%= option.id %>" required>
+                            <%= option.option_text %>
+                        </label>
+                    </div>
+                <% }) %>
+                <button type="submit" class="btn btn-primary">Submit Vote</button>
+            </form>
+        <% } else { %>
+            <% options.forEach(option => { %>
+                <div class="option-result">
+                    <div class="option-text"><%= option.option_text %></div>
+                    <div class="option-bar">
+                        <div class="option-fill" style="width: <%= totalVotes > 0 ? (option.vote_count / totalVotes * 100) : 0 %>%"></div>
+                    </div>
+                    <div class="option-count"><%= option.vote_count %> participants (<%= totalVotes > 0 ? Math.round(option.vote_count / totalVotes * 100) : 0 %>%)</div>
+                </div>
+            <% }) %>
+        <% } %>
+    </div>
+    
+    <% if (user && user.is_admin) { %>
+        <div class="admin-actions">
+            <a href="/polls/<%= poll.id %>/delete" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this initiative?')">Delete Initiative</a>
+        </div>
+    <% } %>
+</div>

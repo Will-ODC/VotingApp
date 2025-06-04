@@ -1,0 +1,47 @@
+
+<div class="profile">
+    <h1>My Profile</h1>
+    
+    <div class="profile-info">
+        <h3>Account Information</h3>
+        <p>Username: <strong><%= user.username %></strong></p>
+        <% if (user.is_admin) { %>
+            <p>Role: <strong>Administrator</strong></p>
+        <% } %>
+        <a href="/profile/change-password" class="btn btn-secondary">Change Password</a>
+    </div>
+    
+    <div class="profile-section">
+        <h3>My Initiatives</h3>
+        <% if (userPolls.length === 0) { %>
+            <p>You haven't proposed any initiatives yet.</p>
+            <a href="/polls/create" class="btn btn-primary">Propose Your First Initiative</a>
+        <% } else { %>
+            <div class="polls-list">
+                <% userPolls.forEach(poll => { %>
+                    <div class="poll-item">
+                        <h4><a href="/polls/<%= poll.id %>"><%= poll.title %></a></h4>
+                        <p>Participants: <%= poll.vote_count %></p>
+                        <p>Created: <%= new Date(poll.created_at).toLocaleDateString() %></p>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+    
+    <div class="profile-section">
+        <h3>My Participation</h3>
+        <% if (votedPolls.length === 0) { %>
+            <p>You haven't participated in any community decisions yet.</p>
+        <% } else { %>
+            <div class="polls-list">
+                <% votedPolls.forEach(poll => { %>
+                    <div class="poll-item">
+                        <h4><a href="/polls/<%= poll.id %>"><%= poll.title %></a></h4>
+                        <p>Your vote: <strong><%= poll.voted_option %></strong></p>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+</div>

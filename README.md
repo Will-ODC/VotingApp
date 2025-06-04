@@ -37,9 +37,9 @@ A web-based voting platform that enables democratic decision-making through comm
    - Or create `.env` with:
      ```
      PORT=3000
-     ADMIN_USERNAME=Will
+     ADMIN_USERNAME=admin
      ADMIN_PASSWORD=your_secure_password
-     ADMIN_EMAIL=wjexc@hotmail.com
+     ADMIN_EMAIL=admin@example.com
      SESSION_SECRET=your-secret-key-change-this-in-production
      ```
 
@@ -56,11 +56,11 @@ A web-based voting platform that enables democratic decision-making through comm
 
 ## Default Admin Account
 
-- **Username**: Will
+If no environment variables are set, the default admin account will be:
+- **Username**: admin
 - **Password**: admin123
-- **Email**: wjexc@hotmail.com
 
-⚠️ **Important**: Change the admin password after first login!
+⚠️ **Important**: Change the admin password immediately after first login!
 
 ## Project Structure
 

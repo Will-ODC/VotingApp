@@ -26,8 +26,16 @@ router.post('/create', requireAuth, async (req, res) => {
 
     try {
         const pollId = await new Promise((resolve, reject) => {
-            // If no end_date provided, set to 30 days from now
-            const closesAt = end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            let closesAt;
+            if (end_date) {
+                // Convert datetime-local format to ISO string
+                closesAt = new Date(end_date).toISOString();
+            } else {
+                // Default to 30 days from now
+                closesAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            }
+            
+            console.log('Creating poll with closes_at:', closesAt);
             
             db.run(
                 `INSERT INTO polls (title, description, created_by, closes_at) 
@@ -61,6 +69,38 @@ router.post('/create', requireAuth, async (req, res) => {
     } catch (error) {
         console.error('Error creating poll:', error);
         res.status(500).render('error', { message: 'Failed to create poll' });
+    }
+});
+
+router.get('/all', requireAuth, async (req, res) => {
+    try {
+        const allPolls = await new Promise((resolve, reject) => {
+            db.all(
+                `SELECT p.*, u.username as creator_name, COUNT(DISTINCT v.id) as vote_count,
+                 CASE 
+                    WHEN datetime(p.closes_at) > datetime('now') AND p.is_active = 1 THEN 'active'
+                    WHEN datetime(p.closes_at) <= datetime('now') THEN 'expired'
+                    ELSE 'deleted'
+                 END as status
+                 FROM polls p 
+                 JOIN users u ON p.created_by = u.id 
+                 LEFT JOIN votes v ON p.id = v.poll_id
+                 GROUP BY p.id
+                 ORDER BY p.created_at DESC`,
+                (err, rows) => {
+                    if (err) reject(err);
+                    else resolve(rows);
+                }
+            );
+        });
+
+        res.render('polls/all', {
+            polls: allPolls,
+            user: req.session.user
+        });
+    } catch (error) {
+        console.error('Error fetching all polls:', error);
+        res.status(500).render('error', { message: 'Failed to load polls' });
     }
 });
 

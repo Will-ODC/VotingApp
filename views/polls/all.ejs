@@ -1,0 +1,86 @@
+<h1>All Community Initiatives</h1>
+
+<div class="filter-tabs">
+    <a href="/" class="btn btn-secondary">Active Only</a>
+    <a href="/polls/all" class="btn btn-primary">All Initiatives</a>
+</div>
+
+<% if (polls.length === 0) { %>
+    <p class="no-polls">No initiatives found.</p>
+<% } else { %>
+    <div class="polls-grid">
+        <% polls.forEach(poll => { %>
+            <div class="poll-card <%= poll.status %>-poll">
+                <div class="poll-status">
+                    <% if (poll.status === 'active') { %>
+                        <span class="badge badge-success">Active</span>
+                    <% } else if (poll.status === 'expired') { %>
+                        <span class="badge badge-warning">Expired</span>
+                    <% } else { %>
+                        <span class="badge badge-danger">Deleted</span>
+                    <% } %>
+                </div>
+                <h3><a href="/polls/<%= poll.id %>"><%= poll.title %></a></h3>
+                <p class="poll-description"><%= poll.description %></p>
+                <div class="poll-meta">
+                    <span>By: <%= poll.creator_name %></span>
+                    <span>Participants: <%= poll.vote_count %></span>
+                </div>
+                <div class="poll-dates">
+                    <small>Created: <%= new Date(poll.created_at).toLocaleDateString() %></small>
+                    <small>Ends: <%= new Date(poll.closes_at).toLocaleDateString() %> <%= new Date(poll.closes_at).toLocaleTimeString() %></small>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+<% } %>
+
+<style>
+.filter-tabs {
+    margin: 2rem 0;
+    display: flex;
+    gap: 1rem;
+}
+
+.poll-status {
+    margin-bottom: 0.5rem;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.expired-poll {
+    opacity: 0.7;
+}
+
+.deleted-poll {
+    opacity: 0.5;
+}
+
+.poll-dates {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+    display: flex;
+    justify-content: space-between;
+}
+</style>

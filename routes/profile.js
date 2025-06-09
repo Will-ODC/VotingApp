@@ -1,8 +1,21 @@
+/**
+ * Profile Routes
+ * 
+ * This module handles user profile functionality:
+ * - View user's created polls and voting history
+ * - Change password functionality
+ * - Personal statistics and activity
+ */
+
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const db = require('../models/database');
 
+/**
+ * Middleware to require user authentication
+ * Redirects to login page if user is not authenticated
+ */
 function requireAuth(req, res, next) {
     if (!req.session.user) {
         return res.redirect('/auth/login');
@@ -10,10 +23,18 @@ function requireAuth(req, res, next) {
     next();
 }
 
+/**
+ * GET /profile
+ * Display user profile page with:
+ * - Polls created by the user
+ * - Polls the user has voted in
+ * - Vote counts for user's polls
+ */
 router.get('/', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
     
     try {
+        // Fetch polls created by the user with vote counts
         const userPolls = await new Promise((resolve, reject) => {
             db.all(
                 `SELECT p.*, COUNT(DISTINCT v.id) as vote_count
@@ -30,6 +51,7 @@ router.get('/', requireAuth, async (req, res) => {
             );
         });
 
+        // Fetch polls the user has voted in with their selected option
         const votedPolls = await new Promise((resolve, reject) => {
             db.all(
                 `SELECT p.*, o.option_text as voted_option
@@ -57,6 +79,10 @@ router.get('/', requireAuth, async (req, res) => {
     }
 });
 
+/**
+ * GET /profile/change-password
+ * Display password change form
+ */
 router.get('/change-password', requireAuth, (req, res) => {
     res.render('profile/change-password', { 
         user: req.session.user,
@@ -65,10 +91,18 @@ router.get('/change-password', requireAuth, (req, res) => {
     });
 });
 
+/**
+ * POST /profile/change-password
+ * Process password change request
+ * - Validates current password
+ * - Enforces password requirements
+ * - Updates password hash in database
+ */
 router.post('/change-password', requireAuth, async (req, res) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const userId = req.session.user.id;
 
+    // Validate password confirmation
     if (newPassword !== confirmPassword) {
         return res.render('profile/change-password', {
             user: req.session.user,
@@ -77,6 +111,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
         });
     }
 
+    // Validate password length requirement
     if (newPassword.length < 6) {
         return res.render('profile/change-password', {
             user: req.session.user,
@@ -86,6 +121,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
     }
 
     try {
+        // Fetch current password hash from database
         const user = await new Promise((resolve, reject) => {
             db.get(
                 'SELECT password FROM users WHERE id = ?',
@@ -97,6 +133,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
             );
         });
 
+        // Verify current password is correct
         const hashedCurrent = crypto.createHash('sha256').update(currentPassword).digest('hex');
         
         if (user.password !== hashedCurrent) {
@@ -107,6 +144,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
             });
         }
 
+        // Hash new password and update in database
         const hashedNew = crypto.createHash('sha256').update(newPassword).digest('hex');
         
         await new Promise((resolve, reject) => {
@@ -120,6 +158,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
             );
         });
 
+        // Show success message
         res.render('profile/change-password', {
             user: req.session.user,
             error: null,
@@ -135,4 +174,5 @@ router.post('/change-password', requireAuth, async (req, res) => {
     }
 });
 
+// Export the router for use in main app
 module.exports = router;

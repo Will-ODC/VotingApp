@@ -12,7 +12,10 @@ const db = require('../models/database');
 
 /**
  * GET /
- * Home page - displays the 10 most recent active polls
+ * Home page - displays polls sorted by popularity and activity
+ * Supports sorting: ?sort=popular|recent|active
+ * Supports search: ?search=query
+ * Default shows most popular polls (by vote count)
  * Only shows polls that are:
  * - Active (not deleted)
  * - Not expired (closes_at is in the future)
@@ -20,17 +23,41 @@ const db = require('../models/database');
  */
 router.get('/', async (req, res) => {
     try {
-        // Fetch recent active polls with vote counts
+        const sort = req.query.sort || 'popular';
+        const search = req.query.search || '';
+        
+        // Build search condition
+        let searchCondition = '';
+        let queryParams = [];
+        if (search.trim()) {
+            searchCondition = `AND (p.title LIKE ? OR p.description LIKE ?)`;
+            const searchPattern = `%${search.trim()}%`;
+            queryParams = [searchPattern, searchPattern];
+        }
+        
+        // Determine order clause based on sort parameter
+        let orderClause = 'ORDER BY vote_count DESC, p.created_at DESC'; // Default: popular
+        if (sort === 'recent') {
+            orderClause = 'ORDER BY p.created_at DESC';
+        } else if (sort === 'active') {
+            // Sort by activity (recent votes + creation time)
+            orderClause = 'ORDER BY last_vote_time DESC, p.created_at DESC';
+        }
+
+        // Fetch active polls with vote counts, search, and sorting
         const polls = await new Promise((resolve, reject) => {
             db.all(`
-                SELECT p.*, COUNT(DISTINCT v.id) as vote_count
+                SELECT p.*, 
+                       COUNT(DISTINCT v.id) as vote_count,
+                       MAX(v.voted_at) as last_vote_time
                 FROM polls p
                 LEFT JOIN votes v ON p.id = v.poll_id
                 WHERE p.is_active = 1 AND datetime(p.closes_at) > datetime('now')
+                ${searchCondition}
                 GROUP BY p.id
-                ORDER BY p.created_at DESC
+                ${orderClause}
                 LIMIT 10
-            `, (err, rows) => {
+            `, queryParams, (err, rows) => {
                 if (err) reject(err);
                 else resolve(rows);
             });
@@ -38,7 +65,9 @@ router.get('/', async (req, res) => {
 
         res.render('index', {
             polls,
-            user: req.session.user || null
+            user: req.session.user || null,
+            currentSort: sort,
+            searchQuery: search
         });
     } catch (error) {
         console.error('Error fetching polls:', error);

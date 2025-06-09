@@ -30,18 +30,221 @@
     </div>
     
     <div class="profile-section">
-        <h3>My Participation</h3>
+        <div class="section-header">
+            <h3>My Participation</h3>
+            <% if (totalVotedPolls > 0) { %>
+                <div class="participation-controls">
+                    <span class="results-info">
+                        Page <%= currentPage %> of <%= totalPages %> 
+                        (<%= ((currentPage - 1) * perPage + 1) %>-<%= Math.min(currentPage * perPage, totalVotedPolls) %> of <%= totalVotedPolls %> polls)
+                    </span>
+                    <% if (totalPages > 1) { %>
+                        <div class="pagination-controls">
+                            <% if (hasPrevPage) { %>
+                                <a href="/profile?page=<%= currentPage - 1 %>" class="btn btn-secondary btn-sm">← Previous</a>
+                            <% } %>
+                            
+                            <span class="page-info">Page <%= currentPage %> of <%= totalPages %></span>
+                            
+                            <% if (hasNextPage) { %>
+                                <a href="/profile?page=<%= currentPage + 1 %>" class="btn btn-secondary btn-sm">Next →</a>
+                            <% } %>
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
         <% if (votedPolls.length === 0) { %>
             <p>You haven't participated in any community decisions yet.</p>
         <% } else { %>
             <div class="polls-list">
                 <% votedPolls.forEach(poll => { %>
-                    <div class="poll-item">
-                        <h4><a href="/polls/<%= poll.id %>"><%= poll.title %></a></h4>
+                    <div class="poll-item <%= poll.poll_status %>-poll">
+                        <div class="poll-header">
+                            <h4><a href="/polls/<%= poll.id %>"><%= poll.title %></a></h4>
+                            <div class="poll-status-badge">
+                                <% if (poll.poll_status === 'active') { %>
+                                    <span class="badge badge-success">Active</span>
+                                <% } else if (poll.poll_status === 'expired') { %>
+                                    <span class="badge badge-warning">Expired</span>
+                                <% } else { %>
+                                    <span class="badge badge-danger">Deleted</span>
+                                <% } %>
+                            </div>
+                        </div>
                         <p>Your vote: <strong><%= poll.voted_option %></strong></p>
+                        <div class="poll-meta">
+                            <span>Created by: <%= poll.creator_name %></span>
+                            <span>Total votes: <%= poll.total_votes %></span>
+                            <% if (poll.voted_at) { %>
+                                <span>Voted: <%= new Date(poll.voted_at).toLocaleDateString() %></span>
+                            <% } %>
+                        </div>
+                        <% if (poll.closes_at) { %>
+                            <div class="poll-timing">
+                                <small>
+                                    <% if (poll.poll_status === 'active') { %>
+                                        Expires: <%= new Date(poll.closes_at).toLocaleDateString() %> at <%= new Date(poll.closes_at).toLocaleTimeString() %>
+                                    <% } else if (poll.poll_status === 'expired') { %>
+                                        Expired: <%= new Date(poll.closes_at).toLocaleDateString() %> at <%= new Date(poll.closes_at).toLocaleTimeString() %>
+                                    <% } %>
+                                </small>
+                            </div>
+                        <% } %>
                     </div>
                 <% }) %>
             </div>
         <% } %>
     </div>
 </div>
+
+<style>
+.profile {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.profile-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-header h3 {
+    margin: 0;
+}
+
+.participation-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.results-info {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-info {
+    font-size: 0.875rem;
+    color: #666;
+    padding: 0 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.poll-item {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    transition: box-shadow 0.2s;
+}
+
+.poll-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.poll-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.poll-header h4 {
+    margin: 0;
+    flex: 1;
+}
+
+.poll-status-badge {
+    margin-left: 1rem;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.poll-meta {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.poll-meta span {
+    margin-right: 1rem;
+}
+
+.poll-timing {
+    margin-top: 0.5rem;
+    color: #666;
+}
+
+.expired-poll {
+    opacity: 0.8;
+    background-color: #fff3cd;
+}
+
+.deleted-poll {
+    opacity: 0.6;
+    background-color: #f8d7da;
+}
+
+@media (max-width: 768px) {
+    .poll-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .poll-status-badge {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .poll-meta span {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+}
+</style>

@@ -52,11 +52,11 @@ router.get('/create', requireAuth, (req, res) => {
  * - Redirects to poll view page
  */
 router.post('/create', requireAuth, async (req, res) => {
-    const { title, description, options, end_date } = req.body;
+    const { title, description, options, end_date, vote_threshold } = req.body;
     const userId = req.session.user.id;
 
     try {
-        // Create the poll with expiration date
+        // Create the poll with expiration date and threshold
         const pollId = await new Promise((resolve, reject) => {
             let closesAt;
             if (end_date) {
@@ -67,13 +67,16 @@ router.post('/create', requireAuth, async (req, res) => {
                 closesAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
             }
             
-            console.log('Creating poll with closes_at:', closesAt);
+            // Parse vote threshold (null if not provided or invalid)
+            const threshold = vote_threshold && parseInt(vote_threshold) > 0 ? parseInt(vote_threshold) : null;
             
-            // Insert poll into database
+            console.log('Creating poll with closes_at:', closesAt, 'threshold:', threshold);
+            
+            // Insert poll into database with threshold
             db.run(
-                `INSERT INTO polls (title, description, created_by, closes_at) 
-                 VALUES (?, ?, ?, ?)`,
-                [title, description, userId, closesAt],
+                `INSERT INTO polls (title, description, created_by, closes_at, vote_threshold) 
+                 VALUES (?, ?, ?, ?, ?)`,
+                [title, description, userId, closesAt, threshold],
                 function(err) {
                     if (err) reject(err);
                     else resolve(this.lastID);
@@ -112,24 +115,59 @@ router.post('/create', requireAuth, async (req, res) => {
  * GET /polls/all
  * Display all polls with their status (active/expired/deleted)
  * Shows vote counts and creator information
+ * Supports filtering by status: ?filter=deleted|active|expired|all
+ * Supports search: ?search=query
  * Requires authentication
  */
 router.get('/all', requireAuth, async (req, res) => {
     try {
-        // Fetch all polls with status calculation
+        const filter = req.query.filter || 'all';
+        const search = req.query.search || '';
+        
+        // Build WHERE clause based on filter
+        let whereConditions = [];
+        if (filter === 'deleted') {
+            whereConditions.push('p.is_active = 0');
+        } else if (filter === 'active') {
+            whereConditions.push('p.is_active = 1 AND datetime(p.closes_at) > datetime("now")');
+        } else if (filter === 'expired') {
+            whereConditions.push('p.is_active = 1 AND datetime(p.closes_at) <= datetime("now")');
+        }
+        // 'all' filter shows everything (no filter condition)
+
+        // Add search condition if search query exists
+        let queryParams = [];
+        if (search.trim()) {
+            whereConditions.push('(p.title LIKE ? OR p.description LIKE ?)');
+            const searchPattern = `%${search.trim()}%`;
+            queryParams = [searchPattern, searchPattern];
+        }
+
+        // Build final WHERE clause
+        const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+        // Determine sort order - active polls show expiring soonest first
+        let orderClause = 'ORDER BY p.created_at DESC'; // Default for all/expired/deleted
+        if (filter === 'active') {
+            orderClause = 'ORDER BY p.closes_at ASC'; // Expiring soonest first for active polls
+        }
+
+        // Fetch polls with status calculation, filtering, and search
         const allPolls = await new Promise((resolve, reject) => {
             db.all(
                 `SELECT p.*, u.username as creator_name, COUNT(DISTINCT v.id) as vote_count,
                  CASE 
                     WHEN datetime(p.closes_at) > datetime('now') AND p.is_active = 1 THEN 'active'
-                    WHEN datetime(p.closes_at) <= datetime('now') THEN 'expired'
+                    WHEN datetime(p.closes_at) <= datetime('now') AND p.is_active = 1 THEN 'expired'
                     ELSE 'deleted'
                  END as status
                  FROM polls p 
                  JOIN users u ON p.created_by = u.id 
                  LEFT JOIN votes v ON p.id = v.poll_id
+                 ${whereClause}
                  GROUP BY p.id
-                 ORDER BY p.created_at DESC`,
+                 ${orderClause}`,
+                queryParams,
                 (err, rows) => {
                     if (err) reject(err);
                     else resolve(rows);
@@ -139,7 +177,9 @@ router.get('/all', requireAuth, async (req, res) => {
 
         res.render('polls/all', {
             polls: allPolls,
-            user: req.session.user
+            user: req.session.user,
+            currentFilter: filter,
+            searchQuery: search
         });
     } catch (error) {
         console.error('Error fetching all polls:', error);
@@ -157,13 +197,16 @@ router.get('/:id', async (req, res) => {
     const pollId = req.params.id;
     
     try {
-        // Fetch poll details with creator information
+        // Fetch poll details with creator information and approval status
         const poll = await new Promise((resolve, reject) => {
             db.get(
-                `SELECT p.*, u.username as creator_name 
+                `SELECT p.*, u.username as creator_name,
+                 COUNT(DISTINCT v.id) as current_vote_count
                  FROM polls p 
                  JOIN users u ON p.created_by = u.id 
-                 WHERE p.id = ?`,
+                 LEFT JOIN votes v ON p.id = v.poll_id
+                 WHERE p.id = ?
+                 GROUP BY p.id`,
                 [pollId],
                 (err, row) => {
                     if (err) reject(err);
@@ -192,12 +235,15 @@ router.get('/:id', async (req, res) => {
             );
         });
 
-        // Check if current user has already voted
+        // Check if current user has already voted and get their vote details
         let hasVoted = false;
+        let userVote = null;
+        let canChangeVote = false;
+        
         if (req.session.user) {
             const vote = await new Promise((resolve, reject) => {
                 db.get(
-                    'SELECT id FROM votes WHERE poll_id = ? AND user_id = ?',
+                    'SELECT option_id, voted_at FROM votes WHERE poll_id = ? AND user_id = ?',
                     [pollId, req.session.user.id],
                     (err, row) => {
                         if (err) reject(err);
@@ -206,6 +252,10 @@ router.get('/:id', async (req, res) => {
                 );
             });
             hasVoted = !!vote;
+            userVote = vote;
+            
+            // User can change vote if poll is active and not expired
+            canChangeVote = hasVoted && poll.is_active && new Date(poll.closes_at) > new Date();
         }
 
         // Calculate total votes for percentage display
@@ -215,6 +265,8 @@ router.get('/:id', async (req, res) => {
             poll,
             options,
             hasVoted,
+            userVote,
+            canChangeVote,
             totalVotes,
             user: req.session.user || null
         });
@@ -226,8 +278,8 @@ router.get('/:id', async (req, res) => {
 
 /**
  * POST /polls/:id/vote
- * Submit a vote for a poll option
- * - Prevents duplicate voting
+ * Submit or change a vote for a poll option
+ * - Allows vote changes until poll expires
  * - Records user's vote choice
  * - Requires authentication
  */
@@ -237,10 +289,31 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
 
     try {
+        // Check if poll is still active
+        const poll = await new Promise((resolve, reject) => {
+            db.get(
+                'SELECT * FROM polls WHERE id = ? AND is_active = 1',
+                [pollId],
+                (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                }
+            );
+        });
+
+        if (!poll) {
+            return res.status(400).json({ error: 'Poll not found or inactive' });
+        }
+
+        // Check if poll has expired
+        if (new Date(poll.closes_at) <= new Date()) {
+            return res.status(400).json({ error: 'This poll has expired and no longer accepts votes' });
+        }
+
         // Check if user has already voted in this poll
         const existingVote = await new Promise((resolve, reject) => {
             db.get(
-                'SELECT id FROM votes WHERE poll_id = ? AND user_id = ?',
+                'SELECT id, option_id FROM votes WHERE poll_id = ? AND user_id = ?',
                 [pollId, userId],
                 (err, row) => {
                     if (err) reject(err);
@@ -250,20 +323,33 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
         });
 
         if (existingVote) {
-            return res.status(400).json({ error: 'You have already voted in this poll' });
+            // User has voted before - update their vote
+            await new Promise((resolve, reject) => {
+                db.run(
+                    'UPDATE votes SET option_id = ?, voted_at = datetime("now") WHERE poll_id = ? AND user_id = ?',
+                    [optionId, pollId, userId],
+                    (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    }
+                );
+            });
+        } else {
+            // First time voting - insert new vote
+            await new Promise((resolve, reject) => {
+                db.run(
+                    'INSERT INTO votes (poll_id, option_id, user_id) VALUES (?, ?, ?)',
+                    [pollId, optionId, userId],
+                    (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    }
+                );
+            });
         }
 
-        // Record the vote
-        await new Promise((resolve, reject) => {
-            db.run(
-                'INSERT INTO votes (poll_id, option_id, user_id) VALUES (?, ?, ?)',
-                [pollId, optionId, userId],
-                (err) => {
-                    if (err) reject(err);
-                    else resolve();
-                }
-            );
-        });
+        // Check if poll now meets its approval threshold
+        await db.checkPollThreshold(pollId);
 
         // Redirect back to poll to see updated results
         res.redirect(`/polls/${pollId}`);

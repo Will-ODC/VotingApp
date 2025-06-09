@@ -1,9 +1,42 @@
 <h1>Community Decisions</h1>
 
+<!-- Search and Sort Controls -->
+<div class="controls-section">
+    <form method="GET" action="/" class="search-sort-form">
+        <div class="search-group">
+            <input type="text" name="search" placeholder="Search polls..." 
+                   value="<%= searchQuery || '' %>" class="search-input">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+        
+        <div class="sort-group">
+            <label for="sort">Sort by:</label>
+            <select name="sort" id="sort" class="sort-select" onchange="this.form.submit()">
+                <option value="popular" <%= (currentSort === 'popular') ? 'selected' : '' %>>Most Popular</option>
+                <option value="recent" <%= (currentSort === 'recent') ? 'selected' : '' %>>Most Recent</option>
+                <option value="active" <%= (currentSort === 'active') ? 'selected' : '' %>>Most Active</option>
+            </select>
+        </div>
+        
+        <% if (searchQuery && searchQuery.trim()) { %>
+            <a href="/" class="btn btn-secondary">Clear Search</a>
+        <% } %>
+    </form>
+</div>
+
+<% if (searchQuery && searchQuery.trim()) { %>
+    <p class="search-results">Search results for: "<%= searchQuery %>"</p>
+<% } %>
+
 <% if (polls.length === 0) { %>
-    <p class="no-polls">No active community decisions at the moment.</p>
-    <% if (user) { %>
-        <a href="/polls/create" class="btn btn-primary">Propose the first initiative!</a>
+    <% if (searchQuery && searchQuery.trim()) { %>
+        <p class="no-polls">No polls found matching your search.</p>
+        <a href="/" class="btn btn-secondary">View all polls</a>
+    <% } else { %>
+        <p class="no-polls">No active community decisions at the moment.</p>
+        <% if (user) { %>
+            <a href="/polls/create" class="btn btn-primary">Propose the first initiative!</a>
+        <% } %>
     <% } %>
 <% } else { %>
     <div class="polls-grid">
@@ -21,3 +54,66 @@
         <% }) %>
     </div>
 <% } %>
+
+<style>
+.controls-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.search-sort-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-group {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.sort-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sort-select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: white;
+}
+
+.search-results {
+    font-style: italic;
+    color: #666;
+    margin: 1rem 0;
+}
+
+@media (max-width: 768px) {
+    .search-sort-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-group {
+        min-width: auto;
+    }
+}
+</style>

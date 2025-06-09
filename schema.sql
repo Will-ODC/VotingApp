@@ -21,6 +21,9 @@ CREATE TABLE IF NOT EXISTS polls (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     closes_at TIMESTAMP NOT NULL,
     is_active BOOLEAN DEFAULT 1,
+    vote_threshold INTEGER DEFAULT NULL,
+    is_approved BOOLEAN DEFAULT 0,
+    approved_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (created_by) REFERENCES users(id)
 );
 

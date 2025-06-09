@@ -1,12 +1,42 @@
 <h1>All Community Initiatives</h1>
 
-<div class="filter-tabs">
-    <a href="/" class="btn btn-secondary">Active Only</a>
-    <a href="/polls/all" class="btn btn-primary">All Initiatives</a>
+<!-- Filter and Search Controls -->
+<div class="controls-section">
+    <div class="filter-tabs">
+        <a href="/polls/all?filter=all<%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" 
+           class="btn <%= (currentFilter === 'all') ? 'btn-primary' : 'btn-secondary' %>">All</a>
+        <a href="/polls/all?filter=active<%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" 
+           class="btn <%= (currentFilter === 'active') ? 'btn-primary' : 'btn-secondary' %>">Active</a>
+        <a href="/polls/all?filter=expired<%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" 
+           class="btn <%= (currentFilter === 'expired') ? 'btn-primary' : 'btn-secondary' %>">Expired</a>
+        <a href="/polls/all?filter=deleted<%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" 
+           class="btn <%= (currentFilter === 'deleted') ? 'btn-primary' : 'btn-secondary' %>">Deleted</a>
+    </div>
+    
+    <form method="GET" action="/polls/all" class="search-form">
+        <input type="hidden" name="filter" value="<%= currentFilter %>">
+        <div class="search-group">
+            <input type="text" name="search" placeholder="Search all polls..." 
+                   value="<%= searchQuery || '' %>" class="search-input">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+        <% if (searchQuery && searchQuery.trim()) { %>
+            <a href="/polls/all?filter=<%= currentFilter %>" class="btn btn-secondary">Clear Search</a>
+        <% } %>
+    </form>
 </div>
 
+<% if (searchQuery && searchQuery.trim()) { %>
+    <p class="search-results">Search results for: "<%= searchQuery %>" in <%= currentFilter %> polls</p>
+<% } %>
+
 <% if (polls.length === 0) { %>
-    <p class="no-polls">No initiatives found.</p>
+    <% if (searchQuery && searchQuery.trim()) { %>
+        <p class="no-polls">No <%= currentFilter %> polls found matching your search.</p>
+        <a href="/polls/all?filter=<%= currentFilter %>" class="btn btn-secondary">Clear search</a>
+    <% } else { %>
+        <p class="no-polls">No <%= currentFilter %> initiatives found.</p>
+    <% } %>
 <% } else { %>
     <div class="polls-grid">
         <% polls.forEach(poll => { %>
@@ -36,10 +66,47 @@
 <% } %>
 
 <style>
-.filter-tabs {
+.controls-section {
     margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.filter-tabs {
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.search-form {
     display: flex;
     gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-group {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.search-results {
+    font-style: italic;
+    color: #666;
+    margin: 1rem 0;
 }
 
 .poll-status {

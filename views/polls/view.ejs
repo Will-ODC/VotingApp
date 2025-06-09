@@ -11,33 +11,81 @@
         <% } %>
     </div>
     
+    <% if (poll.vote_threshold) { %>
+        <div class="poll-threshold-info">
+            <div class="threshold-display">
+                <strong>Approval Threshold: <%= poll.vote_threshold %> votes</strong>
+                <div class="threshold-progress">
+                    <div class="threshold-bar">
+                        <div class="threshold-fill" style="width: <%= Math.min((totalVotes / poll.vote_threshold) * 100, 100) %>%"></div>
+                    </div>
+                    <span class="threshold-text">
+                        <%= totalVotes %> / <%= poll.vote_threshold %> votes 
+                        (<%= Math.round((totalVotes / poll.vote_threshold) * 100) %>%)
+                    </span>
+                </div>
+            </div>
+            <% if (poll.is_approved) { %>
+                <div class="approval-status approved">
+                    <span class="approval-badge">✓ APPROVED FOR ACTION</span>
+                    <% if (poll.approved_at) { %>
+                        <small>Approved on <%= new Date(poll.approved_at).toLocaleDateString() %></small>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <div class="approval-status pending">
+                    <span class="approval-badge">Pending Approval</span>
+                    <small>Needs <%= Math.max(0, poll.vote_threshold - totalVotes) %> more votes for approval</small>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
+    
     <% if (!user) { %>
         <div class="alert alert-info">
             Please <a href="/auth/login">login</a> to participate in this decision.
         </div>
-    <% } else if (hasVoted) { %>
+    <% } else if (hasVoted && !canChangeVote) { %>
         <div class="alert alert-success">
             Thank you for participating in this community decision.
+            <% if (new Date(poll.closes_at) <= new Date()) { %>
+                <br><small>This poll has expired and votes can no longer be changed.</small>
+            <% } %>
+        </div>
+    <% } else if (hasVoted && canChangeVote) { %>
+        <div class="alert alert-warning">
+            You have already voted in this poll. You can change your vote until it expires.
         </div>
     <% } %>
     
     <div class="poll-options">
-        <% if (!hasVoted && user) { %>
+        <% if ((!hasVoted || canChangeVote) && user) { %>
             <form action="/polls/<%= poll.id %>/vote" method="POST">
                 <% options.forEach(option => { %>
                     <div class="option">
                         <label>
-                            <input type="radio" name="optionId" value="<%= option.id %>" required>
+                            <input type="radio" name="optionId" value="<%= option.id %>" 
+                                   <%= (userVote && userVote.option_id === option.id) ? 'checked' : '' %> required>
                             <%= option.option_text %>
+                            <% if (userVote && userVote.option_id === option.id) { %>
+                                <span class="current-vote">(Your current vote)</span>
+                            <% } %>
                         </label>
                     </div>
                 <% }) %>
-                <button type="submit" class="btn btn-primary">Submit Vote</button>
+                <button type="submit" class="btn btn-primary">
+                    <%= hasVoted ? 'Change Vote' : 'Submit Vote' %>
+                </button>
             </form>
         <% } else { %>
             <% options.forEach(option => { %>
-                <div class="option-result">
-                    <div class="option-text"><%= option.option_text %></div>
+                <div class="option-result <%= (userVote && userVote.option_id === option.id) ? 'user-voted' : '' %>">
+                    <div class="option-text">
+                        <%= option.option_text %>
+                        <% if (userVote && userVote.option_id === option.id) { %>
+                            <span class="your-vote">✓ Your vote</span>
+                        <% } %>
+                    </div>
                     <div class="option-bar">
                         <div class="option-fill" style="width: <%= totalVotes > 0 ? (option.vote_count / totalVotes * 100) : 0 %>%"></div>
                     </div>
@@ -53,3 +101,215 @@
         </div>
     <% } %>
 </div>
+
+<style>
+.poll-view {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.poll-meta {
+    margin: 1rem 0;
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.poll-meta span {
+    margin-right: 1rem;
+}
+
+.alert {
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+    border: 1px solid;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+.poll-options {
+    margin: 2rem 0;
+}
+
+.option {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}
+
+.option label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.option input[type="radio"] {
+    margin-right: 0.5rem;
+}
+
+.current-vote {
+    color: #007bff;
+    font-weight: bold;
+    margin-left: 0.5rem;
+}
+
+.option-result {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.option-result.user-voted {
+    border-color: #007bff;
+    background-color: #f0f8ff;
+}
+
+.option-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.your-vote {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.option-bar {
+    height: 20px;
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.option-fill {
+    height: 100%;
+    background-color: #007bff;
+    transition: width 0.3s ease;
+}
+
+.option-count {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.poll-threshold-info {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.threshold-display {
+    margin-bottom: 1rem;
+}
+
+.threshold-progress {
+    margin: 1rem 0;
+}
+
+.threshold-bar {
+    height: 24px;
+    background-color: #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.threshold-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    transition: width 0.3s ease;
+    border-radius: 12px;
+}
+
+.threshold-text {
+    font-size: 0.875rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.approval-status {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.approval-status.approved {
+    background-color: #d4edda;
+    border: 2px solid #28a745;
+    color: #155724;
+}
+
+.approval-status.pending {
+    background-color: #fff3cd;
+    border: 2px solid #ffc107;
+    color: #856404;
+}
+
+.approval-badge {
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.approval-status small {
+    display: block;
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+.admin-actions {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #dee2e6;
+}
+
+@media (max-width: 768px) {
+    .poll-view {
+        padding: 1rem;
+    }
+    
+    .poll-meta span {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    
+    .option-text {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .your-vote {
+        margin-top: 0.25rem;
+    }
+}
+</style>

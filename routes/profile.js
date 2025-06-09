@@ -27,11 +27,15 @@ function requireAuth(req, res, next) {
  * GET /profile
  * Display user profile page with:
  * - Polls created by the user
- * - Polls the user has voted in
+ * - Polls the user has voted in (with pagination)
  * - Vote counts for user's polls
+ * Supports ?page=1,2,3... for participation results (10 per page)
  */
 router.get('/', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const perPage = 10; // Fixed at 10 per page
+    const offset = (page - 1) * perPage;
     
     try {
         // Fetch polls created by the user with vote counts
@@ -51,16 +55,44 @@ router.get('/', requireAuth, async (req, res) => {
             );
         });
 
-        // Fetch polls the user has voted in with their selected option
+        // Get total count of voted polls for pagination info
+        const totalVotedPolls = await new Promise((resolve, reject) => {
+            db.get(
+                'SELECT COUNT(*) as count FROM votes WHERE user_id = ?',
+                [userId],
+                (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row.count);
+                }
+            );
+        });
+
+        // Calculate pagination info
+        const totalPages = Math.ceil(totalVotedPolls / perPage);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
+
+        // Fetch polls the user has voted in with their selected option and poll status
         const votedPolls = await new Promise((resolve, reject) => {
             db.all(
-                `SELECT p.*, o.option_text as voted_option
+                `SELECT p.*, o.option_text as voted_option, v.voted_at,
+                 COUNT(DISTINCT v2.id) as total_votes,
+                 CASE 
+                    WHEN datetime(p.closes_at) > datetime('now') AND p.is_active = 1 THEN 'active'
+                    WHEN datetime(p.closes_at) <= datetime('now') AND p.is_active = 1 THEN 'expired'
+                    ELSE 'deleted'
+                 END as poll_status,
+                 u.username as creator_name
                  FROM votes v
                  JOIN polls p ON v.poll_id = p.id
                  JOIN options o ON v.option_id = o.id
+                 JOIN users u ON p.created_by = u.id
+                 LEFT JOIN votes v2 ON p.id = v2.poll_id
                  WHERE v.user_id = ?
-                 ORDER BY v.voted_at DESC`,
-                [userId],
+                 GROUP BY p.id, v.id
+                 ORDER BY v.voted_at DESC
+                 LIMIT ? OFFSET ?`,
+                [userId, perPage, offset],
                 (err, rows) => {
                     if (err) reject(err);
                     else resolve(rows);
@@ -71,7 +103,14 @@ router.get('/', requireAuth, async (req, res) => {
         res.render('profile/index', {
             user: req.session.user,
             userPolls,
-            votedPolls
+            votedPolls,
+            currentPage: page,
+            totalPages,
+            totalVotedPolls,
+            hasNextPage,
+            hasPrevPage,
+            perPage,
+            showingCount: votedPolls.length
         });
     } catch (error) {
         console.error('Error loading profile:', error);

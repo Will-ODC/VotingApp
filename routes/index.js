@@ -25,15 +25,24 @@ router.get('/', async (req, res) => {
     try {
         const sort = req.query.sort || 'popular';
         const search = req.query.search || '';
+        const category = req.query.category || '';
         
-        // Build search condition
-        let searchCondition = '';
+        // Build search and filter conditions
+        let conditions = [];
         let queryParams = [];
+        
         if (search.trim()) {
-            searchCondition = `AND (p.title LIKE ? OR p.description LIKE ?)`;
+            conditions.push(`(p.title LIKE ? OR p.description LIKE ?)`);
             const searchPattern = `%${search.trim()}%`;
-            queryParams = [searchPattern, searchPattern];
+            queryParams.push(searchPattern, searchPattern);
         }
+        
+        if (category.trim()) {
+            conditions.push(`p.category = ?`);
+            queryParams.push(category.trim());
+        }
+        
+        const searchCondition = conditions.length > 0 ? `AND ${conditions.join(' AND ')}` : '';
         
         // Determine order clause based on sort parameter
         let orderClause = 'ORDER BY vote_count DESC, p.created_at DESC'; // Default: popular
@@ -67,7 +76,8 @@ router.get('/', async (req, res) => {
             polls,
             user: req.session.user || null,
             currentSort: sort,
-            searchQuery: search
+            searchQuery: search,
+            currentCategory: category
         });
     } catch (error) {
         console.error('Error fetching polls:', error);

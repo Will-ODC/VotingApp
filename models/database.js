@@ -70,6 +70,7 @@ const runMigrations = () => {
             const hasThreshold = columns.some(col => col.name === 'vote_threshold');
             const hasApproved = columns.some(col => col.name === 'is_approved');
             const hasApprovedAt = columns.some(col => col.name === 'approved_at');
+            const hasCategory = columns.some(col => col.name === 'category');
             
             let migrationsToRun = [];
             
@@ -81,6 +82,9 @@ const runMigrations = () => {
             }
             if (!hasApprovedAt) {
                 migrationsToRun.push('ALTER TABLE polls ADD COLUMN approved_at TIMESTAMP DEFAULT NULL');
+            }
+            if (!hasCategory) {
+                migrationsToRun.push('ALTER TABLE polls ADD COLUMN category TEXT DEFAULT "general"');
             }
             
             if (migrationsToRun.length > 0) {

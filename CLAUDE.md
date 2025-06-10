@@ -1,7 +1,13 @@
 # VotingApp - Development Documentation
 
 ## Project Overview
-A Node.js web application for community decision-making through polls and voting. Built with Express.js, SQLite, and EJS templating.
+An Online Democratic Community (ODC) platform that enables transparent, community-controlled decision-making and ethical data monetization for collective wellbeing. Built as a Node.js web application using Express.js, SQLite, and EJS templating.
+
+### ODC Vision
+- **Core Mission**: Create a democratic platform where users control how their data is used and monetized, with all proceeds funding community-chosen wellbeing initiatives
+- **Funding Model**: Hybrid approach combining Wikipedia-style donations with voluntary corporate data partnerships (where users explicitly opt-in to share feedback)
+- **Target Community**: Initial focus on 1,000 committed users in specific niches (e.g., privacy advocates, local governance, sustainable living)
+- **Key Differentiator**: Not another social media platform, but a community research cooperative that uses democratic technology for collective benefit
 
 ## Architecture
 - **Backend**: Node.js with Express.js
@@ -9,6 +15,49 @@ A Node.js web application for community decision-making through polls and voting
 - **Frontend**: EJS templates with embedded CSS
 - **Authentication**: Session-based with middleware
 - **File Structure**: MVC pattern with routes, models, views, middleware
+
+## 🎯 ODC Implementation Roadmap
+
+### Phase 1: Foundation (Weeks 1-4)
+Focus on core infrastructure for community understanding and organization.
+
+- [x] **About Page** (1 day) - Simple explanation of ODC concepts, vision, and how the platform works
+- [x] **Poll Categories/Tags** (2 days) - Organize polls by type (budget allocation, community rules, partnerships, wellbeing initiatives)
+- [ ] **Deploy MVP to Production** (3-5 days) - Deploy basic but functional ODC for community testing and feedback
+- [ ] **User Contribution Tracking** (2 days) - Track donations given, polls created, votes cast (foundation for reputation system)
+
+### Phase 2: Trust & Transparency (Weeks 5-8)
+Build community trust through transparency and user guidance.
+
+- [ ] **Community Fund Display** (3 days) - Show total funds, recent donations, and pending allocations
+- [ ] **Basic Weighted Voting Display** (3 days) - Show future voting weights based on contributions (UI only, no logic yet)
+- [ ] **First-Time User Tutorial** (5 days) - Interactive guide highlighting key features and democratic process
+
+### Phase 3: Community Engagement (Weeks 9-12)
+Enable deeper participation and discussion.
+
+- [ ] **User-Submitted Poll Options** (3 days) - Allow community members to add options to existing polls
+- [ ] **Initiative-to-Profile Links** (2 days) - Link polls to proposer profiles/blogs for progress updates
+- [ ] **Poll Discussion Comments** (1 week) - Basic commenting system for deliberation before voting
+- [ ] **Email Notifications** (1 week) - Notify users of expiring polls and community updates
+- [ ] **Vote Notification Preferences** (4 days) - After voting, popup offers: notify when poll closes, monthly summary of voted polls, or no notifications
+- [ ] **Enhanced Profile Pages** (3 days) - Show contribution history and community involvement
+
+### Phase 4: Advanced Governance (Months 4-6)
+Implement sophisticated democratic features.
+
+- [ ] **Trust Rating System** (2 weeks) - Verified tags (student, employee, expert) with authentication
+- [ ] **Weighted Voting Logic** (2 weeks) - Implement actual contribution-based voting weights
+- [ ] **Multiple Voting Methods** (2 weeks) - Add ranked choice and approval voting options
+
+### Phase 5: Advanced Engagement (Months 6+)
+Advanced features for community insights and rapid participation.
+
+- [ ] **Quick-Vote Carousel View** (2 weeks) - Single-poll view allowing rapid scrolling and voting through related initiatives
+- [ ] **Initiative Sets/Collections** (3 weeks) - Create grouped polls for comprehensive decision-making on complex topics
+- [ ] **3-Perspective Discussion Algorithm** (3 weeks) - Show popular opinions that agree/disagree with user, plus expert views
+- [ ] **Community Insights Dashboard** (2 weeks) - Aggregate trends and wellbeing metrics
+- [ ] **Data Partnership Framework** (1 month) - Secure system for voluntary data sharing with ethical partners
 
 ## ✅ Completed Features
 
@@ -190,17 +239,29 @@ VotingApp/
 
 ## 🚀 Future Enhancement Opportunities
 
-### Advanced Features
-- [ ] **Email Notifications** - Notify users of poll expiration
-- [ ] **Poll Categories** - Organize polls by topic/category
-- [ ] **Anonymous Voting** - Option for anonymous polls
-- [ ] **Poll Templates** - Reusable poll formats
-- [ ] **Bulk Operations** - Admin tools for managing multiple polls
-- [ ] **Analytics Dashboard** - Voting statistics and trends
-- [ ] **User Avatars** - Profile pictures and customization
-- [ ] **Poll Comments** - Discussion on polls
-- [ ] **Poll Sharing** - Social media integration
-- [ ] **Export Functionality** - Download results as CSV/PDF
+### ODC-Specific Features
+- [ ] **Federated ODC Network** - Allow communities to create interconnected ODC instances
+- [ ] **Wellbeing Metrics Tracking** - Measure and display community health indicators
+- [ ] **Ethical Data Marketplace** - Platform for transparent data partnerships with values-aligned organizations
+- [ ] **Democratic Budget Allocation** - Liquid democracy for fund distribution
+- [ ] **Impact Reporting** - Automated reports showing how community funds improved wellbeing
+- [ ] **Anonymous Voting Options** - For sensitive community decisions
+- [ ] **Reputation Decay System** - Ensure active participation for voting weight
+- [ ] **Community Constitution** - Votable foundational rules and amendment process
+
+### Advanced Participation Features
+- [ ] **Dynamic Poll Options** - Users can add new options to existing polls with community approval
+- [ ] **Progress Tracking Links** - Connect initiatives to external blogs/profiles for implementation updates
+- [ ] **Rapid Engagement Interface** - Swipe-style quick voting for bulk participation in related polls
+- [ ] **Initiative Collections** - Bundle related polls into comprehensive decision packages
+- [ ] **Cross-Initiative Analytics** - Track voting patterns across poll sets and categories
+
+### Advanced Democratic Features
+- [ ] **Quadratic Voting** - Prevent wealth-based dominance in decisions
+- [ ] **Delegation System** - Allow users to delegate votes to trusted representatives
+- [ ] **Proposal Templates** - Structured formats for different types of initiatives
+- [ ] **Consensus Building Tools** - Features to find common ground before voting
+- [ ] **Exit Rights** - Users can leave with their data and proportional fund share
 
 ### Technical Improvements
 - [ ] **API Endpoints** - RESTful API for mobile/external access

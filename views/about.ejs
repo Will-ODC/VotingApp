@@ -1,22 +1,83 @@
 <div class="about-page">
-    <h1>About Online Democratic Community</h1>
+    <h1>About the Online Democratic Community (ODC)</h1>
     
-    <p>Welcome to the Online Democratic Community - a collaborative platform where voices matter and decisions are made together through democratic participation.</p>
-    
-    <h3>Features</h3>
-    <ul>
-        <li>Create community polls and initiatives</li>
-        <li>Participate in democratic decision-making</li>
-        <li>View transparent, real-time results</li>
-        <li>Secure member authentication and profiles</li>
-        <li>Community moderation and governance</li>
-    </ul>
-    
-    <h3>How It Works</h3>
-    <ol>
-        <li>Join our community by creating an account</li>
-        <li>Propose initiatives or participate in ongoing discussions</li>
-        <li>Cast your vote to make your voice heard</li>
-        <li>Watch democracy in action with live results</li>
-    </ol>
+    <div class="intro-section">
+        <h2>A New Model for Community Ownership</h2>
+        <p>The ODC is a democratic platform where <strong>you</strong> control how your data is used and how community resources are allocated. Unlike traditional platforms that profit from your data, we're building a community-owned cooperative that puts wellbeing first.</p>
+    </div>
+
+    <div class="vision-section">
+        <h3>Our Vision: Your Data, Your Choice, Your Community</h3>
+        <div class="vision-grid">
+            <div class="vision-item">
+                <h4>🗳️ Democratic Control</h4>
+                <p>Every member has a voice. Vote on community rules, budget allocation, and which partnerships align with our values.</p>
+            </div>
+            <div class="vision-item">
+                <h4>💰 Transparent Funding</h4>
+                <p>See exactly where every dollar comes from and goes. Community funds support projects YOU vote for.</p>
+            </div>
+            <div class="vision-item">
+                <h4>🔒 Ethical Data Use</h4>
+                <p>If you choose to share data with partner organizations, you control what's shared and the community benefits from the proceeds.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="how-section">
+        <h3>How the ODC Works</h3>
+        <ol>
+            <li><strong>Join the Community</strong> - Create an account and become a voting member</li>
+            <li><strong>Participate in Decisions</strong> - Vote on initiatives, budgets, and community rules</li>
+            <li><strong>Contribute (Optional)</strong> - Donate funds, share feedback with ethical partners, or help moderate</li>
+            <li><strong>Shape Our Future</strong> - Your participation gives you more influence in community decisions</li>
+            <li><strong>Benefit Together</strong> - All proceeds fund community-chosen wellbeing initiatives</li>
+        </ol>
+    </div>
+
+    <div class="funding-section">
+        <h3>How We're Funded</h3>
+        <p>The ODC operates on a sustainable, transparent model:</p>
+        <ul>
+            <li><strong>Member Donations</strong> - Like Wikipedia, members who can contribute help support the platform</li>
+            <li><strong>Ethical Partnerships</strong> - When companies want community feedback, members can voluntarily participate and proceeds go to the community fund</li>
+            <li><strong>No Hidden Data Mining</strong> - We will NEVER sell your data without your explicit consent</li>
+        </ul>
+    </div>
+
+    <div class="different-section">
+        <h3>Why We're Different</h3>
+        <table class="comparison-table">
+            <tr>
+                <th>Traditional Platforms</th>
+                <th>Online Democratic Community</th>
+            </tr>
+            <tr>
+                <td>Extract value from your data</td>
+                <td>You control your data</td>
+            </tr>
+            <tr>
+                <td>Decisions made by executives</td>
+                <td>Decisions made by community vote</td>
+            </tr>
+            <tr>
+                <td>Profits go to shareholders</td>
+                <td>All proceeds fund community wellbeing</td>
+            </tr>
+            <tr>
+                <td>Opaque algorithms and policies</td>
+                <td>Transparent governance and funding</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="join-section">
+        <h3>Ready to Build a Better Online Community?</h3>
+        <p>The ODC is more than a platform - it's a movement toward democratic, community-controlled technology that serves human wellbeing.</p>
+        <% if (!user) { %>
+            <a href="/auth/register" class="cta-button">Join the Community</a>
+        <% } else { %>
+            <a href="/polls/create" class="cta-button">Create Your First Initiative</a>
+        <% } %>
+    </div>
 </div>

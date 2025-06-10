@@ -52,7 +52,7 @@ router.get('/create', requireAuth, (req, res) => {
  * - Redirects to poll view page
  */
 router.post('/create', requireAuth, async (req, res) => {
-    const { title, description, options, end_date, vote_threshold } = req.body;
+    const { title, description, options, end_date, vote_threshold, category } = req.body;
     const userId = req.session.user.id;
 
     try {
@@ -72,11 +72,11 @@ router.post('/create', requireAuth, async (req, res) => {
             
             console.log('Creating poll with closes_at:', closesAt, 'threshold:', threshold);
             
-            // Insert poll into database with threshold
+            // Insert poll into database with threshold and category
             db.run(
-                `INSERT INTO polls (title, description, created_by, closes_at, vote_threshold) 
-                 VALUES (?, ?, ?, ?, ?)`,
-                [title, description, userId, closesAt, threshold],
+                `INSERT INTO polls (title, description, created_by, closes_at, vote_threshold, category) 
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [title, description, userId, closesAt, threshold, category || 'general'],
                 function(err) {
                     if (err) reject(err);
                     else resolve(this.lastID);

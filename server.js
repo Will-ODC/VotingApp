@@ -46,6 +46,15 @@ app.use(express.json());  // Parse JSON bodies
 // Configure session middleware for user authentication
 app.use(require('./middleware/session'));
 
+// Health check endpoint for monitoring
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        database: process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite'
+    });
+});
+
 // Define application routes
 app.use('/', indexRoutes);  // Home page and general routes
 app.use('/polls', pollRoutes);  // Poll creation, viewing, and voting

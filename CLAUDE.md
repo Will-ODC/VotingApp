@@ -24,11 +24,12 @@ Focus on core infrastructure for community understanding and organization.
 - [x] **About Page** (1 day) - Simple explanation of ODC concepts, vision, and how the platform works
 - [x] **Poll Categories/Tags** (2 days) - Organize polls by type (budget allocation, community rules, partnerships, wellbeing initiatives)
 - [ ] **Deploy MVP to Production** (3-5 days) - Deploy basic but functional ODC for community testing and feedback
-- [ ] **User Contribution Tracking** (2 days) - Track donations given, polls created, votes cast (foundation for reputation system)
+- [ ] **User Contribution & Initiative Tracking** (3-4 days) - Track polls created, votes cast, donations, and initiative completions with blog-style posts and community verification
 
 ### Phase 2: Trust & Transparency (Weeks 5-8)
 Build community trust through transparency and user guidance.
 
+- [ ] **Enhanced Profile Pages** (3 days) - Display contribution stats, initiative completion blog posts, and verification badges
 - [ ] **Community Fund Display** (3 days) - Show total funds, recent donations, and pending allocations
 - [ ] **Basic Weighted Voting Display** (3 days) - Show future voting weights based on contributions (UI only, no logic yet)
 - [ ] **First-Time User Tutorial** (5 days) - Interactive guide highlighting key features and democratic process
@@ -37,11 +38,10 @@ Build community trust through transparency and user guidance.
 Enable deeper participation and discussion.
 
 - [ ] **User-Submitted Poll Options** (3 days) - Allow community members to add options to existing polls
-- [ ] **Initiative-to-Profile Links** (2 days) - Link polls to proposer profiles/blogs for progress updates
 - [ ] **Poll Discussion Comments** (1 week) - Basic commenting system for deliberation before voting
 - [ ] **Email Notifications** (1 week) - Notify users of expiring polls and community updates
 - [ ] **Vote Notification Preferences** (4 days) - After voting, popup offers: notify when poll closes, monthly summary of voted polls, or no notifications
-- [ ] **Enhanced Profile Pages** (3 days) - Show contribution history and community involvement
+- [ ] **Initiative Verification Feed** (2 days) - Community feed showing pending initiative completions needing verification
 
 ### Phase 4: Advanced Governance (Months 4-6)
 Implement sophisticated democratic features.
@@ -58,6 +58,55 @@ Advanced features for community insights and rapid participation.
 - [ ] **3-Perspective Discussion Algorithm** (3 weeks) - Show popular opinions that agree/disagree with user, plus expert views
 - [ ] **Community Insights Dashboard** (2 weeks) - Aggregate trends and wellbeing metrics
 - [ ] **Data Partnership Framework** (1 month) - Secure system for voluntary data sharing with ethical partners
+
+## 📊 Strategic Roadmap & Success Metrics
+
+### Phase-Based Success Metrics
+- **Phase 1 (MVP):** 50 active users, 10 organic polls, Weekly Active Users (WAU) tracking
+- **Phase 2 (Trust):** $1,000 community fund, 75% 30-day retention, 100 active users
+- **Phase 3 (Engagement):** 500 users, 3 votes/user/week average, 50+ comments per poll
+- **Phase 4 (Governance):** 1,000 verified users, First $5,000+ allocation, Successful weighted voting
+
+### Go/No-Go Decision Points
+- **After Phase 1:** Minimum 25 committed core users before proceeding
+- **After Phase 2:** Evidence of organic community activity (self-created polls)
+- **After Phase 3:** >50% weekly participation rate
+- **After Phase 4:** Governance model functioning without major conflicts
+
+## 🌱 Community Growth Strategy
+
+### Target Communities (Start with ONE)
+1. **Privacy-Conscious Tech Workers** (Recommended)
+   - Understand data ownership value
+   - Have disposable income
+   - Natural evangelists
+   
+2. **Local Governance Enthusiasts**
+   - Passionate about democratic process
+   - Experience with current system limitations
+   
+3. **Sustainable Living Communities**
+   - Values-aligned with collective wellbeing
+   - Action-oriented mindset
+
+### Growth Phases
+- **Phase 0: Founders Circle (0-25 users)** - Personal outreach, weekly calls, founding benefits
+- **Phase 1: Core Community (25-100)** - Referral system, first wins, origin story
+- **Phase 2: Organic Growth (100-500)** - Content strategy, aligned partnerships, demonstrate impact
+- **Phase 3: Scaled Community (500-1,000)** - Geographic expansion, sub-communities, ambassadors
+
+### Engagement Mechanisms
+- **Weekly Rituals:** "Decision Day" Mondays, "Impact Report" Fridays
+- **Simple Gamification:** Participation streaks, voting badges, founder recognition
+- **Real Impact:** Monthly success stories, transparency reports, direct feedback loops
+
+### Quick Wins for Momentum
+- **Week 1:** Vote on platform name/branding
+- **Week 2:** First user completes and documents an initiative with blog post
+- **Month 1:** Allocate $100 to community-chosen charity
+- **Month 2:** 10 verified initiative completions showing real impact
+- **Quarter 1:** Implement user-voted platform feature
+- **Year 1:** Demonstrate measurable wellbeing improvement
 
 ## ✅ Completed Features
 
@@ -141,6 +190,12 @@ Advanced features for community insights and rapid participation.
 -- Relationships: polls -> users (creator), votes -> users + options
 -- Indexes: Optimized for common queries
 -- Migration system: Automatic column addition for existing databases
+
+-- User Contribution Tracking tables:
+-- contributions: Tracks all user contributions (polls, votes, donations, initiatives)
+-- user_stats: Denormalized stats for fast profile loading
+-- initiative_posts: Blog-style posts documenting completed initiatives
+-- post_verifications: Community verifications of initiative completions
 ```
 
 ### Security Features
@@ -175,6 +230,13 @@ Advanced features for community insights and rapid participation.
 2. Build dynamic SQL with conditions
 3. Execute query with proper sorting
 4. Render results with pagination
+
+### Initiative Completion Flow
+1. User completes approved poll action
+2. Creates blog-style post with evidence (photos, links, description)
+3. Community members verify completion (witnessed, participated, confirmed)
+4. After threshold verifications, contribution points awarded
+5. Initiative success displayed on profile and community impact page
 
 ## 📱 User Interface Components
 
@@ -251,7 +313,6 @@ VotingApp/
 
 ### Advanced Participation Features
 - [ ] **Dynamic Poll Options** - Users can add new options to existing polls with community approval
-- [ ] **Progress Tracking Links** - Connect initiatives to external blogs/profiles for implementation updates
 - [ ] **Rapid Engagement Interface** - Swipe-style quick voting for bulk participation in related polls
 - [ ] **Initiative Collections** - Bundle related polls into comprehensive decision packages
 - [ ] **Cross-Initiative Analytics** - Track voting patterns across poll sets and categories

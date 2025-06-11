@@ -49,8 +49,16 @@ const db = {
     run: async function(sql, params = []) {
         try {
             const result = await pool.query(sql, params);
+            // If RETURNING was used, return the first row's data
+            if (result.rows && result.rows.length > 0) {
+                return {
+                    id: result.rows[0].id || null,
+                    changes: result.rowCount,
+                    ...result.rows[0]
+                };
+            }
             return {
-                id: result.rows[0]?.id || null,
+                id: null,
                 changes: result.rowCount
             };
         } catch (error) {

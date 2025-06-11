@@ -39,33 +39,19 @@ router.get('/', requireAuth, async (req, res) => {
     
     try {
         // Fetch polls created by the user with vote counts
-        const userPolls = await new Promise((resolve, reject) => {
-            db.all(
-                `SELECT p.*, COUNT(DISTINCT v.id) as vote_count
-                 FROM polls p
-                 LEFT JOIN votes v ON p.id = v.poll_id
-                 WHERE p.created_by = $1
-                 GROUP BY p.id
-                 ORDER BY p.created_at DESC`,
-                [userId],
-                (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
-                }
-            );
-        });
+        const userPolls = await db.all(
+            `SELECT p.*, COUNT(DISTINCT v.id) as vote_count
+             FROM polls p
+             LEFT JOIN votes v ON p.id = v.poll_id
+             WHERE p.created_by = $1
+             GROUP BY p.id
+             ORDER BY p.created_at DESC`,
+            [userId]
+        );
 
         // Get total count of voted polls for pagination info
-        const totalVotedPolls = await new Promise((resolve, reject) => {
-            db.get(
-                'SELECT COUNT(*) as count FROM votes WHERE user_id = $1',
-                [userId],
-                (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row.count);
-                }
-            );
-        });
+        const totalResult = await db.get('SELECT COUNT(*) as count FROM votes WHERE user_id = $1', [userId]);
+        const totalVotedPolls = totalResult.count;
 
         // Calculate pagination info
         const totalPages = Math.ceil(totalVotedPolls / perPage);
@@ -73,32 +59,28 @@ router.get('/', requireAuth, async (req, res) => {
         const hasPrevPage = page > 1;
 
         // Fetch polls the user has voted in with their selected option and poll status
-        const votedPolls = await new Promise((resolve, reject) => {
-            db.all(
-                `SELECT p.*, o.option_text as voted_option, v.voted_at,
-                 COUNT(DISTINCT v2.id) as total_votes,
-                 CASE 
-                    WHEN p.closes_at > CURRENT_TIMESTAMP AND p.is_active = 1 THEN 'active'
-                    WHEN p.closes_at <= CURRENT_TIMESTAMP AND p.is_active = 1 THEN 'expired'
-                    ELSE 'deleted'
-                 END as poll_status,
-                 u.username as creator_name
-                 FROM votes v
-                 JOIN polls p ON v.poll_id = p.id
-                 JOIN options o ON v.option_id = o.id
-                 JOIN users u ON p.created_by = u.id
-                 LEFT JOIN votes v2 ON p.id = v2.poll_id
-                 WHERE v.user_id = $1
-                 GROUP BY p.id, v.id
-                 ORDER BY v.voted_at DESC
-                 LIMIT $2 OFFSET $3`,
-                [userId, perPage, offset],
-                (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
-                }
-            );
-        });
+        const votedPolls = await db.all(
+            `SELECT p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved,
+             o.option_text as voted_option, v.voted_at,
+             COUNT(DISTINCT v2.id) as total_votes,
+             CASE 
+                WHEN p.end_date > CURRENT_TIMESTAMP AND p.is_active = TRUE THEN 'active'
+                WHEN p.end_date <= CURRENT_TIMESTAMP AND p.is_active = TRUE THEN 'expired'
+                ELSE 'deleted'
+             END as poll_status,
+             u.username as creator_name
+             FROM votes v
+             JOIN polls p ON v.poll_id = p.id
+             JOIN options o ON v.option_id = o.id
+             JOIN users u ON p.created_by = u.id
+             LEFT JOIN votes v2 ON p.id = v2.poll_id
+             WHERE v.user_id = $1
+             GROUP BY p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, 
+                      o.option_text, v.voted_at, u.username, v.id
+             ORDER BY v.voted_at DESC
+             LIMIT $2 OFFSET $3`,
+            [userId, perPage, offset]
+        );
 
         res.render('profile/index', {
             user: req.session.user,
@@ -161,16 +143,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
 
     try {
         // Fetch current password hash from database
-        const user = await new Promise((resolve, reject) => {
-            db.get(
-                'SELECT password FROM users WHERE id = $1',
-                [userId],
-                (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row);
-                }
-            );
-        });
+        const user = await db.get('SELECT password FROM users WHERE id = $1', [userId]);
 
         // Verify current password is correct
         const hashedCurrent = crypto.createHash('sha256').update(currentPassword).digest('hex');
@@ -186,16 +159,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
         // Hash new password and update in database
         const hashedNew = crypto.createHash('sha256').update(newPassword).digest('hex');
         
-        await new Promise((resolve, reject) => {
-            db.run(
-                'UPDATE users SET password = $1 WHERE id = $2',
-                [hashedNew, userId],
-                (err) => {
-                    if (err) reject(err);
-                    else resolve();
-                }
-            );
-        });
+        await db.run('UPDATE users SET password = $1 WHERE id = $2', [hashedNew, userId]);
 
         // Show success message
         res.render('profile/change-password', {

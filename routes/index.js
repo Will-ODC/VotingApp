@@ -18,7 +18,7 @@ const { db } = require('../models/database');
  * Default shows most popular polls (by vote count)
  * Only shows polls that are:
  * - Active (not deleted)
- * - Not expired (closes_at is in the future)
+ * - Not expired (end_date is in the future)
  * Includes vote count for each poll
  */
 router.get('/', async (req, res) => {
@@ -55,23 +55,18 @@ router.get('/', async (req, res) => {
         }
 
         // Fetch active polls with vote counts, search, and sorting
-        const polls = await new Promise((resolve, reject) => {
-            db.all(`
-                SELECT p.*, 
-                       COUNT(DISTINCT v.id) as vote_count,
-                       MAX(v.voted_at) as last_vote_time
-                FROM polls p
-                LEFT JOIN votes v ON p.id = v.poll_id
-                WHERE p.is_active = 1 AND p.closes_at > CURRENT_TIMESTAMP
-                ${searchCondition}
-                GROUP BY p.id
-                ${orderClause}
-                LIMIT 10
-            `, queryParams, (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
+        const polls = await db.all(`
+            SELECT p.*, 
+                   COUNT(DISTINCT v.id) as vote_count,
+                   MAX(v.voted_at) as last_vote_time
+            FROM polls p
+            LEFT JOIN votes v ON p.id = v.poll_id
+            WHERE p.is_active = TRUE AND p.end_date > CURRENT_TIMESTAMP
+            ${searchCondition}
+            GROUP BY p.id
+            ${orderClause}
+            LIMIT 10
+        `, queryParams);
 
         res.render('index', {
             polls,

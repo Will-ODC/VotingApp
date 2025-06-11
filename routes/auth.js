@@ -34,16 +34,7 @@ router.post('/login', async (req, res) => {
     
     try {
         // Look up user by username
-        const user = await new Promise((resolve, reject) => {
-            db.get(
-                'SELECT * FROM users WHERE username = $1',
-                [username],
-                (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row);
-                }
-            );
-        });
+        const user = await db.get('SELECT * FROM users WHERE username = $1', [username]);
 
         // Check if user exists
         if (!user) {
@@ -88,7 +79,7 @@ router.get('/register', (req, res) => {
  * - Creates new user account
  */
 router.post('/register', async (req, res) => {
-    const { username, password, confirmPassword } = req.body;
+    const { username, email, password, confirmPassword } = req.body;
 
     // Validate password confirmation
     if (password !== confirmPassword) {
@@ -100,37 +91,30 @@ router.post('/register', async (req, res) => {
         return res.render('auth/register', { error: 'Password must be at least 6 characters', user: null });
     }
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.render('auth/register', { error: 'Please enter a valid email address', user: null });
+    }
+
     try {
         // Check if username already exists
-        const existingUser = await new Promise((resolve, reject) => {
-            db.get(
-                'SELECT id FROM users WHERE username = $1',
-                [username],
-                (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row);
-                }
-            );
-        });
-
+        const existingUser = await db.get('SELECT id FROM users WHERE username = $1', [username]);
         if (existingUser) {
             return res.render('auth/register', { error: 'Username already exists', user: null });
+        }
+
+        // Check if email already exists
+        const existingEmail = await db.get('SELECT id FROM users WHERE email = $1', [email]);
+        if (existingEmail) {
+            return res.render('auth/register', { error: 'Email address already registered', user: null });
         }
 
         // Hash password before storing
         const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
         
         // Create new user account
-        await new Promise((resolve, reject) => {
-            db.run(
-                'INSERT INTO users (username, password) VALUES ($1, $2)',
-                [username, hashedPassword],
-                function(err) {
-                    if (err) reject(err);
-                    else resolve(this.lastID);
-                }
-            );
-        });
+        await db.run('INSERT INTO users (username, email, password) VALUES ($1, $2, $3)', [username, email, hashedPassword]);
 
         // Redirect to login page after successful registration
         res.redirect('/auth/login');

@@ -6,8 +6,8 @@
     <div class="poll-meta">
         <span>Proposed by: <%= poll.creator_name %></span>
         <span>Total participants: <%= totalVotes %></span>
-        <% if (poll.closes_at) { %>
-            <span>Ends: <%= new Date(poll.closes_at).toLocaleDateString() %></span>
+        <% if (poll.end_date) { %>
+            <span>Ends: <%= new Date(poll.end_date).toLocaleDateString() %></span>
         <% } %>
     </div>
     
@@ -48,7 +48,7 @@
     <% } else if (hasVoted && !canChangeVote) { %>
         <div class="alert alert-success">
             Thank you for participating in this community decision.
-            <% if (new Date(poll.closes_at) <= new Date()) { %>
+            <% if (new Date(poll.end_date) <= new Date()) { %>
                 <br><small>This poll has expired and votes can no longer be changed.</small>
             <% } %>
         </div>
@@ -59,25 +59,21 @@
     <% } %>
     
     <div class="poll-options">
-        <% if ((!hasVoted || canChangeVote) && user) { %>
+        <% if (!hasVoted && user) { %>
+            <!-- Show voting form for users who haven't voted -->
             <form action="/polls/<%= poll.id %>/vote" method="POST">
                 <% options.forEach(option => { %>
                     <div class="option">
                         <label>
-                            <input type="radio" name="optionId" value="<%= option.id %>" 
-                                   <%= (userVote && userVote.option_id === option.id) ? 'checked' : '' %> required>
+                            <input type="radio" name="optionId" value="<%= option.id %>" required>
                             <%= option.option_text %>
-                            <% if (userVote && userVote.option_id === option.id) { %>
-                                <span class="current-vote">(Your current vote)</span>
-                            <% } %>
                         </label>
                     </div>
                 <% }) %>
-                <button type="submit" class="btn btn-primary">
-                    <%= hasVoted ? 'Change Vote' : 'Submit Vote' %>
-                </button>
+                <button type="submit" class="btn btn-primary">Submit Vote</button>
             </form>
-        <% } else { %>
+        <% } else if (hasVoted && user) { %>
+            <!-- Show results with option to change vote if poll is active -->
             <% options.forEach(option => { %>
                 <div class="option-result <%= (userVote && userVote.option_id === option.id) ? 'user-voted' : '' %>">
                     <div class="option-text">
@@ -86,6 +82,37 @@
                             <span class="your-vote">✓ Your vote</span>
                         <% } %>
                     </div>
+                    <div class="option-bar">
+                        <div class="option-fill" style="width: <%= totalVotes > 0 ? (option.vote_count / totalVotes * 100) : 0 %>%"></div>
+                    </div>
+                    <div class="option-count"><%= option.vote_count %> participants (<%= totalVotes > 0 ? Math.round(option.vote_count / totalVotes * 100) : 0 %>%)</div>
+                </div>
+            <% }) %>
+            
+            <% if (canChangeVote) { %>
+                <div class="change-vote-section">
+                    <button class="btn btn-secondary" onclick="showChangeVoteForm()">Change Your Vote</button>
+                    <form id="changeVoteForm" action="/polls/<%= poll.id %>/vote" method="POST" style="display: none; margin-top: 1rem;">
+                        <h4>Change your vote:</h4>
+                        <% options.forEach(option => { %>
+                            <div class="option">
+                                <label>
+                                    <input type="radio" name="optionId" value="<%= option.id %>" 
+                                           <%= (userVote && userVote.option_id === option.id) ? 'checked' : '' %> required>
+                                    <%= option.option_text %>
+                                </label>
+                            </div>
+                        <% }) %>
+                        <button type="submit" class="btn btn-primary">Update Vote</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideChangeVoteForm()">Cancel</button>
+                    </form>
+                </div>
+            <% } %>
+        <% } else { %>
+            <!-- Show results for non-logged in users -->
+            <% options.forEach(option => { %>
+                <div class="option-result">
+                    <div class="option-text"><%= option.option_text %></div>
                     <div class="option-bar">
                         <div class="option-fill" style="width: <%= totalVotes > 0 ? (option.vote_count / totalVotes * 100) : 0 %>%"></div>
                     </div>
@@ -312,4 +339,27 @@
         margin-top: 0.25rem;
     }
 }
+
+.change-vote-section {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.change-vote-section h4 {
+    margin-bottom: 1rem;
+    color: #333;
+}
 </style>
+
+<script>
+function showChangeVoteForm() {
+    document.getElementById('changeVoteForm').style.display = 'block';
+    event.target.style.display = 'none';
+}
+
+function hideChangeVoteForm() {
+    document.getElementById('changeVoteForm').style.display = 'none';
+    document.querySelector('.change-vote-section button').style.display = 'block';
+}
+</script>

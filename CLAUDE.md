@@ -18,12 +18,23 @@ An Online Democratic Community (ODC) platform that enables transparent, communit
 
 ## 🎯 ODC Implementation Roadmap
 
-### Phase 1: Foundation (Weeks 1-4)
+### Phase 0: Invite-Only Launch (Weeks 1-2)
+Control initial community growth through invitation system for valuable early feedback.
+
+- [ ] **Email Invitation System** (2-3 days) - Replace open registration with invite-only access
+  - Email waitlist submission for non-invited users
+  - Admin dashboard to manage pending email requests
+  - Manual invite generation and sending by admin
+  - Invitation codes/links with expiration
+  - Track invitation usage and conversion
+- [ ] **Complete Production Deployment** (1-2 days) - Finish PostgreSQL migration deployment to Railway
+
+### Phase 1: Foundation (Weeks 3-6)
 Focus on core infrastructure for community understanding and organization.
 
 - [x] **About Page** (1 day) - Simple explanation of ODC concepts, vision, and how the platform works
 - [x] **Poll Categories/Tags** (2 days) - Organize polls by type (budget allocation, community rules, partnerships, wellbeing initiatives)
-- [ ] **Deploy MVP to Production** (3-5 days) - Deploy basic but functional ODC for community testing and feedback
+- [x] **PostgreSQL Migration** (3-4 days) - Complete migration from SQLite to PostgreSQL for production scalability
 - [ ] **User Contribution & Initiative Tracking** (3-4 days) - Track polls created, votes cast, donations, and initiative completions with blog-style posts and community verification
 
 ### Phase 2: Trust & Transparency (Weeks 5-8)
@@ -112,18 +123,20 @@ Advanced features for community insights and rapid participation.
 
 ### 🏗️ Core Infrastructure
 - [x] **Server Setup** - Express server with proper middleware configuration
-- [x] **Database Layer** - SQLite with Promise-based async wrappers
+- [x] **Database Layer** - PostgreSQL with Promise-based async operations and connection pooling
 - [x] **Session Management** - Secure session handling with configurable secrets
 - [x] **MVC Architecture** - Clean separation of concerns
 - [x] **Comprehensive Comments** - All code files fully documented with JSDoc-style comments
+- [x] **PostgreSQL Migration** - Complete migration from SQLite to PostgreSQL with proper schema, query conversion, and deployment configuration
 
 ### 🔐 Authentication System
-- [x] **User Registration** - Account creation with password validation
+- [x] **User Registration** - Account creation with email, username, and password validation
 - [x] **User Login** - Session-based authentication
 - [x] **Password Security** - SHA-256 hashing for stored passwords
 - [x] **Admin System** - Admin user creation and role management
 - [x] **Password Change** - Secure password update functionality
 - [x] **Session Security** - HTTP-only cookies, secure in production
+- [x] **Email Validation** - Email format validation and duplicate email prevention
 
 ### 📊 Poll Management
 - [x] **Poll Creation** - Users can create polls with multiple options
@@ -378,56 +391,58 @@ node server.js             # Start development server
 
 ## 🚧 Current Development Status (June 2025)
 
-### ✅ Completed Phase 1 Tasks
-- [x] **PostgreSQL Support Added** - Dual database system (SQLite local, PostgreSQL production)
-- [x] **Railway Deployment Configuration** - Complete deployment setup with health checks
-- [x] **Environment Variables** - Comprehensive .env.example with all required variables
-- [x] **Custom Domain Setup** - DNS configured for www.onlinedemocracy.org
+### ✅ Completed Today (June 11, 2025)
+- [x] **Complete PostgreSQL Migration** - Full migration from hybrid SQLite/PostgreSQL to PostgreSQL-only
+  - Fixed host binding to always use 0.0.0.0 for Railway compatibility
+  - Converted all datetime() queries to PostgreSQL CURRENT_TIMESTAMP syntax
+  - Updated all SQL placeholders from ? to PostgreSQL numbered format ($1, $2, etc.)
+  - Implemented async database initialization to prevent blocking server startup
+  - Fixed all Promise wrapper patterns causing application hangs
+  - Resolved PostgreSQL GROUP BY clause issues for complex queries
+  - Fixed boolean comparisons (changed 1/0 to TRUE/FALSE)
+  - Updated column references from closes_at to end_date
+  - Added proper RETURNING clauses for INSERT operations
+- [x] **Local Development Working** - Application fully functional with Docker PostgreSQL
+- [x] **User Registration Enhanced** - Added email field with validation and duplicate checking
+- [x] **Database Schema Updated** - PostgreSQL-optimized schema with proper constraints and indexes
 
-### 🔄 Current Issues Being Resolved
+### 🔄 Current Status
+- **Local Development:** ✅ Fully working with Docker PostgreSQL
+- **Database:** ✅ PostgreSQL with complete schema and all features working
+- **Authentication:** ✅ Login, registration, password changes all working
+- **Poll System:** ✅ Creation, voting, viewing, approval thresholds all working
+- **Profile System:** ✅ User profiles with voting history and created polls working
 
-#### Railway Deployment Status
-- **Service Status:** Active with successful deployments
-- **Database:** PostgreSQL service running and connected
-- **Issue:** "Unexposed service" warning preventing public access
-- **URLs Tested:**
-  - `votingapp-production-2fde.up.railway.app` - Not accessible
-  - `www.onlinedemocracy.org` - Application failed to respond
-- **Environment Variables Set:** SESSION_SECRET, NODE_ENV=production, ADMIN_* variables, DATABASE_URL
+### 📋 Immediate Next Steps (Phase 0)
+1. **Complete Production Deployment** (1-2 days)
+   - Deploy PostgreSQL-migrated application to Railway
+   - Verify all features work in production environment
+   - Test domain connectivity (www.onlinedemocracy.org)
 
-#### Local Development Status
-- **Database:** Successfully using SQLite locally
-- **Issue:** Server startup conflicts and connection timeouts
-- **Last Working:** Server starts on port 3001 but connection timeouts occur
-- **Recent Changes:** Modified server.js to bind to localhost in development, 0.0.0.0 in production
+2. **Implement Email Invitation System** (2-3 days)
+   - Replace open registration with invite-only access
+   - Create email waitlist submission for interested users
+   - Admin dashboard for managing invitation requests
+   - Generate and send invitation codes/links
 
-### 🔧 Technical Configuration Completed
-- **Host Binding:** Dynamic (localhost for dev, 0.0.0.0 for production)
-- **Port Configuration:** Dynamic via process.env.PORT (Railway) or 3000 (local)
-- **Database Switching:** Automatic based on DATABASE_URL presence
-- **Health Check Endpoint:** /health endpoint implemented for Railway monitoring
+### 🎯 Ready for Production Deployment
+The application is now technically ready for production deployment with:
+- Stable PostgreSQL database layer
+- All core features (authentication, polls, voting, profiles) working
+- Proper error handling and async operations
+- Docker setup instructions for development
+- Comprehensive documentation
 
-### 📋 Next Steps for Resolution
-1. **Railway Networking:** Resolve "unexposed service" issue to activate public URLs
-2. **Local Development:** Debug connection timeout issues with SQLite database
-3. **Domain Verification:** Complete DNS propagation and Railway domain activation
-4. **Testing:** Verify both local development and production deployment work
+### 🗄️ Database Configuration
+- **Production:** PostgreSQL with complete schema, indexes, and constraints
+- **Development:** PostgreSQL via Docker (postgresql://postgres:postgres@localhost:5432/votingapp)
+- **Admin Credentials:** username=Will, password=admin123 (local), username=admin, password=Krebs@5902 (production)
 
-### 🎯 Pending Implementation (After Deployment Issues Resolved)
-- User Contribution Tracking database tables
-- Initiative completion blog post system with community verification
-- Enhanced profile pages with contribution stats
-- Security improvements (bcrypt password hashing)
-
-### 🗄️ Database Schema Status
-- **Production:** PostgreSQL with all tables and migrations working
-- **Development:** SQLite with same schema, automatic admin user creation
-- **Admin Credentials:** username=admin, password=Krebs@5902 (production)
-
-### 🌐 Domain Configuration
-- **Cloudflare DNS:** CNAME www → wrle7373.up.railway.app (DNS only, gray cloud)
-- **Railway Custom Domain:** www.onlinedemocracy.org (shows green checkmark but not routing)
-- **Railway Generated Domain:** Grey globe indicating inactive status
+### 🌐 Deployment Configuration
+- **Railway:** Configured with proper health checks, environment variables, and PostgreSQL service
+- **Host Binding:** Always 0.0.0.0 for container compatibility
+- **Health Check:** /health endpoint with 30-second timeout
+- **Domain:** www.onlinedemocracy.org (pending final deployment)
 
 ---
 

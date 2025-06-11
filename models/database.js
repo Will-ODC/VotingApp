@@ -120,18 +120,18 @@ const runMigrations = () => {
  * or default values if not specified.
  * 
  * Environment variables:
- * - ADMIN_USERNAME: Admin username (default: 'Will')
+ * - ADMIN_USERNAME: Admin username (default: 'admin')
  * - ADMIN_PASSWORD: Admin password (default: 'admin123')
- * - ADMIN_EMAIL: Admin email (default: 'will@community.com')
+ * - ADMIN_EMAIL: Admin email (default: 'admin@community.com')
  * 
  * The password is hashed using SHA-256 before storage.
  * Uses INSERT OR IGNORE to prevent duplicate admin accounts.
  */
 const createAdminUser = () => {
     const crypto = require('crypto');
-    const adminUsername = process.env.ADMIN_USERNAME || 'Will';
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-    const adminEmail = process.env.ADMIN_EMAIL || 'will@community.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@community.com';
     
     // Hash the password using SHA-256
     const hashedPassword = crypto.createHash('sha256').update(adminPassword).digest('hex');
@@ -139,13 +139,13 @@ const createAdminUser = () => {
     // Insert admin user with is_admin and is_verified flags set to true
     db.run(
         `INSERT OR IGNORE INTO users (username, password, email, name, is_admin, is_verified) VALUES (?, ?, ?, ?, 1, 1)`,
-        [adminUsername, hashedPassword, adminEmail, 'Will'],
+        [adminUsername, hashedPassword, adminEmail, 'Administrator'],
         (err) => {
             if (err) {
                 console.error('Error creating admin user:', err);
             } else {
                 console.log('Admin user created/verified');
-                console.log('Default admin credentials: username=Will, password=admin123');
+                console.log('Default admin credentials: username=admin, password=admin123');
             }
         }
     );

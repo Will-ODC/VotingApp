@@ -205,9 +205,9 @@ Advanced features for community insights and rapid participation.
 - `NODE_ENV` - Environment (development/production)
 
 ### Default Admin Account
-- Username: Will
+- Username: admin
 - Password: admin123
-- Email: will@community.com
+- Email: admin@community.com
 - Role: Administrator
 
 ## 📁 Project Structure

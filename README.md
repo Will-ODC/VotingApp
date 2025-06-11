@@ -95,9 +95,9 @@ A comprehensive web-based voting platform that enables democratic decision-makin
 ## 👤 Default Admin Account
 
 If no environment variables are set, the default admin account will be:
-- **Username**: Will
+- **Username**: admin
 - **Password**: admin123
-- **Email**: will@community.com
+- **Email**: admin@community.com
 
 ⚠️ **Important**: Change the admin password immediately after first login for security!
 

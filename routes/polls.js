@@ -12,7 +12,7 @@
 
 const express = require('express');
 const router = express.Router();
-const db = require('../models/database');
+const { db } = require('../models/database');
 
 /**
  * Middleware to require user authentication
@@ -75,7 +75,7 @@ router.post('/create', requireAuth, async (req, res) => {
             // Insert poll into database with threshold and category
             db.run(
                 `INSERT INTO polls (title, description, created_by, closes_at, vote_threshold, category) 
-                 VALUES (?, ?, ?, ?, ?, ?)`,
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
                 [title, description, userId, closesAt, threshold, category || 'general'],
                 function(err) {
                     if (err) reject(err);
@@ -91,8 +91,8 @@ router.post('/create', requireAuth, async (req, res) => {
                     await new Promise((resolve, reject) => {
                         // Insert each option with auto-approval
                         db.run(
-                            'INSERT INTO options (poll_id, option_text, created_by, is_approved) VALUES (?, ?, ?, 1)',
-                            [pollId, option.trim(), userId],
+                            'INSERT INTO options (poll_id, option_text) VALUES ($1, $2)',
+                            [pollId, option.trim()],
                             (err) => {
                                 if (err) reject(err);
                                 else resolve();
@@ -129,18 +129,20 @@ router.get('/all', requireAuth, async (req, res) => {
         if (filter === 'deleted') {
             whereConditions.push('p.is_active = 0');
         } else if (filter === 'active') {
-            whereConditions.push('p.is_active = 1 AND datetime(p.closes_at) > datetime("now")');
+            whereConditions.push('p.is_active = 1 AND p.closes_at > CURRENT_TIMESTAMP');
         } else if (filter === 'expired') {
-            whereConditions.push('p.is_active = 1 AND datetime(p.closes_at) <= datetime("now")');
+            whereConditions.push('p.is_active = 1 AND p.closes_at <= CURRENT_TIMESTAMP');
         }
         // 'all' filter shows everything (no filter condition)
 
         // Add search condition if search query exists
         let queryParams = [];
         if (search.trim()) {
-            whereConditions.push('(p.title LIKE ? OR p.description LIKE ?)');
             const searchPattern = `%${search.trim()}%`;
             queryParams = [searchPattern, searchPattern];
+            // Build numbered placeholders dynamically
+            let paramIndex = 1;
+            whereConditions.push(`(p.title LIKE $${paramIndex++} OR p.description LIKE $${paramIndex++})`);
         }
 
         // Build final WHERE clause
@@ -157,8 +159,8 @@ router.get('/all', requireAuth, async (req, res) => {
             db.all(
                 `SELECT p.*, u.username as creator_name, COUNT(DISTINCT v.id) as vote_count,
                  CASE 
-                    WHEN datetime(p.closes_at) > datetime('now') AND p.is_active = 1 THEN 'active'
-                    WHEN datetime(p.closes_at) <= datetime('now') AND p.is_active = 1 THEN 'expired'
+                    WHEN p.closes_at > CURRENT_TIMESTAMP AND p.is_active = 1 THEN 'active'
+                    WHEN p.closes_at <= CURRENT_TIMESTAMP AND p.is_active = 1 THEN 'expired'
                     ELSE 'deleted'
                  END as status
                  FROM polls p 
@@ -205,7 +207,7 @@ router.get('/:id', async (req, res) => {
                  FROM polls p 
                  JOIN users u ON p.created_by = u.id 
                  LEFT JOIN votes v ON p.id = v.poll_id
-                 WHERE p.id = ?
+                 WHERE p.id = $1
                  GROUP BY p.id`,
                 [pollId],
                 (err, row) => {
@@ -225,7 +227,7 @@ router.get('/:id', async (req, res) => {
                 `SELECT o.*, COUNT(v.id) as vote_count
                  FROM options o
                  LEFT JOIN votes v ON o.id = v.option_id
-                 WHERE o.poll_id = ?
+                 WHERE o.poll_id = $1
                  GROUP BY o.id`,
                 [pollId],
                 (err, rows) => {
@@ -243,7 +245,7 @@ router.get('/:id', async (req, res) => {
         if (req.session.user) {
             const vote = await new Promise((resolve, reject) => {
                 db.get(
-                    'SELECT option_id, voted_at FROM votes WHERE poll_id = ? AND user_id = ?',
+                    'SELECT option_id, voted_at FROM votes WHERE poll_id = $1 AND user_id = $2',
                     [pollId, req.session.user.id],
                     (err, row) => {
                         if (err) reject(err);
@@ -292,7 +294,7 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
         // Check if poll is still active
         const poll = await new Promise((resolve, reject) => {
             db.get(
-                'SELECT * FROM polls WHERE id = ? AND is_active = 1',
+                'SELECT * FROM polls WHERE id = $1 AND is_active = 1',
                 [pollId],
                 (err, row) => {
                     if (err) reject(err);
@@ -313,7 +315,7 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
         // Check if user has already voted in this poll
         const existingVote = await new Promise((resolve, reject) => {
             db.get(
-                'SELECT id, option_id FROM votes WHERE poll_id = ? AND user_id = ?',
+                'SELECT id, option_id FROM votes WHERE poll_id = $1 AND user_id = $2',
                 [pollId, userId],
                 (err, row) => {
                     if (err) reject(err);
@@ -326,7 +328,7 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
             // User has voted before - update their vote
             await new Promise((resolve, reject) => {
                 db.run(
-                    'UPDATE votes SET option_id = ?, voted_at = datetime("now") WHERE poll_id = ? AND user_id = ?',
+                    'UPDATE votes SET option_id = $1, voted_at = CURRENT_TIMESTAMP WHERE poll_id = $2 AND user_id = $3',
                     [optionId, pollId, userId],
                     (err) => {
                         if (err) reject(err);
@@ -338,7 +340,7 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
             // First time voting - insert new vote
             await new Promise((resolve, reject) => {
                 db.run(
-                    'INSERT INTO votes (poll_id, option_id, user_id) VALUES (?, ?, ?)',
+                    'INSERT INTO votes (poll_id, option_id, user_id) VALUES ($1, $2, $3)',
                     [pollId, optionId, userId],
                     (err) => {
                         if (err) reject(err);
@@ -371,7 +373,7 @@ router.get('/:id/delete', requireAdmin, async (req, res) => {
     try {
         // Soft delete by setting is_active to 0
         await new Promise((resolve, reject) => {
-            db.run('UPDATE polls SET is_active = 0 WHERE id = ?', [pollId], (err) => {
+            db.run('UPDATE polls SET is_active = 0 WHERE id = $1', [pollId], (err) => {
                 if (err) reject(err);
                 else resolve();
             });

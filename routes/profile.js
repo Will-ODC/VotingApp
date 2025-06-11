@@ -10,7 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-const db = require('../models/database');
+const { db } = require('../models/database');
 
 /**
  * Middleware to require user authentication
@@ -44,7 +44,7 @@ router.get('/', requireAuth, async (req, res) => {
                 `SELECT p.*, COUNT(DISTINCT v.id) as vote_count
                  FROM polls p
                  LEFT JOIN votes v ON p.id = v.poll_id
-                 WHERE p.created_by = ?
+                 WHERE p.created_by = $1
                  GROUP BY p.id
                  ORDER BY p.created_at DESC`,
                 [userId],
@@ -58,7 +58,7 @@ router.get('/', requireAuth, async (req, res) => {
         // Get total count of voted polls for pagination info
         const totalVotedPolls = await new Promise((resolve, reject) => {
             db.get(
-                'SELECT COUNT(*) as count FROM votes WHERE user_id = ?',
+                'SELECT COUNT(*) as count FROM votes WHERE user_id = $1',
                 [userId],
                 (err, row) => {
                     if (err) reject(err);
@@ -78,8 +78,8 @@ router.get('/', requireAuth, async (req, res) => {
                 `SELECT p.*, o.option_text as voted_option, v.voted_at,
                  COUNT(DISTINCT v2.id) as total_votes,
                  CASE 
-                    WHEN datetime(p.closes_at) > datetime('now') AND p.is_active = 1 THEN 'active'
-                    WHEN datetime(p.closes_at) <= datetime('now') AND p.is_active = 1 THEN 'expired'
+                    WHEN p.closes_at > CURRENT_TIMESTAMP AND p.is_active = 1 THEN 'active'
+                    WHEN p.closes_at <= CURRENT_TIMESTAMP AND p.is_active = 1 THEN 'expired'
                     ELSE 'deleted'
                  END as poll_status,
                  u.username as creator_name
@@ -88,10 +88,10 @@ router.get('/', requireAuth, async (req, res) => {
                  JOIN options o ON v.option_id = o.id
                  JOIN users u ON p.created_by = u.id
                  LEFT JOIN votes v2 ON p.id = v2.poll_id
-                 WHERE v.user_id = ?
+                 WHERE v.user_id = $1
                  GROUP BY p.id, v.id
                  ORDER BY v.voted_at DESC
-                 LIMIT ? OFFSET ?`,
+                 LIMIT $2 OFFSET $3`,
                 [userId, perPage, offset],
                 (err, rows) => {
                     if (err) reject(err);
@@ -163,7 +163,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
         // Fetch current password hash from database
         const user = await new Promise((resolve, reject) => {
             db.get(
-                'SELECT password FROM users WHERE id = ?',
+                'SELECT password FROM users WHERE id = $1',
                 [userId],
                 (err, row) => {
                     if (err) reject(err);
@@ -188,7 +188,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
         
         await new Promise((resolve, reject) => {
             db.run(
-                'UPDATE users SET password = ? WHERE id = ?',
+                'UPDATE users SET password = $1 WHERE id = $2',
                 [hashedNew, userId],
                 (err) => {
                     if (err) reject(err);

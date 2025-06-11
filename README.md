@@ -50,7 +50,7 @@ A comprehensive web-based voting platform that enables democratic decision-makin
 ## 🛠️ Tech Stack
 
 - **Backend**: Node.js, Express.js with comprehensive route handling
-- **Database**: SQLite with automatic schema migration
+- **Database**: PostgreSQL for production, supports both local and cloud databases
 - **Templating**: EJS with express-ejs-layouts for modular views
 - **Authentication**: Express sessions with SHA-256 password hashing
 - **Styling**: Custom CSS with responsive design principles
@@ -59,29 +59,45 @@ A comprehensive web-based voting platform that enables democratic decision-makin
 
 ## Installation
 
-1. Clone the repository
+### Option 1: Docker PostgreSQL (Recommended)
+
+1. **Install Docker Desktop** (if not already installed)
+   - Download from [docker.com](https://www.docker.com/products/docker-desktop/)
+
+2. **Clone the repository**
    ```bash
    git clone [your-repo-url]
    cd VotingApp
    ```
 
-2. Install dependencies
+3. **Start PostgreSQL with Docker**
+   ```bash
+   # One-time setup (creates and starts PostgreSQL container)
+   docker run -d --name votingapp-db \
+     -e POSTGRES_PASSWORD=postgres \
+     -e POSTGRES_DB=votingapp \
+     -p 5432:5432 \
+     postgres:15
+   ```
+
+4. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. Set up environment variables (optional)
-   - Copy `.env.example` to `.env` if provided
+5. **Set up environment variables** (optional)
+   - Copy `.env.example` to `.env` and customize if needed
    - Or create `.env` with:
      ```
      PORT=3000
+     DATABASE_URL=postgresql://postgres:postgres@localhost:5432/votingapp
      ADMIN_USERNAME=admin
      ADMIN_PASSWORD=your_secure_password
      ADMIN_EMAIL=admin@example.com
      SESSION_SECRET=your-secret-key-change-this-in-production
      ```
 
-4. Start the server
+6. **Start the application**
    ```bash
    npm start
    ```
@@ -90,7 +106,52 @@ A comprehensive web-based voting platform that enables democratic decision-makin
    npm run dev
    ```
 
-5. Access the application at `http://localhost:3000`
+7. **Access the application** at `http://localhost:3000`
+
+### Daily Development Workflow
+```bash
+# Start PostgreSQL (if stopped)
+docker start votingapp-db
+
+# Start the application
+npm start
+
+# Stop PostgreSQL when done (optional)
+docker stop votingapp-db
+```
+
+### Option 2: Cloud PostgreSQL (No Docker Required)
+
+1. **Get a free PostgreSQL database** from [Neon](https://neon.tech) or [Supabase](https://supabase.com)
+
+2. **Clone the repository**
+   ```bash
+   git clone [your-repo-url]
+   cd VotingApp
+   ```
+
+3. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Set up environment variables**
+   - Create `.env` with your cloud database URL:
+     ```
+     PORT=3000
+     DATABASE_URL=postgresql://your-cloud-database-url
+     ADMIN_USERNAME=admin
+     ADMIN_PASSWORD=your_secure_password
+     ADMIN_EMAIL=admin@example.com
+     SESSION_SECRET=your-secret-key-change-this-in-production
+     ```
+
+5. **Start the application**
+   ```bash
+   npm start
+   ```
+
+6. **Access the application** at `http://localhost:3000`
 
 ## 👤 Default Admin Account
 

@@ -8,7 +8,7 @@
 
 const express = require('express');
 const router = express.Router();
-const db = require('../models/database');
+const { db } = require('../models/database');
 
 /**
  * GET /
@@ -30,15 +30,16 @@ router.get('/', async (req, res) => {
         // Build search and filter conditions
         let conditions = [];
         let queryParams = [];
+        let paramIndex = 1;
         
         if (search.trim()) {
-            conditions.push(`(p.title LIKE ? OR p.description LIKE ?)`);
+            conditions.push(`(p.title LIKE $${paramIndex++} OR p.description LIKE $${paramIndex++})`);
             const searchPattern = `%${search.trim()}%`;
             queryParams.push(searchPattern, searchPattern);
         }
         
         if (category.trim()) {
-            conditions.push(`p.category = ?`);
+            conditions.push(`p.category = $${paramIndex++}`);
             queryParams.push(category.trim());
         }
         
@@ -61,7 +62,7 @@ router.get('/', async (req, res) => {
                        MAX(v.voted_at) as last_vote_time
                 FROM polls p
                 LEFT JOIN votes v ON p.id = v.poll_id
-                WHERE p.is_active = 1 AND datetime(p.closes_at) > datetime('now')
+                WHERE p.is_active = 1 AND p.closes_at > CURRENT_TIMESTAMP
                 ${searchCondition}
                 GROUP BY p.id
                 ${orderClause}

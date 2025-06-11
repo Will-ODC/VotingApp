@@ -12,7 +12,7 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-const db = require('../models/database');
+const { db } = require('../models/database');
 
 /**
  * GET /auth/login
@@ -36,7 +36,7 @@ router.post('/login', async (req, res) => {
         // Look up user by username
         const user = await new Promise((resolve, reject) => {
             db.get(
-                'SELECT * FROM users WHERE username = ?',
+                'SELECT * FROM users WHERE username = $1',
                 [username],
                 (err, row) => {
                     if (err) reject(err);
@@ -104,7 +104,7 @@ router.post('/register', async (req, res) => {
         // Check if username already exists
         const existingUser = await new Promise((resolve, reject) => {
             db.get(
-                'SELECT id FROM users WHERE username = ?',
+                'SELECT id FROM users WHERE username = $1',
                 [username],
                 (err, row) => {
                     if (err) reject(err);
@@ -123,7 +123,7 @@ router.post('/register', async (req, res) => {
         // Create new user account
         await new Promise((resolve, reject) => {
             db.run(
-                'INSERT INTO users (username, password) VALUES (?, ?)',
+                'INSERT INTO users (username, password) VALUES ($1, $2)',
                 [username, hashedPassword],
                 function(err) {
                     if (err) reject(err);

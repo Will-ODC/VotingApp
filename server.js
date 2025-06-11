@@ -20,7 +20,7 @@ const expressLayouts = require('express-ejs-layouts');
 dotenv.config();
 
 // Import database connection and initialization
-const db = require('./models/database');
+const { db, initialize } = require('./models/database');
 
 // Import route modules
 const indexRoutes = require('./routes/index');
@@ -71,7 +71,23 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong!');
 });
 
-// Start the Express server
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${PORT} - Railway deployment`);
-});
+// Initialize database and start server
+const startServer = async () => {
+    try {
+        // Initialize database
+        await initialize();
+        
+        // Start the Express server  
+        const HOST = '0.0.0.0'; // Always bind to 0.0.0.0 for Railway and Docker compatibility
+        app.listen(PORT, HOST, () => {
+            console.log(`Server running on http://${HOST}:${PORT}`);
+            console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
+
+// Start the application
+startServer();

@@ -43,21 +43,43 @@ router.post('/login',
     async (req, res) => {
         const { username, password } = req.body;
         
+        console.log('🔐 LOGIN ATTEMPT:', { username, timestamp: new Date().toISOString() });
+        
         try {
             // Delegate to service layer
+            console.log('🔍 Calling userService.authenticate...');
             const user = await userService.authenticate(username, password);
+            console.log('✅ Authentication successful:', { 
+                userId: user.id, 
+                username: user.username, 
+                isAdmin: user.is_admin 
+            });
             
             // Create session
+            console.log('📝 Creating session...');
             req.session.user = {
                 id: user.id,
                 username: user.username,
                 is_admin: user.is_admin
             };
-
-            // Redirect to home page
-            res.redirect('/');
+            
+            console.log('💾 Session created:', req.session.user);
+            console.log('🔑 Session ID:', req.sessionID);
+            
+            // Save session explicitly
+            req.session.save((err) => {
+                if (err) {
+                    console.error('❌ Session save error:', err);
+                    req.flash('error', 'Session creation failed');
+                    return res.redirect('/auth/login');
+                }
+                
+                console.log('✅ Session saved successfully, redirecting to /');
+                res.redirect('/');
+            });
+            
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('❌ Login error:', error);
             req.flash('error', error.message);
             res.redirect('/auth/login');
         }

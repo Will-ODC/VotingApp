@@ -17,9 +17,17 @@ const { db } = require('../models/database');
  * Redirects to login page if user is not authenticated
  */
 function requireAuth(req, res, next) {
+    console.log('🔐 AUTH CHECK');
+    console.log('🔑 Session ID:', req.sessionID);
+    console.log('👤 Session user:', req.session.user);
+    console.log('📋 Full session:', req.session);
+    
     if (!req.session.user) {
+        console.log('❌ No session user found, redirecting to login');
         return res.redirect('/auth/login');
     }
+    
+    console.log('✅ Auth check passed');
     next();
 }
 

@@ -22,6 +22,11 @@ const { db } = require('../models/database');
  * Includes vote count for each poll
  */
 router.get('/', async (req, res) => {
+    console.log('🏠 HOME PAGE REQUEST');
+    console.log('🔑 Session ID:', req.sessionID);
+    console.log('👤 Session user:', req.session.user);
+    console.log('📋 Session data:', req.session);
+    
     try {
         const sort = req.query.sort || 'popular';
         const search = req.query.search || '';

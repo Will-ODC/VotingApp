@@ -52,7 +52,10 @@ const sessionMiddleware = session({
     cookie: {
         secure: process.env.NODE_ENV === 'production',  // HTTPS only in production
         httpOnly: true,  // Prevent XSS attacks by disabling client-side access
-        maxAge: 24 * 60 * 60 * 1000  // Session expires after 24 hours
+        maxAge: 24 * 60 * 60 * 1000,  // Session expires after 24 hours
+        sameSite: 'lax',  // Allow cookies to be sent with navigations
+        domain: process.env.COOKIE_DOMAIN || undefined,  // Set if needed for subdomain sharing
+        path: '/'  // Explicitly set path
     }
 });
 

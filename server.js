@@ -39,6 +39,12 @@ app.set('views', path.join(__dirname, 'views'));  // Set views directory
 app.use(expressLayouts);  // Enable layout support
 app.set('layout', 'layout');  // Set default layout file
 
+// Trust proxy for Railway deployment
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);  // Trust first proxy (Railway's load balancer)
+    console.log('🔒 Proxy trust enabled for production');
+}
+
 // Configure middleware
 app.use(express.static(path.join(__dirname, 'public')));  // Serve static files from public directory
 app.use(express.urlencoded({ extended: true }));  // Parse URL-encoded bodies

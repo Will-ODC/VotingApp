@@ -23,14 +23,14 @@ const { db } = require('../models/database');
  */
 router.get('/', async (req, res) => {
     try {
-        // Simplified query for debugging
+        // Fixed query with correct column names
         const polls = await db.all(`
             SELECT p.*, 
                    COUNT(DISTINCT v.id) as vote_count
             FROM polls p
             LEFT JOIN votes v ON p.id = v.poll_id
             WHERE p.is_active = TRUE AND (p.end_date IS NULL OR p.end_date > CURRENT_TIMESTAMP)
-            GROUP BY p.id, p.title, p.description, p.creator_id, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, p.approved_at
+            GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category, p.poll_type
             ORDER BY vote_count DESC, p.created_at DESC
             LIMIT 10
         `);

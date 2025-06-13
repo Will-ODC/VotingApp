@@ -21,13 +21,30 @@ const pgSession = require('connect-pg-simple')(session);
  *   - httpOnly: Prevent client-side JS access (XSS protection)
  *   - maxAge: Session expires after 24 hours
  */
+// Debug session store connection
+console.log('🗃️ SESSION STORE CONFIG:');
+console.log('📊 DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('🔐 SESSION_SECRET exists:', !!process.env.SESSION_SECRET);
+console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
+
+const sessionStore = new pgSession({
+    conString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/votingapp',
+    tableName: 'session',  // Session table name
+    createTableIfMissing: true  // Auto-create session table
+});
+
+// Debug session store events
+sessionStore.on('connect', () => {
+    console.log('✅ Session store connected to PostgreSQL');
+});
+
+sessionStore.on('disconnect', () => {
+    console.log('❌ Session store disconnected from PostgreSQL');
+});
+
 const sessionMiddleware = session({
     // PostgreSQL session store
-    store: new pgSession({
-        conString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/votingapp',
-        tableName: 'session',  // Session table name
-        createTableIfMissing: true  // Auto-create session table
-    }),
+    store: sessionStore,
     // Use environment variable or generate random secret
     secret: process.env.SESSION_SECRET || crypto.randomBytes(64).toString('hex'),
     resave: false,  // Don't save session if it wasn't modified

@@ -80,13 +80,13 @@
                                 <span>Voted: <%= new Date(poll.voted_at).toLocaleDateString() %></span>
                             <% } %>
                         </div>
-                        <% if (poll.closes_at) { %>
+                        <% if (poll.end_date) { %>
                             <div class="poll-timing">
                                 <small>
                                     <% if (poll.poll_status === 'active') { %>
-                                        Expires: <%= new Date(poll.closes_at).toLocaleDateString() %> at <%= new Date(poll.closes_at).toLocaleTimeString() %>
+                                        Expires: <%= new Date(poll.end_date).toLocaleDateString() %> at <%= new Date(poll.end_date).toLocaleTimeString() %>
                                     <% } else if (poll.poll_status === 'expired') { %>
-                                        Expired: <%= new Date(poll.closes_at).toLocaleDateString() %> at <%= new Date(poll.closes_at).toLocaleTimeString() %>
+                                        Expired: <%= new Date(poll.end_date).toLocaleDateString() %> at <%= new Date(poll.end_date).toLocaleTimeString() %>
                                     <% } %>
                                 </small>
                             </div>

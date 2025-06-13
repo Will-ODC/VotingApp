@@ -1,0 +1,20 @@
+git commit -m "$(cat <<'EOF'
+Refactor poll system to class-based architecture and fix data structure issues
+
+- Created BasePoll abstract class with common interface for all poll types
+- Implemented SimplePoll class maintaining current functionality
+- Added PollFactory for type-based poll instantiation
+- Added poll_type and vote_data columns to database schema
+- Updated all poll routes to use new class system
+- Fixed null results calculation and data structure mismatches
+- Fixed closes_at vs end_date column name inconsistencies in templates
+- Added consistent integer normalization for vote counts
+- Maintained full backward compatibility with existing polls
+
+Enables easy extension with ranked choice, approval, and quadratic voting.
+
+Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"

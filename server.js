@@ -15,6 +15,7 @@ const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 const expressLayouts = require('express-ejs-layouts');
+const flash = require('connect-flash');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -46,6 +47,9 @@ app.use(express.json());  // Parse JSON bodies
 // Configure session middleware for user authentication
 app.use(require('./middleware/session'));
 
+// Configure flash messages
+app.use(flash());
+
 // Health check endpoint for monitoring
 app.get('/health', (req, res) => {
     res.status(200).json({ 
@@ -61,15 +65,14 @@ app.use('/polls', pollRoutes);  // Poll creation, viewing, and voting
 app.use('/auth', authRoutes);  // Login, registration, and logout
 app.use('/profile', profileRoutes);  // User profile management
 
-/**
- * Global error handling middleware
- * Catches any errors that occur during request processing
- * and sends a generic error response to the client
- */
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something went wrong!');
-});
+// Import error handlers
+const { errorHandler, notFoundHandler } = require('./src/middleware/errorHandler');
+
+// 404 handler - must come after all other routes
+app.use(notFoundHandler);
+
+// Global error handler - must be last middleware
+app.use(errorHandler);
 
 // Initialize database and start server
 const startServer = async () => {

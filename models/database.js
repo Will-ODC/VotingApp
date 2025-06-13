@@ -15,9 +15,9 @@ const crypto = require('crypto');
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/votingapp',
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    max: 20,
+    max: parseInt(process.env.DB_MAX_CONNECTIONS) || 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 30000,
 });
 
 // Database interface
@@ -123,7 +123,8 @@ const initializeDatabase = async () => {
                 vote_threshold INTEGER DEFAULT NULL,
                 is_approved BOOLEAN DEFAULT FALSE,
                 approved_at TIMESTAMP DEFAULT NULL,
-                category TEXT DEFAULT 'general'
+                category TEXT DEFAULT 'general',
+                poll_type TEXT DEFAULT 'simple'
             )`,
             
             // Options table
@@ -140,6 +141,7 @@ const initializeDatabase = async () => {
                 user_id INTEGER REFERENCES users(id),
                 poll_id INTEGER REFERENCES polls(id),
                 option_id INTEGER REFERENCES options(id),
+                vote_data JSONB,
                 voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(user_id, poll_id)
             )`

@@ -13,6 +13,7 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../models/database');
+const { PollFactory, PollTypes } = require('../models/polls');
 
 /**
  * Middleware to require user authentication
@@ -52,7 +53,7 @@ router.get('/create', requireAuth, (req, res) => {
  * - Redirects to poll view page
  */
 router.post('/create', requireAuth, async (req, res) => {
-    const { title, description, options, end_date, vote_threshold, category } = req.body;
+    const { title, description, options, end_date, vote_threshold, category, poll_type } = req.body;
     const userId = req.session.user.id;
 
     try {
@@ -71,11 +72,17 @@ router.post('/create', requireAuth, async (req, res) => {
         
         console.log('Creating poll with end_date:', closesAt, 'threshold:', threshold);
         
-        // Insert poll into database with threshold and category
+        // Validate poll type
+        const pollType = poll_type || 'simple';
+        if (!PollTypes.isTypeAvailable(pollType)) {
+            return res.status(400).render('error', { message: 'Invalid poll type selected' });
+        }
+        
+        // Insert poll into database with threshold, category, and type
         const result = await db.run(
-            `INSERT INTO polls (title, description, created_by, end_date, vote_threshold, category) 
-             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-            [title, description, userId, closesAt, threshold, category || 'general']
+            `INSERT INTO polls (title, description, created_by, end_date, vote_threshold, category, poll_type) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+            [title, description, userId, closesAt, threshold, category || 'general', pollType]
         );
         const pollId = result.id;
 
@@ -145,7 +152,7 @@ router.get('/all', requireAuth, async (req, res) => {
 
         // Fetch polls with status calculation, filtering, and search
         const allPolls = await db.all(
-            `SELECT p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, p.category,
+            `SELECT p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, p.category, p.poll_type,
              u.username as creator_name, COUNT(DISTINCT v.id) as vote_count,
              CASE 
                 WHEN p.end_date > CURRENT_TIMESTAMP AND p.is_active = TRUE THEN 'active'
@@ -156,7 +163,7 @@ router.get('/all', requireAuth, async (req, res) => {
              JOIN users u ON p.created_by = u.id 
              LEFT JOIN votes v ON p.id = v.poll_id
              ${whereClause}
-             GROUP BY p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, p.category, u.username
+             GROUP BY p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, p.category, p.poll_type, u.username
              ${orderClause}`,
             queryParams
         );
@@ -183,59 +190,34 @@ router.get('/:id', async (req, res) => {
     const pollId = req.params.id;
     
     try {
-        // Fetch poll details with creator information and approval status
-        const poll = await db.get(
-            `SELECT p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, p.category,
-             u.username as creator_name, COUNT(DISTINCT v.id) as current_vote_count
-             FROM polls p 
-             JOIN users u ON p.created_by = u.id 
-             LEFT JOIN votes v ON p.id = v.poll_id
-             WHERE p.id = $1
-             GROUP BY p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, p.category, u.username`,
-            [pollId]
-        );
-
+        // Fetch poll using factory
+        const poll = await PollFactory.getPollById(db, pollId);
+        
         if (!poll) {
             return res.status(404).render('error', { message: 'Poll not found' });
         }
 
-        // Fetch poll options with vote counts
-        const options = await db.all(
-            `SELECT o.id, o.poll_id, o.option_text, o.created_at, COUNT(v.id) as vote_count
-             FROM options o
-             LEFT JOIN votes v ON o.id = v.option_id
-             WHERE o.poll_id = $1
-             GROUP BY o.id, o.poll_id, o.option_text, o.created_at`,
-            [pollId]
+        // Get poll creator info
+        const creator = await db.get(
+            'SELECT username FROM users WHERE id = $1',
+            [poll.createdBy]
         );
 
-        // Check if current user has already voted and get their vote details
-        let hasVoted = false;
-        let userVote = null;
-        let canChangeVote = false;
+        // Get display data from poll class
+        const displayData = await poll.getDisplayData(db, req.session.user?.id);
         
-        if (req.session.user) {
-            const vote = await db.get(
-                'SELECT option_id, voted_at FROM votes WHERE poll_id = $1 AND user_id = $2',
-                [pollId, req.session.user.id]
-            );
-            hasVoted = !!vote;
-            userVote = vote;
-            
-            // User can change vote if poll is active and not expired
-            canChangeVote = hasVoted && poll.is_active && new Date(poll.end_date) > new Date();
-        }
-
-        // Calculate total votes for percentage display
-        const totalVotes = options.reduce((sum, opt) => sum + parseInt(opt.vote_count), 0);
+        // Add creator name to poll data
+        displayData.poll.creator_name = creator.username;
 
         res.render('polls/view', {
-            poll,
-            options,
-            hasVoted,
-            userVote,
-            canChangeVote,
-            totalVotes,
+            poll: displayData.poll,
+            options: displayData.options,
+            hasVoted: displayData.hasVoted,
+            userVote: displayData.userVote,
+            canChangeVote: displayData.canChangeVote,
+            totalVotes: displayData.results.totalVotes,
+            results: displayData.results,
+            votingInterface: displayData.votingInterface,
             user: req.session.user || null
         });
     } catch (error) {
@@ -257,43 +239,29 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
 
     try {
-        // Check if poll is still active
-        const poll = await db.get('SELECT * FROM polls WHERE id = $1 AND is_active = TRUE', [pollId]);
-
+        // Fetch poll using factory
+        const poll = await PollFactory.getPollById(db, pollId);
+        
         if (!poll) {
-            return res.status(400).json({ error: 'Poll not found or inactive' });
+            return res.status(400).json({ error: 'Poll not found' });
         }
 
-        // Check if poll has expired
-        if (new Date(poll.end_date) <= new Date()) {
-            return res.status(400).json({ error: 'This poll has expired and no longer accepts votes' });
+        // Prepare vote data (structure depends on poll type)
+        const voteData = { optionId };
+        
+        // Validate and record vote using poll class methods
+        const validation = poll.validateVote(userId, voteData);
+        if (!validation.valid) {
+            return res.status(400).json({ error: validation.error });
         }
-
-        // Check if user has already voted in this poll
-        const existingVote = await db.get('SELECT id, option_id FROM votes WHERE poll_id = $1 AND user_id = $2', [pollId, userId]);
-
-        if (existingVote) {
-            // User has voted before - update their vote
-            await db.run(
-                'UPDATE votes SET option_id = $1, voted_at = CURRENT_TIMESTAMP WHERE poll_id = $2 AND user_id = $3',
-                [optionId, pollId, userId]
-            );
-        } else {
-            // First time voting - insert new vote
-            await db.run(
-                'INSERT INTO votes (poll_id, option_id, user_id) VALUES ($1, $2, $3)',
-                [pollId, optionId, userId]
-            );
-        }
-
-        // Check if poll now meets its approval threshold
-        await db.checkPollThreshold(pollId);
+        
+        await poll.recordVote(db, userId, voteData);
 
         // Redirect back to poll to see updated results
         res.redirect(`/polls/${pollId}`);
     } catch (error) {
         console.error('Error voting:', error);
-        res.status(500).json({ error: 'Failed to submit vote' });
+        res.status(500).json({ error: error.message || 'Failed to submit vote' });
     }
 });
 

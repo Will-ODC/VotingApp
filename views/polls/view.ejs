@@ -1,7 +1,10 @@
 
 <div class="poll-view">
     <h1><%= poll.title %></h1>
-    <p class="poll-description"><%= poll.description %></p>
+    <div class="poll-description-box">
+        <h3>Initiative Description</h3>
+        <p><%= poll.description %></p>
+    </div>
     
     <div class="poll-meta">
         <span>Proposed by: <%= poll.creator_name %></span>
@@ -134,6 +137,28 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
+}
+
+.poll-description-box {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-left: 4px solid #007bff;
+}
+
+.poll-description-box h3 {
+    margin: 0 0 1rem 0;
+    color: #495057;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.poll-description-box p {
+    margin: 0;
+    color: #6c757d;
+    line-height: 1.6;
 }
 
 .poll-meta {

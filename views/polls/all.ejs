@@ -58,7 +58,7 @@
                 </div>
                 <div class="poll-dates">
                     <small>Created: <%= new Date(poll.created_at).toLocaleDateString() %></small>
-                    <small>Ends: <%= new Date(poll.closes_at).toLocaleDateString() %> <%= new Date(poll.closes_at).toLocaleTimeString() %></small>
+                    <small>Ends: <%= new Date(poll.end_date).toLocaleDateString() %> <%= new Date(poll.end_date).toLocaleTimeString() %></small>
                 </div>
             </div>
         <% }) %>

@@ -65,8 +65,8 @@
                 <p class="poll-description"><%= poll.description %></p>
                 <div class="poll-meta">
                     <span>Participants: <%= poll.vote_count %></span>
-                    <% if (poll.closes_at) { %>
-                        <span>Ends: <%= new Date(poll.closes_at).toLocaleDateString() %></span>
+                    <% if (poll.end_date) { %>
+                        <span>Ends: <%= new Date(poll.end_date).toLocaleDateString() %></span>
                     <% } %>
                 </div>
             </div>

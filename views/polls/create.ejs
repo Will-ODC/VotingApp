@@ -28,6 +28,17 @@
         </div>
         
         <div class="form-group">
+            <label for="poll_type">Voting Method</label>
+            <select id="poll_type" name="poll_type" required>
+                <option value="simple">Simple Poll (Single Choice)</option>
+                <option value="ranked" disabled>Ranked Choice Voting (Coming Soon)</option>
+                <option value="approval" disabled>Approval Voting (Coming Soon)</option>
+                <option value="quadratic" disabled>Quadratic Voting (Coming Soon)</option>
+            </select>
+            <small class="form-text">Choose how users will vote on this initiative</small>
+        </div>
+        
+        <div class="form-group">
             <label for="end_date">End Date (Optional)</label>
             <input type="datetime-local" id="end_date" name="end_date">
         </div>

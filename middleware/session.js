@@ -24,7 +24,7 @@ const pgSession = require('connect-pg-simple')(session);
 const sessionMiddleware = session({
     // PostgreSQL session store
     store: new pgSession({
-        conString: process.env.DATABASE_URL,
+        conString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/votingapp',
         tableName: 'session',  // Session table name
         createTableIfMissing: true  // Auto-create session table
     }),

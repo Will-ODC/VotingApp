@@ -12,9 +12,19 @@ const path = require('path');
 const crypto = require('crypto');
 
 // Create PostgreSQL connection pool
+const connectionConfig = process.env.DATABASE_URL ? {
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+} : {
+    host: 'localhost',
+    port: 5432,
+    database: 'votingapp',
+    user: 'postgres',
+    password: 'postgres'
+};
+
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/votingapp',
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ...connectionConfig,
     max: parseInt(process.env.DB_MAX_CONNECTIONS) || 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 30000,

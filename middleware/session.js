@@ -7,6 +7,7 @@
 
 const session = require('express-session');
 const crypto = require('crypto');
+const pgSession = require('connect-pg-simple')(session);
 
 /**
  * Configure session middleware with security best practices
@@ -21,6 +22,12 @@ const crypto = require('crypto');
  *   - maxAge: Session expires after 24 hours
  */
 const sessionMiddleware = session({
+    // PostgreSQL session store
+    store: new pgSession({
+        conString: process.env.DATABASE_URL,
+        tableName: 'session',  // Session table name
+        createTableIfMissing: true  // Auto-create session table
+    }),
     // Use environment variable or generate random secret
     secret: process.env.SESSION_SECRET || crypto.randomBytes(64).toString('hex'),
     resave: false,  // Don't save session if it wasn't modified

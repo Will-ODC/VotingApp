@@ -228,14 +228,30 @@ VotingApp/
 - **Thresholds**: Set vote requirements for poll approval and track progress visually
 - **Real-time Updates**: See live vote counts and approval status changes
 
-## Deployment
+## 🌐 Live Deployment
 
-The app is ready for deployment on platforms like:
-- Railway (recommended for SQLite support)
+**The app is now live at: [www.onlinedemocracy.org](https://www.onlinedemocracy.org)**
+
+### Production Deployment Details
+- **Platform**: Railway.app with PostgreSQL database
+- **Domain**: www.onlinedemocracy.org
+- **Status**: ✅ Fully operational with secure authentication and session management
+
+### Deployment Platforms Supported
+- Railway (currently deployed - recommended for PostgreSQL)
 - Render
 - Fly.io
+- Heroku
 
-Set environment variables on your hosting platform for production security.
+### Required Environment Variables for Deployment
+```
+DATABASE_URL=your-postgresql-connection-string
+NODE_ENV=production
+SESSION_SECRET=your-secure-random-string
+ADMIN_USERNAME=your-admin-username
+ADMIN_PASSWORD=your-admin-password
+ADMIN_EMAIL=your-admin-email
+```
 
 ## 🔒 Security Notes
 
@@ -279,7 +295,14 @@ npm start    # Standard start
 
 ## 🎯 Recent Updates
 
-### June 13, 2025 - Complete PostgreSQL Migration
+### June 13, 2025 - Production Deployment & Session Fix
+- ✅ **Live Deployment**: Successfully deployed to www.onlinedemocracy.org on Railway
+- ✅ **Session Persistence Fix**: Resolved production login issues with proxy trust and cookie configuration
+- ✅ **Clean Architecture**: Refactored authentication with UserService and UserRepository patterns
+- ✅ **PostgreSQL GROUP BY Fix**: Fixed SQL compatibility issues for production database
+- ✅ **Production Environment**: Configured with proper environment variables and session storage
+
+### June 11, 2025 - Complete PostgreSQL Migration
 - ✅ **Full PostgreSQL Migration**: Complete transition from SQLite to PostgreSQL for production scalability
 - ✅ **Railway Deployment Ready**: Fixed host binding, async database initialization, and PostgreSQL syntax
 - ✅ **Enhanced User Registration**: Added email field with validation and duplicate email prevention

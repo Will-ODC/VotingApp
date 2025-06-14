@@ -70,8 +70,6 @@ router.post('/create', requireAuth, async (req, res) => {
         // Parse vote threshold (null if not provided or invalid)
         const threshold = vote_threshold && parseInt(vote_threshold) > 0 ? parseInt(vote_threshold) : null;
         
-        console.log('Creating poll with end_date:', closesAt, 'threshold:', threshold);
-        
         // Validate poll type
         const pollType = poll_type || 'simple';
         if (!PollTypes.isTypeAvailable(pollType)) {

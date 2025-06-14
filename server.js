@@ -42,7 +42,6 @@ app.set('layout', 'layout');  // Set default layout file
 // Trust proxy for Railway deployment
 if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);  // Trust first proxy (Railway's load balancer)
-    console.log('🔒 Proxy trust enabled for production');
 }
 
 // Configure middleware
@@ -51,21 +50,7 @@ app.use(express.urlencoded({ extended: true }));  // Parse URL-encoded bodies
 app.use(express.json());  // Parse JSON bodies
 
 // Configure session middleware for user authentication
-const sessionMiddleware = require('./middleware/session');
-app.use(sessionMiddleware);
-
-// Debug middleware to log session state
-app.use((req, res, next) => {
-    console.log('🔍 REQUEST:', req.method, req.path);
-    console.log('🆔 Session ID:', req.sessionID);
-    console.log('👤 Session User:', req.session?.user);
-    console.log('📅 Session:', {
-        id: req.sessionID,
-        cookie: req.session?.cookie,
-        userExists: !!req.session?.user
-    });
-    next();
-});
+app.use(require('./middleware/session'));
 
 // Configure flash messages
 app.use(flash());

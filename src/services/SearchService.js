@@ -56,7 +56,7 @@ class SearchService {
     
     // Add search condition if query provided
     if (query && query.trim().length > 0) {
-      conditions.push(`(p.title LIKE $${paramIndex++} OR p.description LIKE $${paramIndex++})`);
+      conditions.push(`(p.title ILIKE $${paramIndex++} OR p.description ILIKE $${paramIndex++})`);
       const searchPattern = `%${query.trim()}%`;
       queryParams.push(searchPattern, searchPattern);
     }
@@ -99,7 +99,7 @@ class SearchService {
     }
 
     const searchPattern = `%${query.trim()}%`;
-    let whereConditions = [`(p.title LIKE $1 OR p.description LIKE $2)`];
+    let whereConditions = [`(p.title ILIKE $1 OR p.description ILIKE $2)`];
     
     // Add filter conditions
     if (filter === 'active') {
@@ -149,7 +149,7 @@ class SearchService {
       FROM polls p
       LEFT JOIN votes v ON p.id = v.poll_id
       WHERE p.created_by = $1 
-        AND (p.title LIKE $2 OR p.description LIKE $3)
+        AND (p.title ILIKE $2 OR p.description ILIKE $3)
       GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category
       ${orderClause}
       LIMIT 20
@@ -194,7 +194,7 @@ class SearchService {
       FROM polls p
       WHERE p.is_active = TRUE 
         AND (p.end_date IS NULL OR p.end_date > CURRENT_TIMESTAMP)
-        AND (p.title LIKE $1 OR p.category LIKE $2)
+        AND (p.title ILIKE $1 OR p.category ILIKE $2)
       ORDER BY p.title
       LIMIT $3
     `;

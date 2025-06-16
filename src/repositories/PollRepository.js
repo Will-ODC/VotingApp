@@ -218,7 +218,7 @@ class PollRepository {
       const searchPattern = `%${search.trim()}%`;
       queryParams = [searchPattern, searchPattern];
       searchCondition = whereConditions.length > 0 ? ' AND ' : ' WHERE ';
-      searchCondition += '(p.title LIKE $1 OR p.description LIKE $2)';
+      searchCondition += '(p.title ILIKE $1 OR p.description ILIKE $2)';
     }
 
     const query = `

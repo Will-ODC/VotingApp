@@ -53,8 +53,14 @@ class PollService {
       });
     }
 
-    if (endDate && new Date(endDate) <= new Date()) {
-      errors.push('End date must be in the future');
+    if (endDate) {
+      // Allow today's date but not past dates - compare date strings to avoid timezone issues
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const inputDateStr = typeof endDate === 'string' ? endDate : new Date(endDate).toISOString().split('T')[0];
+      
+      if (inputDateStr < today) {
+        errors.push('End date cannot be in the past');
+      }
     }
 
     if (voteThreshold !== null && voteThreshold !== undefined && voteThreshold !== '') {

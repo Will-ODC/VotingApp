@@ -162,29 +162,15 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
 
     try {
-        // Fetch poll using factory
-        const poll = await PollFactory.getPollById(db, pollId);
-        
-        if (!poll) {
-            return res.status(400).json({ error: 'Poll not found' });
-        }
-
-        // Prepare vote data (structure depends on poll type)
-        const voteData = { optionId };
-        
-        // Validate and record vote using poll class methods
-        const validation = poll.validateVote(userId, voteData);
-        if (!validation.valid) {
-            return res.status(400).json({ error: validation.error });
-        }
-        
-        await poll.recordVote(db, userId, voteData);
+        // Delegate to service layer
+        await pollService.submitVote(userId, pollId, optionId);
 
         // Redirect back to poll to see updated results
         res.redirect(`/polls/${pollId}`);
     } catch (error) {
         console.error('Error voting:', error);
-        res.status(500).json({ error: error.message || 'Failed to submit vote' });
+        req.flash('error', error.message);
+        res.redirect(`/polls/${pollId}`);
     }
 });
 

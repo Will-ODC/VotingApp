@@ -11,17 +11,24 @@ class VoteRepository {
    * Creates or updates a user's vote
    */
   async createOrUpdate(userId, optionId) {
+    // Get the poll_id for this option
+    const optionQuery = 'SELECT poll_id FROM options WHERE id = $1';
+    const option = await this.db.get(optionQuery, [optionId]);
+    
+    if (!option) {
+      throw new Error('Option not found');
+    }
+    
+    const pollId = option.poll_id;
+
     // First, check if user has already voted on this poll
     const existingVoteQuery = `
       SELECT v.id 
       FROM votes v
-      JOIN options o ON v.option_id = o.id
-      WHERE v.user_id = $1 AND o.poll_id = (
-        SELECT poll_id FROM options WHERE id = $2
-      )
+      WHERE v.user_id = $1 AND v.poll_id = $2
     `;
     
-    const existingVote = await this.db.get(existingVoteQuery, [userId, optionId]);
+    const existingVote = await this.db.get(existingVoteQuery, [userId, pollId]);
 
     if (existingVote) {
       // Update existing vote
@@ -34,10 +41,10 @@ class VoteRepository {
     } else {
       // Create new vote
       const insertQuery = `
-        INSERT INTO votes (user_id, option_id, voted_at) 
-        VALUES ($1, $2, CURRENT_TIMESTAMP)
+        INSERT INTO votes (user_id, poll_id, option_id, voted_at) 
+        VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
       `;
-      await this.db.run(insertQuery, [userId, optionId]);
+      await this.db.run(insertQuery, [userId, pollId, optionId]);
     }
   }
 

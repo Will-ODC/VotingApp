@@ -61,7 +61,7 @@ class UserRepository {
    * Get user statistics
    */
   async getUserStats(userId) {
-    const pollCountQuery = 'SELECT COUNT(*) as count FROM polls WHERE creator_id = $1';
+    const pollCountQuery = 'SELECT COUNT(*) as count FROM polls WHERE created_by = $1';
     const voteCountQuery = 'SELECT COUNT(*) as count FROM votes WHERE user_id = $1';
     
     const [pollResult, voteResult] = await Promise.all([

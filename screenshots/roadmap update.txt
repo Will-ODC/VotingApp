@@ -1,0 +1,40 @@
+Summary: MVP Feature Priorities & Launch Strategy
+Most Urgent Features (Before First Poll)
+1. Poll Type Distinction
+o Add field: Initiative (executable) vs Opinion (discussion only)
+o Visual indicators (different colors/badges)
+o Only "Initiative" type requires executor commitment
+2. Executor Commitment System
+o Add "Who will execute this?" field to poll creation
+o Checkbox: "I commit to executing this initiative"
+o Display executor clearly on poll cards
+3. Evidence Documentation
+o Add evidence_url field for post-execution proof
+o Simple text field for external links (Google Photos, Imgur)
+o Delay image hosting to Phase 2 (use multer later)
+Launch Strategy
+Key Insight: One-time donations to established charities work well for MVP - clear proof, professional photos, immediate credibility.
+Monthly Rhythm:
+* Week 1-3: Vote on initiatives
+* Week 4: Implementation detail polls (Opinion type)
+* Next month, Week 1: Execute winning initiative
+* Week 2: Share evidence and impact report
+Implementation Flow
+1. Initiative wins ? Executor notified
+2. Follow-up polls for implementation details (as Opinion polls)
+3. Execute based on community input
+4. Document with photos/receipts via URL
+5. Share impact publicly (no login required)
+What to Defer
+* Complex image hosting (use URLs initially)
+* In-person verification (Phase 2)
+* Skill trading features (Phase 5+)
+* Email system (collect addresses, implement later)
+Founder Participation
+* Months 1-2: Exclude yourself from options (build trust)
+* Month 3+: Can include genuine community service offerings
+* Be transparent if you submit an option
+* Never advocate for your own option
+Core Principle
+You have most features needed already. Add the three urgent features above and launch. Everything else can evolve based on what you learn from real usage. Don't over-engineer - start simple and iterate.
+

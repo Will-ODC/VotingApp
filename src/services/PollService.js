@@ -56,8 +56,9 @@ class PollService {
       errors.push('End date must be in the future');
     }
 
-    if (voteThreshold !== null && voteThreshold !== undefined) {
-      if (voteThreshold < 1) {
+    if (voteThreshold !== null && voteThreshold !== undefined && voteThreshold !== '') {
+      const threshold = parseInt(voteThreshold);
+      if (isNaN(threshold) || threshold < 1) {
         errors.push('Vote threshold must be at least 1');
       }
     }
@@ -100,8 +101,8 @@ class PollService {
       .filter(opt => opt && opt.trim().length > 0)
       .map(opt => opt.trim());
 
-    // Parse vote threshold (null if not provided or invalid)
-    const threshold = voteThreshold && parseInt(voteThreshold) > 0 ? parseInt(voteThreshold) : null;
+    // Parse vote threshold (null if not provided, empty, or invalid)
+    const threshold = (voteThreshold && voteThreshold !== '' && parseInt(voteThreshold) > 0) ? parseInt(voteThreshold) : null;
 
     // Create poll
     const poll = await this.pollRepository.create({

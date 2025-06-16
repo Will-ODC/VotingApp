@@ -122,6 +122,37 @@ class VoteRepository {
     const votes = await this.db.all(query, [pollId]);
     return votes;
   }
+
+  /**
+   * Gets detailed voting history for a user with poll status and creator information
+   * Used for profile page with complex JOIN operations and status calculations
+   */
+  async getDetailedVotingHistory(userId, limit, offset) {
+    const query = `
+      SELECT p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved,
+             o.option_text as voted_option, v.voted_at,
+             COUNT(DISTINCT v2.id) as total_votes,
+             CASE 
+                WHEN p.end_date > CURRENT_TIMESTAMP AND p.is_active = TRUE THEN 'active'
+                WHEN p.end_date <= CURRENT_TIMESTAMP AND p.is_active = TRUE THEN 'expired'
+                ELSE 'deleted'
+             END as poll_status,
+             u.username as creator_name
+             FROM votes v
+             JOIN polls p ON v.poll_id = p.id
+             JOIN options o ON v.option_id = o.id
+             JOIN users u ON p.created_by = u.id
+             LEFT JOIN votes v2 ON p.id = v2.poll_id
+             WHERE v.user_id = $1
+             GROUP BY p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, 
+                      o.option_text, v.voted_at, u.username, v.id
+             ORDER BY v.voted_at DESC
+             LIMIT $2 OFFSET $3
+    `;
+    
+    const votes = await this.db.all(query, [userId, limit, offset]);
+    return votes;
+  }
 }
 
 module.exports = VoteRepository;

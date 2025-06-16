@@ -14,6 +14,16 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('../models/database');
 const { PollFactory, PollTypes } = require('../models/polls');
+const PollService = require('../src/services/PollService');
+const PollRepository = require('../src/repositories/PollRepository');
+const VoteRepository = require('../src/repositories/VoteRepository');
+const { validateRequest, sanitizeRequest } = require('../src/middleware/validation');
+const { pollSchemas } = require('../src/validators/schemas');
+
+// Initialize dependencies
+const pollRepository = new PollRepository(db);
+const voteRepository = new VoteRepository(db);
+const pollService = new PollService(pollRepository, voteRepository);
 
 /**
  * Middleware to require user authentication
@@ -48,62 +58,28 @@ router.get('/create', requireAuth, (req, res) => {
 /**
  * POST /polls/create
  * Process poll creation form
- * - Creates poll with title, description, and expiration date
- * - Adds initial poll options
- * - Redirects to poll view page
+ * Now uses PollService and validation middleware
  */
-router.post('/create', requireAuth, async (req, res) => {
-    const { title, description, options, end_date, vote_threshold, category, poll_type } = req.body;
-    const userId = req.session.user.id;
-
-    try {
-        // Create the poll with expiration date and threshold
-        let closesAt;
-        if (end_date) {
-            // Convert datetime-local format to ISO string
-            closesAt = new Date(end_date).toISOString();
-        } else {
-            // Default to 30 days from now if no date specified
-            closesAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-        }
+router.post('/create', 
+    requireAuth,
+    sanitizeRequest,
+    validateRequest(pollSchemas.create),
+    async (req, res) => {
+        const userId = req.session.user.id;
         
-        // Parse vote threshold (null if not provided or invalid)
-        const threshold = vote_threshold && parseInt(vote_threshold) > 0 ? parseInt(vote_threshold) : null;
-        
-        // Validate poll type
-        const pollType = poll_type || 'simple';
-        if (!PollTypes.isTypeAvailable(pollType)) {
-            return res.status(400).render('error', { message: 'Invalid poll type selected' });
+        try {
+            // Delegate to service layer
+            const poll = await pollService.createPoll(userId, req.body);
+            
+            // Redirect to the newly created poll
+            res.redirect(`/polls/${poll.id}`);
+        } catch (error) {
+            console.error('Error creating poll:', error);
+            req.flash('error', error.message);
+            res.redirect('/polls/create');
         }
-        
-        // Insert poll into database with threshold, category, and type
-        const result = await db.run(
-            `INSERT INTO polls (title, description, created_by, end_date, vote_threshold, category, poll_type) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-            [title, description, userId, closesAt, threshold, category || 'general', pollType]
-        );
-        const pollId = result.id;
-
-        // Add poll options if provided
-        if (options && Array.isArray(options)) {
-            for (const option of options) {
-                if (option.trim()) {
-                    // Insert each option with auto-approval
-                    await db.run(
-                        'INSERT INTO options (poll_id, option_text) VALUES ($1, $2)',
-                        [pollId, option.trim()]
-                    );
-                }
-            }
-        }
-
-        // Redirect to the newly created poll
-        res.redirect(`/polls/${pollId}`);
-    } catch (error) {
-        console.error('Error creating poll:', error);
-        res.status(500).render('error', { message: 'Failed to create poll' });
     }
-});
+);
 
 /**
  * GET /polls/all
@@ -118,53 +94,11 @@ router.get('/all', requireAuth, async (req, res) => {
         const filter = req.query.filter || 'all';
         const search = req.query.search || '';
         
-        // Build WHERE clause based on filter
-        let whereConditions = [];
-        if (filter === 'deleted') {
-            whereConditions.push('p.is_active = FALSE');
-        } else if (filter === 'active') {
-            whereConditions.push('p.is_active = TRUE AND p.end_date > CURRENT_TIMESTAMP');
-        } else if (filter === 'expired') {
-            whereConditions.push('p.is_active = TRUE AND p.end_date <= CURRENT_TIMESTAMP');
-        }
-        // 'all' filter shows everything (no filter condition)
-
-        // Add search condition if search query exists
-        let queryParams = [];
-        if (search.trim()) {
-            const searchPattern = `%${search.trim()}%`;
-            queryParams = [searchPattern, searchPattern];
-            // Build numbered placeholders dynamically
-            let paramIndex = 1;
-            whereConditions.push(`(p.title LIKE $${paramIndex++} OR p.description LIKE $${paramIndex++})`);
-        }
-
-        // Build final WHERE clause
-        const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
-
-        // Determine sort order - active polls show expiring soonest first
-        let orderClause = 'ORDER BY p.created_at DESC'; // Default for all/expired/deleted
-        if (filter === 'active') {
-            orderClause = 'ORDER BY p.end_date ASC'; // Expiring soonest first for active polls
-        }
-
-        // Fetch polls with status calculation, filtering, and search
-        const allPolls = await db.all(
-            `SELECT p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, p.category, p.poll_type,
-             u.username as creator_name, COUNT(DISTINCT v.id) as vote_count,
-             CASE 
-                WHEN p.end_date > CURRENT_TIMESTAMP AND p.is_active = TRUE THEN 'active'
-                WHEN p.end_date <= CURRENT_TIMESTAMP AND p.is_active = TRUE THEN 'expired'
-                ELSE 'deleted'
-             END as status
-             FROM polls p 
-             JOIN users u ON p.created_by = u.id 
-             LEFT JOIN votes v ON p.id = v.poll_id
-             ${whereClause}
-             GROUP BY p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, p.vote_threshold, p.is_approved, p.category, p.poll_type, u.username
-             ${orderClause}`,
-            queryParams
-        );
+        // Delegate to service layer
+        const allPolls = await pollService.getAllPollsWithStatus({
+            filter,
+            search
+        });
 
         res.render('polls/all', {
             polls: allPolls,
@@ -188,24 +122,15 @@ router.get('/:id', async (req, res) => {
     const pollId = req.params.id;
     
     try {
-        // Fetch poll using factory
-        const poll = await PollFactory.getPollById(db, pollId);
+        // Delegate to service layer
+        const displayData = await pollService.getPollForDisplay(
+            pollId, 
+            req.session.user?.id
+        );
         
-        if (!poll) {
+        if (!displayData) {
             return res.status(404).render('error', { message: 'Poll not found' });
         }
-
-        // Get poll creator info
-        const creator = await db.get(
-            'SELECT username FROM users WHERE id = $1',
-            [poll.createdBy]
-        );
-
-        // Get display data from poll class
-        const displayData = await poll.getDisplayData(db, req.session.user?.id);
-        
-        // Add creator name to poll data
-        displayData.poll.creator_name = creator.username;
 
         res.render('polls/view', {
             poll: displayData.poll,
@@ -273,8 +198,8 @@ router.get('/:id/delete', requireAdmin, async (req, res) => {
     const pollId = req.params.id;
     
     try {
-        // Soft delete by setting is_active to 0
-        await db.run('UPDATE polls SET is_active = FALSE WHERE id = $1', [pollId]);
+        // Delegate to service layer
+        await pollService.deletePoll(pollId, req.session.user.id);
         
         res.redirect('/');
     } catch (error) {

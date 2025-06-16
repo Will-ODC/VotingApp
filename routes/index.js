@@ -4,11 +4,21 @@
  * This module handles the main pages of the application:
  * - Home page with active polls listing
  * - About page with application information
+ * 
+ * Refactored to follow clean architecture pattern with service layer
  */
 
 const express = require('express');
 const router = express.Router();
 const { db } = require('../models/database');
+const HomeService = require('../src/services/HomeService');
+const SearchService = require('../src/services/SearchService');
+const PollRepository = require('../src/repositories/PollRepository');
+
+// Initialize dependencies
+const pollRepository = new PollRepository(db);
+const homeService = new HomeService(pollRepository);
+const searchService = new SearchService(pollRepository);
 
 /**
  * GET /
@@ -20,65 +30,61 @@ const { db } = require('../models/database');
  * - Active (not deleted)
  * - Not expired (end_date is in the future)
  * Includes vote count for each poll
+ * 
+ * Refactored to use HomeService for business logic
  */
 router.get('/', async (req, res) => {
     try {
-        const sort = req.query.sort || 'popular';
-        const search = req.query.search || '';
-        const category = req.query.category || '';
+        // Validate and sanitize parameters
+        const params = homeService.validateSearchParams(req.query);
         
-        // Build search and filter conditions
-        let conditions = [];
-        let queryParams = [];
-        let paramIndex = 1;
-        
-        if (search.trim()) {
-            conditions.push(`(p.title LIKE $${paramIndex++} OR p.description LIKE $${paramIndex++})`);
-            const searchPattern = `%${search.trim()}%`;
-            queryParams.push(searchPattern, searchPattern);
-        }
-        
-        if (category.trim()) {
-            conditions.push(`p.category = $${paramIndex++}`);
-            queryParams.push(category.trim());
-        }
-        
-        const searchCondition = conditions.length > 0 ? `AND ${conditions.join(' AND ')}` : '';
-        
-        // Determine order clause based on sort parameter
-        let orderClause = 'ORDER BY vote_count DESC, p.created_at DESC'; // Default: popular
-        if (sort === 'recent') {
-            orderClause = 'ORDER BY p.created_at DESC';
-        } else if (sort === 'active') {
-            // Sort by activity (recent votes + creation time)
-            orderClause = 'ORDER BY last_vote_time DESC, p.created_at DESC';
-        }
+        // Get polls using service layer
+        const polls = await homeService.getHomepagePolls({
+            sort: params.sort,
+            search: params.search,
+            category: params.category
+        });
 
-        // Fetch active polls with vote counts, search, and sorting
-        // Fixed PostgreSQL GROUP BY with all non-aggregated columns
-        const polls = await db.all(`
-            SELECT p.*, 
-                   COUNT(DISTINCT v.id) as vote_count,
-                   MAX(v.voted_at) as last_vote_time
-            FROM polls p
-            LEFT JOIN votes v ON p.id = v.poll_id
-            WHERE p.is_active = TRUE AND (p.end_date IS NULL OR p.end_date > CURRENT_TIMESTAMP)
-            ${searchCondition}
-            GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category, p.poll_type
-            ${orderClause}
-            LIMIT 10
-        `, queryParams);
+        // Get additional homepage data
+        const [stats, categories] = await Promise.all([
+            homeService.getHomepageStats(),
+            homeService.getCategories()
+        ]);
 
         res.render('index', {
             polls,
             user: req.session.user || null,
-            currentSort: sort,
-            searchQuery: search,
-            currentCategory: category
+            currentSort: params.sort,
+            searchQuery: params.search,
+            currentCategory: params.category,
+            stats,
+            categories
         });
     } catch (error) {
-        console.error('Error fetching polls:', error);
-        res.status(500).render('error', { message: 'Failed to load polls' });
+        console.error('Error fetching homepage data:', error);
+        res.status(500).render('error', { message: 'Failed to load homepage' });
+    }
+});
+
+
+/**
+ * GET /api/search/suggestions
+ * API endpoint for search suggestions (for autocomplete)
+ */
+router.get('/api/search/suggestions', async (req, res) => {
+    try {
+        const query = req.query.q || '';
+        const limit = parseInt(req.query.limit) || 5;
+        
+        if (query.length < 2) {
+            return res.json([]);
+        }
+        
+        const suggestions = await searchService.getSearchSuggestions(query, limit);
+        res.json(suggestions);
+    } catch (error) {
+        console.error('Error fetching search suggestions:', error);
+        res.status(500).json({ error: 'Failed to fetch suggestions' });
     }
 });
 

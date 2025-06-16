@@ -1,5 +1,11 @@
 const crypto = require('crypto');
-const { MIN_PASSWORD_LENGTH, MAX_USERNAME_LENGTH, MAX_EMAIL_LENGTH } = require('../config/constants');
+const { 
+  MIN_PASSWORD_LENGTH, 
+  MAX_USERNAME_LENGTH, 
+  MAX_EMAIL_LENGTH,
+  CACHE_KEYS 
+} = require('../config/constants');
+const cacheService = require('./CacheService');
 
 /**
  * UserService handles all user-related business logic
@@ -129,6 +135,9 @@ class UserService {
     const hashedNewPassword = this.hashPassword(newPassword);
     await this.userRepository.updatePassword(userId, hashedNewPassword);
 
+    // Invalidate user cache after password change
+    this.invalidateUserCache(userId);
+
     return true;
   }
 
@@ -136,14 +145,61 @@ class UserService {
    * Gets user profile information
    */
   async getProfile(userId) {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const cacheKey = cacheService.generateKey(CACHE_KEYS.USER_PROFILE, userId);
+    
+    return await cacheService.getOrSet(cacheKey, async () => {
+      const user = await this.userRepository.findById(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
 
-    // Return user without password
-    const { password, ...profile } = user;
-    return profile;
+      // Return user without password
+      const { password, ...profile } = user;
+      return profile;
+    }, 600); // Cache for 10 minutes - user profile changes infrequently
+  }
+
+  /**
+   * Invalidates cache entries related to a specific user
+   * @param {number} userId - The user ID
+   */
+  invalidateUserCache(userId) {
+    // Clear user profile cache
+    const profileCacheKey = cacheService.generateKey(CACHE_KEYS.USER_PROFILE, userId);
+    cacheService.delete(profileCacheKey);
+    
+    // Clear user statistics cache
+    const statsCacheKey = cacheService.generateKey(CACHE_KEYS.USER_STATS, userId);
+    cacheService.delete(statsCacheKey);
+  }
+
+  /**
+   * Gets user statistics (voting history, created polls, etc.)
+   * This method can be added when profile statistics are needed
+   * @param {number} userId - The user ID
+   * @returns {Object} User statistics
+   */
+  async getUserStats(userId) {
+    const cacheKey = cacheService.generateKey(CACHE_KEYS.USER_STATS, userId);
+    
+    return await cacheService.getOrSet(cacheKey, async () => {
+      // This would implement the actual statistics gathering
+      // For now, return basic structure that can be expanded
+      const user = await this.userRepository.findById(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // TODO: Implement actual statistics queries
+      // This is a placeholder for future implementation
+      return {
+        userId: userId,
+        pollsCreated: 0,
+        votesCount: 0,
+        joinedDate: user.created_at,
+        lastActive: user.updated_at || user.created_at
+      };
+    }, 300); // Cache for 5 minutes - stats may change more frequently
   }
 }
 

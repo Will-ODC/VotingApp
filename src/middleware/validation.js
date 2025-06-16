@@ -38,11 +38,25 @@ function sanitizeRequest(req, res, next) {
       }
       
       // Convert numeric strings to numbers for specific fields
-      if (['voteThreshold', 'optionId'].includes(key) && req.body[key]) {
+      if (['voteThreshold', 'vote_threshold', 'optionId'].includes(key) && req.body[key]) {
         const num = parseInt(req.body[key], 10);
         if (!isNaN(num)) {
           req.body[key] = num;
         }
+      }
+      
+      // Handle snake_case to camelCase conversion for specific fields
+      if (key === 'vote_threshold' && req.body[key] !== undefined) {
+        req.body.voteThreshold = req.body[key];
+        delete req.body[key];
+      }
+      if (key === 'end_date' && req.body[key] !== undefined) {
+        req.body.endDate = req.body[key];
+        delete req.body[key];
+      }
+      if (key === 'poll_type' && req.body[key] !== undefined) {
+        req.body.pollType = req.body[key];
+        delete req.body[key];
       }
     });
   }

@@ -4,8 +4,10 @@ const {
   MAX_POLL_OPTIONS,
   MAX_POLL_TITLE_LENGTH,
   MAX_POLL_DESCRIPTION_LENGTH,
-  MAX_OPTION_LENGTH
+  MAX_OPTION_LENGTH,
+  CACHE_KEYS
 } = require('../config/constants');
+const cacheService = require('./CacheService');
 
 /**
  * PollService handles all poll-related business logic
@@ -67,12 +69,19 @@ class PollService {
    * Creates a new poll
    */
   async createPoll(creatorId, pollData) {
-    const { title, description, options, endDate, voteThreshold } = pollData;
+    const { title, description, options, endDate, voteThreshold, category, pollType } = pollData;
 
     // Validate input
     const errors = this.validatePollData(title, description, options, endDate, voteThreshold);
     if (errors.length > 0) {
       throw new Error(errors.join(', '));
+    }
+
+    // Validate poll type if provided
+    const { PollTypes } = require('../../models/polls');
+    const validPollType = pollType || 'simple';
+    if (!PollTypes.isTypeAvailable(validPollType)) {
+      throw new Error('Invalid poll type selected');
     }
 
     // Calculate end date if not provided
@@ -81,6 +90,9 @@ class PollService {
       const date = new Date();
       date.setDate(date.getDate() + DEFAULT_POLL_DURATION_DAYS);
       pollEndDate = date.toISOString();
+    } else {
+      // Convert datetime-local format to ISO string
+      pollEndDate = new Date(endDate).toISOString();
     }
 
     // Filter valid options
@@ -88,15 +100,23 @@ class PollService {
       .filter(opt => opt && opt.trim().length > 0)
       .map(opt => opt.trim());
 
+    // Parse vote threshold (null if not provided or invalid)
+    const threshold = voteThreshold && parseInt(voteThreshold) > 0 ? parseInt(voteThreshold) : null;
+
     // Create poll
     const poll = await this.pollRepository.create({
       title: title.trim(),
       description: description?.trim() || '',
       creatorId,
       endDate: pollEndDate,
-      voteThreshold: voteThreshold || null,
+      voteThreshold: threshold,
+      category: category || 'general',
+      pollType: validPollType,
       options: validOptions
     });
+
+    // Invalidate active polls cache since a new poll was created
+    cacheService.clearByPrefix(CACHE_KEYS.ACTIVE_POLLS);
 
     return poll;
   }
@@ -157,6 +177,9 @@ class PollService {
       await this.checkAndUpdateThreshold(pollId);
     }
 
+    // Invalidate related cache entries
+    this.invalidatePollCache(pollId, userId);
+
     return true;
   }
 
@@ -185,20 +208,29 @@ class PollService {
   async getActivePolls(options = {}) {
     const { search, sort = 'popular', limit = 10, offset = 0 } = options;
     
-    const polls = await this.pollRepository.findActive({
-      search,
-      sort,
-      limit,
-      offset
-    });
+    // Create cache key based on options
+    const cacheKey = cacheService.generateKey(
+      CACHE_KEYS.ACTIVE_POLLS,
+      `${sort}_${limit}_${offset}`,
+      search ? `search_${encodeURIComponent(search)}` : 'no_search'
+    );
 
-    return polls.map(poll => ({
-      ...poll,
-      hasExpired: false,
-      progressPercentage: poll.vote_threshold 
-        ? Math.min(100, (poll.total_votes / poll.vote_threshold) * 100)
-        : null
-    }));
+    return await cacheService.getOrSet(cacheKey, async () => {
+      const polls = await this.pollRepository.findActive({
+        search,
+        sort,
+        limit,
+        offset
+      });
+
+      return polls.map(poll => ({
+        ...poll,
+        hasExpired: false,
+        progressPercentage: poll.vote_threshold 
+          ? Math.min(100, (poll.total_votes / poll.vote_threshold) * 100)
+          : null
+      }));
+    }, 120); // Cache for 2 minutes - frequent updates for active polls
   }
 
   /**
@@ -222,6 +254,81 @@ class PollService {
   }
 
   /**
+   * Gets all polls with detailed status calculation for browse view
+   * @param {Object} options - Query options
+   * @param {string} options.filter - Status filter (all|active|expired|deleted)
+   * @param {string} options.search - Search query
+   * @returns {Array} Polls with status and metadata
+   */
+  async getAllPollsWithStatus(options = {}) {
+    const { filter = 'all', search = '' } = options;
+    
+    // Build query conditions based on filter
+    let whereConditions = [];
+    if (filter === 'deleted') {
+      whereConditions.push('p.is_active = FALSE');
+    } else if (filter === 'active') {
+      whereConditions.push('p.is_active = TRUE AND p.end_date > CURRENT_TIMESTAMP');
+    } else if (filter === 'expired') {
+      whereConditions.push('p.is_active = TRUE AND p.end_date <= CURRENT_TIMESTAMP');
+    }
+    
+    // Determine sort order - active polls show expiring soonest first
+    let orderClause = 'ORDER BY p.created_at DESC'; // Default for all/expired/deleted
+    if (filter === 'active') {
+      orderClause = 'ORDER BY p.end_date ASC'; // Expiring soonest first for active polls
+    }
+
+    const polls = await this.pollRepository.findAllWithStatus({
+      whereConditions,
+      search,
+      orderClause
+    });
+
+    return polls;
+  }
+
+  /**
+   * Gets poll details for viewing, including options and user vote
+   * @param {number} pollId - The poll ID
+   * @param {number|null} userId - The current user ID (optional)
+   * @returns {Object} Poll data with display information
+   */
+  async getPollForDisplay(pollId, userId = null) {
+    // Create cache key - include userId to cache user-specific data
+    const cacheKey = cacheService.generateKey(
+      CACHE_KEYS.POLL_DISPLAY, 
+      pollId, 
+      userId ? `user_${userId}` : 'anonymous'
+    );
+
+    // Try to get from cache first
+    return await cacheService.getOrSet(cacheKey, async () => {
+      // Use factory pattern from existing code
+      const { PollFactory } = require('../../models/polls');
+      const poll = await PollFactory.getPollById(this.pollRepository.db, pollId);
+      
+      if (!poll) {
+        return null;
+      }
+
+      // Get poll creator info
+      const creator = await this.pollRepository.db.get(
+        'SELECT username FROM users WHERE id = $1',
+        [poll.createdBy]
+      );
+
+      // Get display data from poll class
+      const displayData = await poll.getDisplayData(this.pollRepository.db, userId);
+      
+      // Add creator name to poll data
+      displayData.poll.creator_name = creator.username;
+
+      return displayData;
+    }, 180); // Cache for 3 minutes - shorter than default for real-time voting
+  }
+
+  /**
    * Soft deletes a poll (admin only)
    */
   async deletePoll(pollId, adminId) {
@@ -231,7 +338,54 @@ class PollService {
     }
 
     await this.pollRepository.softDelete(pollId);
+    
+    // Invalidate all cache entries for this poll
+    this.invalidatePollCache(pollId);
+    
     return true;
+  }
+
+  /**
+   * Invalidates cache entries related to a specific poll
+   * @param {number} pollId - The poll ID
+   * @param {number|null} userId - Specific user ID to invalidate (optional)
+   */
+  invalidatePollCache(pollId, userId = null) {
+    // Clear poll display cache for all users or specific user
+    if (userId) {
+      // Clear for specific user
+      const userCacheKey = cacheService.generateKey(
+        CACHE_KEYS.POLL_DISPLAY, 
+        pollId, 
+        `user_${userId}`
+      );
+      cacheService.delete(userCacheKey);
+    } else {
+      // Clear for all users (using prefix)
+      const pollPrefix = cacheService.generateKey(CACHE_KEYS.POLL_DISPLAY, pollId);
+      cacheService.clearByPrefix(pollPrefix);
+    }
+    
+    // Clear anonymous poll display cache
+    const anonymousCacheKey = cacheService.generateKey(
+      CACHE_KEYS.POLL_DISPLAY, 
+      pollId, 
+      'anonymous'
+    );
+    cacheService.delete(anonymousCacheKey);
+
+    // Clear active polls cache (voting affects poll popularity/sorting)
+    cacheService.clearByPrefix(CACHE_KEYS.ACTIVE_POLLS);
+  }
+
+  /**
+   * Invalidates all poll-related cache entries
+   * Used when major changes occur that affect multiple polls
+   */
+  invalidateAllPollCache() {
+    cacheService.clearByPrefix(CACHE_KEYS.POLL_DISPLAY);
+    cacheService.clearByPrefix(CACHE_KEYS.ACTIVE_POLLS);
+    cacheService.clearByPrefix(CACHE_KEYS.POLL_RESULTS);
   }
 }
 

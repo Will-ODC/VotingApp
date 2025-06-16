@@ -96,6 +96,18 @@ const pollSchemas = {
       type: 'number',
       min: 1,
       message: 'Vote threshold must be at least 1'
+    },
+    category: {
+      required: false,
+      type: 'string',
+      maxLength: 50,
+      message: 'Category must not exceed 50 characters'
+    },
+    poll_type: {
+      required: false,
+      type: 'string',
+      maxLength: 20,
+      message: 'Poll type must not exceed 20 characters'
     }
   },
 

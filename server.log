@@ -1,0 +1,6 @@
+PostgreSQL connection verified
+Database tables created successfully
+Admin user created/verified
+Default admin credentials: username=Will, password=admin123
+Server running on http://0.0.0.0:3000
+Environment: development

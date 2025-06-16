@@ -359,17 +359,29 @@ footer {
 .about-page h2 {
     color: #34495e;
     margin-bottom: 1rem;
+    text-align: center;
 }
 
 .about-page h3 {
     color: #2c3e50;
     margin: 2rem 0 1rem 0;
     font-size: 1.5rem;
+    text-align: center;
+}
+
+/* Center content blocks with constrained width */
+.about-page p,
+.about-page > ul,
+.about-page > ol {
+    max-width: 850px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.8;
 }
 
 .intro-section {
-    text-align: center;
-    margin-bottom: 3rem;
+    max-width: 900px;
+    margin: 0 auto 3rem auto;
     padding: 2rem;
     background: #f8f9fa;
     border-radius: 8px;
@@ -378,13 +390,15 @@ footer {
 .intro-section p {
     font-size: 1.1rem;
     line-height: 1.8;
+    text-align: left;
 }
 
 .vision-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
-    margin: 2rem 0;
+    max-width: 900px;
+    margin: 2rem auto;
 }
 
 .vision-item {
@@ -406,6 +420,11 @@ footer {
     font-size: 1.2rem;
 }
 
+.how-section {
+    max-width: 850px;
+    margin: 2rem auto;
+}
+
 .how-section ol {
     margin-left: 2rem;
     line-height: 2;
@@ -416,10 +435,11 @@ footer {
 }
 
 .funding-section {
+    max-width: 850px;
     background: #e8f4f8;
     padding: 2rem;
     border-radius: 8px;
-    margin: 2rem 0;
+    margin: 2rem auto;
 }
 
 .funding-section h3 {
@@ -431,12 +451,92 @@ footer {
     line-height: 2;
 }
 
-/* Comparison table styling with optimized width to reduce white space */
+/* Comparison container - two column layout */
+.comparison-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    max-width: 900px;
+    margin: 2rem auto;
+}
+
+.comparison-column {
+    padding: 2rem;
+    border-radius: 8px;
+    background: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.comparison-column.traditional {
+    background: #fee5e5;
+    border: 1px solid #fcc;
+}
+
+.comparison-column.odc {
+    background: #e5f7e5;
+    border: 1px solid #cfc;
+}
+
+.comparison-column h4 {
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    text-align: center;
+}
+
+.comparison-column.traditional h4 {
+    color: #c33;
+}
+
+.comparison-column.odc h4 {
+    color: #2a7f2a;
+}
+
+.comparison-column ul {
+    list-style: none;
+    padding: 0;
+}
+
+.comparison-column li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    line-height: 1.6;
+}
+
+.comparison-column li:last-child {
+    border-bottom: none;
+}
+
+.comparison-column.traditional li::before {
+    content: "✗ ";
+    color: #c33;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.comparison-column.odc li::before {
+    content: "✓ ";
+    color: #2a7f2a;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* Responsive - stack columns on mobile */
+@media (max-width: 768px) {
+    .comparison-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .comparison-column {
+        padding: 1.5rem;
+    }
+}
+
+/* OLD TABLE STYLES - COMMENTED OUT
 .comparison-table {
     width: 100%;
-    /* max-width: 750px; */ /* Removed to allow full container width */
     border-collapse: collapse;
-    margin: 1rem 0; /* Changed from auto to 0 to align with heading */
+    margin: 1rem 0;
 }
 
 .comparison-table th,
@@ -446,15 +546,14 @@ footer {
     border-bottom: 1px solid #ddd;
 }
 
-/* Set specific column widths for better content balance */
 .comparison-table th:first-child,
 .comparison-table td:first-child {
-    width: 45%; /* Traditional Platforms column */
+    width: 45%;
 }
 
 .comparison-table th:last-child,
 .comparison-table td:last-child {
-    width: 55%; /* Online Democracy column - slightly wider for longer content */
+    width: 55%;
 }
 
 .comparison-table th {
@@ -466,10 +565,12 @@ footer {
 .comparison-table tr:nth-child(even) {
     background: #f8f9fa;
 }
+*/
 
 .join-section {
     text-align: center;
-    margin-top: 3rem;
+    max-width: 850px;
+    margin: 3rem auto 0 auto;
     padding: 2rem;
     background: #e8f4f8;
     border-radius: 8px;
@@ -504,14 +605,5 @@ footer {
     .vision-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
-    }
-    
-    .comparison-table {
-        font-size: 0.9rem;
-    }
-    
-    .comparison-table th,
-    .comparison-table td {
-        padding: 0.5rem;
     }
 }

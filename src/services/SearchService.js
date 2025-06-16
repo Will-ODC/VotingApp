@@ -14,15 +14,17 @@ class SearchService {
    * @param {string} options.context - Search context (homepage|all|user)
    * @param {string} options.sort - Sort method
    * @param {string} options.filter - Status filter (for all polls context)
+   * @param {string} options.category - Category filter (for homepage context)
    * @param {number} options.userId - User ID (for user context)
+   * @param {number} options.limit - Result limit
    * @returns {Array} Search results
    */
   async searchPolls(options = {}) {
-    const { query, context = 'homepage', sort = 'popular', filter = 'all', userId = null } = options;
+    const { query, context = 'homepage', sort = 'popular', filter = 'all', category = '', userId = null, limit = 20 } = options;
     
     switch (context) {
       case 'homepage':
-        return this._searchHomepagePolls(query, sort);
+        return this._searchHomepagePolls(query, sort, category, limit);
       case 'all':
         return this._searchAllPolls(query, sort, filter);
       case 'user':
@@ -33,15 +35,39 @@ class SearchService {
   }
 
   /**
-   * Searches homepage polls (active only)
+   * Searches homepage polls (active only) with support for category filtering
+   * Works in both search mode (with query) and browse mode (without query)
    * @private
+   * @param {string} query - Search query (optional)
+   * @param {string} sort - Sort method
+   * @param {string} category - Category filter (optional)
+   * @param {number} limit - Result limit
+   * @returns {Array} Matching polls
    */
-  async _searchHomepagePolls(query, sort) {
-    if (!query || query.trim().length === 0) {
-      return [];
+  async _searchHomepagePolls(query, sort, category, limit = 20) {
+    // Build dynamic conditions and parameters
+    let conditions = [];
+    let queryParams = [];
+    let paramIndex = 1;
+    
+    // Always filter for active polls
+    conditions.push('p.is_active = TRUE');
+    conditions.push('(p.end_date IS NULL OR p.end_date > CURRENT_TIMESTAMP)');
+    
+    // Add search condition if query provided
+    if (query && query.trim().length > 0) {
+      conditions.push(`(p.title LIKE $${paramIndex++} OR p.description LIKE $${paramIndex++})`);
+      const searchPattern = `%${query.trim()}%`;
+      queryParams.push(searchPattern, searchPattern);
     }
-
-    const searchPattern = `%${query.trim()}%`;
+    
+    // Add category filter if provided
+    if (category && category.trim().length > 0) {
+      conditions.push(`p.category = $${paramIndex++}`);
+      queryParams.push(category.trim());
+    }
+    
+    const whereClause = conditions.join(' AND ');
     const orderClause = this._getOrderClause(sort, 'homepage');
     
     const sql = `
@@ -50,15 +76,16 @@ class SearchService {
              MAX(v.voted_at) as last_vote_time
       FROM polls p
       LEFT JOIN votes v ON p.id = v.poll_id
-      WHERE p.is_active = TRUE 
-        AND (p.end_date IS NULL OR p.end_date > CURRENT_TIMESTAMP)
-        AND (p.title LIKE $1 OR p.description LIKE $2)
+      WHERE ${whereClause}
       GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category
       ${orderClause}
-      LIMIT 20
+      LIMIT $${paramIndex}
     `;
+    
+    // Add limit as the last parameter
+    queryParams.push(limit);
 
-    const results = await this.pollRepository.db.all(sql, [searchPattern, searchPattern]);
+    const results = await this.pollRepository.db.all(sql, queryParams);
     return this._enrichPollResults(results, 'homepage');
   }
 
@@ -95,7 +122,7 @@ class SearchService {
       LEFT JOIN users u ON p.created_by = u.id
       LEFT JOIN votes v ON p.id = v.poll_id
       WHERE ${whereClause}
-      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.categoryp.poll_type, u.username
+      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category, p.poll_type, u.username
       ${orderClause}
       LIMIT 50
     `;
@@ -130,6 +157,23 @@ class SearchService {
 
     const results = await this.pollRepository.db.all(sql, [userId, searchPattern, searchPattern]);
     return this._enrichPollResults(results, 'user');
+  }
+
+  /**
+   * Gets homepage polls with optional search, category filtering, and sorting
+   * This method provides a simpler interface for homepage-specific searches
+   * @param {Object} options - Query options
+   * @param {string} options.query - Search query (optional)
+   * @param {string} options.sort - Sort method (popular|recent|active)
+   * @param {string} options.category - Category filter (optional)
+   * @param {number} options.limit - Result limit
+   * @returns {Array} Array of polls
+   */
+  async getHomepagePolls(options = {}) {
+    return this.searchPolls({
+      ...options,
+      context: 'homepage'
+    });
   }
 
   /**
@@ -261,13 +305,15 @@ class SearchService {
    * @returns {Object} Sanitized parameters
    */
   validateSearchParams(params) {
-    const { query, sort, filter, context } = params;
+    const { query, sort, filter, context, category, limit } = params;
     
     return {
       query: query ? query.trim().substring(0, 100) : '',
       sort: this._validateSortParam(sort, context),
       filter: this._validateFilterParam(filter),
-      context: ['homepage', 'all', 'user'].includes(context) ? context : 'homepage'
+      context: ['homepage', 'all', 'user'].includes(context) ? context : 'homepage',
+      category: category ? category.trim().substring(0, 50) : '',
+      limit: this._validateLimitParam(limit)
     };
   }
 
@@ -293,6 +339,18 @@ class SearchService {
   _validateFilterParam(filter) {
     const validFilters = ['all', 'active', 'expired', 'deleted'];
     return validFilters.includes(filter) ? filter : 'all';
+  }
+
+  /**
+   * Validates limit parameter
+   * @private
+   */
+  _validateLimitParam(limit) {
+    const parsedLimit = parseInt(limit);
+    if (isNaN(parsedLimit) || parsedLimit < 1) {
+      return 20; // Default limit
+    }
+    return Math.min(parsedLimit, 100); // Max limit of 100
   }
 }
 

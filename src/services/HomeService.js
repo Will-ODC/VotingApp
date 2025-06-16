@@ -1,14 +1,17 @@
 /**
- * HomeService handles homepage and search-related business logic
+ * HomeService handles homepage-specific business logic
  * Extracted from index routes to follow Single Responsibility Principle
+ * Delegates search functionality to SearchService
  */
 class HomeService {
-  constructor(pollRepository) {
+  constructor(pollRepository, searchService) {
     this.pollRepository = pollRepository;
+    this.searchService = searchService;
   }
 
   /**
    * Gets homepage polls with filtering, searching, and sorting
+   * Delegates to SearchService for actual search functionality
    * @param {Object} options - Query options
    * @param {string} options.sort - Sort method (popular|recent|active)
    * @param {string} options.search - Search query
@@ -18,67 +21,22 @@ class HomeService {
   async getHomepagePolls(options = {}) {
     const { sort = 'popular', search = '', category = '' } = options;
     
-    // Build search and filter conditions
-    let conditions = [];
-    let queryParams = [];
-    let paramIndex = 1;
+    // Delegate to SearchService with homepage context
+    // Default limit of 10 to maintain backward compatibility
+    const polls = await this.searchService.getHomepagePolls({
+      query: search,
+      sort: sort,
+      category: category,
+      limit: 10
+    });
     
-    if (search.trim()) {
-      conditions.push(`(p.title LIKE $${paramIndex++} OR p.description LIKE $${paramIndex++})`);
-      const searchPattern = `%${search.trim()}%`;
-      queryParams.push(searchPattern, searchPattern);
-    }
-    
-    if (category.trim()) {
-      conditions.push(`p.category = $${paramIndex++}`);
-      queryParams.push(category.trim());
-    }
-    
-    const searchCondition = conditions.length > 0 ? `AND ${conditions.join(' AND ')}` : '';
-    
-    // Determine order clause based on sort parameter
-    let orderClause = this._getOrderClause(sort);
-
-    // Fetch active polls with vote counts, search, and sorting
-    const query = `
-      SELECT p.*, 
-             COUNT(DISTINCT v.id) as vote_count,
-             MAX(v.voted_at) as last_vote_time
-      FROM polls p
-      LEFT JOIN votes v ON p.id = v.poll_id
-      WHERE p.is_active = TRUE AND (p.end_date IS NULL OR p.end_date > CURRENT_TIMESTAMP)
-      ${searchCondition}
-      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category
-      ${orderClause}
-      LIMIT 10
-    `;
-
-    const polls = await this.pollRepository.db.all(query, queryParams);
-    
+    // SearchService already enriches polls with hasExpired and progressPercentage
+    // but we need to ensure backward compatibility for any differences
     return polls.map(poll => ({
       ...poll,
-      hasExpired: false, // These are active polls only
-      progressPercentage: poll.vote_threshold 
-        ? Math.min(100, (poll.vote_count / poll.vote_threshold) * 100)
-        : null
+      // Ensure hasExpired is false for active polls (backward compatibility)
+      hasExpired: false
     }));
-  }
-
-  /**
-   * Gets the appropriate ORDER BY clause for the given sort method
-   * @private
-   */
-  _getOrderClause(sort) {
-    switch (sort) {
-      case 'recent':
-        return 'ORDER BY p.created_at DESC';
-      case 'active':
-        // Sort by activity (recent votes + creation time)
-        return 'ORDER BY last_vote_time DESC, p.created_at DESC';
-      case 'popular':
-      default:
-        return 'ORDER BY vote_count DESC, p.created_at DESC';
-    }
   }
 
   /**
@@ -150,26 +108,24 @@ class HomeService {
 
   /**
    * Validates search and filter parameters
+   * Delegates to SearchService for consistent validation across the application
    * @param {Object} params - Request parameters
    * @returns {Object} Sanitized parameters
    */
   validateSearchParams(params) {
-    const { sort, search, category } = params;
+    // Delegate to SearchService for validation
+    const validated = this.searchService.validateSearchParams({
+      query: params.search,
+      sort: params.sort,
+      category: params.category,
+      context: 'homepage'
+    });
     
-    // Validate sort parameter
-    const validSorts = ['popular', 'recent', 'active'];
-    const sanitizedSort = validSorts.includes(sort) ? sort : 'popular';
-    
-    // Sanitize search query (basic length limit)
-    const sanitizedSearch = search ? search.trim().substring(0, 100) : '';
-    
-    // Sanitize category
-    const sanitizedCategory = category ? category.trim().substring(0, 50) : '';
-    
+    // Map back to expected format for backward compatibility
     return {
-      sort: sanitizedSort,
-      search: sanitizedSearch,
-      category: sanitizedCategory
+      sort: validated.sort,
+      search: validated.query,
+      category: validated.category
     };
   }
 }

@@ -78,7 +78,7 @@ The refactoring was done incrementally without breaking existing functionality:
 3. Used parallel agents to accelerate the refactoring process
 4. Maintained 100% backward compatibility
 
-## Completed Refactoring (June 15, 2025)
+## Completed Refactoring (June 15-16, 2025)
 
 ### ✅ All Routes Migrated
 - **Auth Routes**: Login, register, logout using UserService
@@ -91,8 +91,8 @@ The refactoring was done incrementally without breaking existing functionality:
 2. **PollService** - Poll creation, retrieval, and management
 3. **VoteService** - Voting logic and vote tracking
 4. **ProfileService** - User profiles and statistics
-5. **HomeService** - Homepage aggregation and stats
-6. **SearchService** - Unified search across contexts
+5. **HomeService** - Homepage aggregation and stats (delegates search to SearchService)
+6. **SearchService** - Unified search across contexts (homepage, all polls, user polls)
 7. **CacheService** - Performance optimization with in-memory caching
 
 ### ✅ Caching Layer Implemented
@@ -100,6 +100,12 @@ The refactoring was done incrementally without breaking existing functionality:
 - Smart invalidation strategy for data consistency
 - Performance monitoring and statistics
 - 50-80% performance improvement on cached operations
+
+### ✅ Service Dependencies Optimized (June 16, 2025)
+- **HomeService Refactored**: Now delegates search functionality to SearchService
+- **Eliminated Code Duplication**: Removed duplicate search implementation from HomeService
+- **Improved Consistency**: All search operations now use the same validation and logic
+- **Maintained Backward Compatibility**: Same API, same return formats, same limits
 
 ## Next Steps
 

@@ -17,8 +17,8 @@ const PollRepository = require('../src/repositories/PollRepository');
 
 // Initialize dependencies
 const pollRepository = new PollRepository(db);
-const homeService = new HomeService(pollRepository);
 const searchService = new SearchService(pollRepository);
+const homeService = new HomeService(pollRepository, searchService);
 
 /**
  * GET /

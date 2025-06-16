@@ -125,15 +125,29 @@ function convertToPSTEndOfDay(dateString) {
         throw new Error('Date string must be in YYYY-MM-DD format');
     }
     
-    const [year, month, day] = dateParts;
-    const inputDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    // Simple approach: Use the fact that PST is typically UTC-8 or UTC-7 (DST)
+    // Create a date string that represents 11:59:59 PM PST/PDT
     
-    if (isNaN(inputDate.getTime())) {
-        throw new Error('Invalid date components in date string');
-    }
+    // First, let's determine if we're in DST for the target date
+    const [year, month, day] = dateParts.map(Number);
+    const testDate = new Date(year, month - 1, day);
     
-    const endOfDayDate = setTimeToPSTEndOfDay(inputDate);
-    return endOfDayDate.toISOString();
+    // PST: UTC-8 (November - March)
+    // PDT: UTC-7 (April - October, roughly)
+    // More precisely, check if we're in daylight saving time
+    const isDST = (month >= 3 && month <= 10) && !(month === 3 && day < 8) && !(month === 11 && day >= 1);
+    
+    // Create the date string with proper timezone offset
+    const offsetHours = isDST ? 7 : 8; // PDT: UTC-7, PST: UTC-8
+    const offsetString = isDST ? '-07:00' : '-08:00';
+    
+    // Create the ISO string representing 11:59:59 PM PST/PDT
+    const pstEndOfDay = `${dateString}T23:59:59.000${offsetString}`;
+    
+    // Convert to Date object (which will convert to UTC) and return ISO string
+    const utcDate = new Date(pstEndOfDay);
+    
+    return utcDate.toISOString();
 }
 
 /**

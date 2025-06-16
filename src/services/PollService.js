@@ -162,7 +162,20 @@ class PollService {
       throw new Error('This poll has been deleted');
     }
 
-    if (new Date(poll.end_date) < new Date()) {
+    const now = new Date();
+    const pollEndDate = new Date(poll.end_date);
+    
+    // Debug logging for production
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Poll expiration check:', {
+        pollId: poll.id,
+        pollEndDate: pollEndDate.toISOString(),
+        currentTime: now.toISOString(),
+        isExpired: pollEndDate < now
+      });
+    }
+    
+    if (pollEndDate < now) {
       throw new Error('This poll has expired');
     }
 

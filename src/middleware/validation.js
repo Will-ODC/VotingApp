@@ -19,7 +19,7 @@ function validateRequest(schema) {
       
       // For regular requests, flash errors and redirect back
       req.flash('error', errors.join('. '));
-      return res.redirect('back');
+      return res.redirect(req.get('Referrer') || '/');
     }
     
     next();

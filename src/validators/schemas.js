@@ -89,7 +89,7 @@ const pollSchemas = {
       required: false,
       type: 'date',
       futureOnly: true,
-      message: 'End date must be in the future'
+      message: 'End date cannot be in the past'
     },
     voteThreshold: {
       required: false,
@@ -206,8 +206,15 @@ function validate(data, schema) {
       const date = new Date(value);
       if (isNaN(date.getTime())) {
         errors.push(`${field} must be a valid date`);
-      } else if (rules.futureOnly && date <= new Date()) {
-        errors.push(rules.message || `${field} must be in the future`);
+      } else if (rules.futureOnly) {
+        // Allow today's date but not past dates
+        // Compare date strings to avoid timezone issues
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const inputDateStr = typeof value === 'string' ? value : date.toISOString().split('T')[0];
+        
+        if (inputDateStr < today) {
+          errors.push(rules.message || `${field} cannot be in the past`);
+        }
       }
     }
   }

@@ -22,7 +22,7 @@
                     <div class="poll-item">
                         <h4><a href="/polls/<%= poll.id %>"><%= poll.title %></a></h4>
                         <p>Participants: <%= poll.vote_count %></p>
-                        <p>Created: <%= new Date(poll.created_at).toLocaleDateString() %></p>
+                        <p>Created: <%= formatDatePST(poll.created_at) %></p>
                     </div>
                 <% }) %>
             </div>
@@ -77,16 +77,16 @@
                             <span>Created by: <%= poll.creator_name %></span>
                             <span>Total votes: <%= poll.total_votes %></span>
                             <% if (poll.voted_at) { %>
-                                <span>Voted: <%= new Date(poll.voted_at).toLocaleDateString() %></span>
+                                <span>Voted: <%= formatDatePST(poll.voted_at) %></span>
                             <% } %>
                         </div>
                         <% if (poll.end_date) { %>
                             <div class="poll-timing">
                                 <small>
                                     <% if (poll.poll_status === 'active') { %>
-                                        Expires: <%= new Date(poll.end_date).toLocaleDateString() %> at <%= new Date(poll.end_date).toLocaleTimeString() %>
+                                        Expires: <%= formatDatePST(poll.end_date) %>
                                     <% } else if (poll.poll_status === 'expired') { %>
-                                        Expired: <%= new Date(poll.end_date).toLocaleDateString() %> at <%= new Date(poll.end_date).toLocaleTimeString() %>
+                                        Expired: <%= formatDatePST(poll.end_date) %>
                                     <% } %>
                                 </small>
                             </div>

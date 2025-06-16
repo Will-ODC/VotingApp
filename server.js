@@ -55,6 +55,31 @@ app.use(require('./middleware/session'));
 // Configure flash messages
 app.use(flash());
 
+// Add date formatting helper to all views
+app.use((req, res, next) => {
+    // Helper function to format dates to PST without time
+    res.locals.formatDatePST = (dateString) => {
+        if (!dateString) return '';
+        
+        const date = new Date(dateString);
+        
+        // Options for PST timezone formatting
+        const options = {
+            timeZone: 'America/Los_Angeles',
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric'
+        };
+        
+        return date.toLocaleDateString('en-US', options);
+    };
+    
+    // Make user available to all views
+    res.locals.user = req.session.user || null;
+    
+    next();
+});
+
 // Health check endpoint for monitoring
 app.get('/health', (req, res) => {
     res.status(200).json({ 
@@ -96,6 +121,17 @@ const startServer = async () => {
         process.exit(1);
     }
 };
+
+// Graceful shutdown handling
+process.on('SIGINT', () => {
+    console.log('\nReceived SIGINT (Ctrl+C). Shutting down gracefully...');
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    console.log('\nReceived SIGTERM. Shutting down gracefully...');
+    process.exit(0);
+});
 
 // Start the application
 startServer();

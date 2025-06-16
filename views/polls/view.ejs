@@ -10,7 +10,7 @@
         <span>Proposed by: <%= poll.creator_name %></span>
         <span>Total participants: <%= totalVotes %></span>
         <% if (poll.end_date) { %>
-            <span>Ends: <%= new Date(poll.end_date).toLocaleDateString() %></span>
+            <span>Ends: <%= formatDatePST(poll.end_date) %></span>
         <% } %>
     </div>
     
@@ -32,7 +32,7 @@
                 <div class="approval-status approved">
                     <span class="approval-badge">✓ APPROVED FOR ACTION</span>
                     <% if (poll.approved_at) { %>
-                        <small>Approved on <%= new Date(poll.approved_at).toLocaleDateString() %></small>
+                        <small>Approved on <%= formatDatePST(poll.approved_at) %></small>
                     <% } %>
                 </div>
             <% } else { %>

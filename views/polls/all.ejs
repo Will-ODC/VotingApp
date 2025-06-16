@@ -57,8 +57,8 @@
                     <span>Participants: <%= poll.vote_count %></span>
                 </div>
                 <div class="poll-dates">
-                    <small>Created: <%= new Date(poll.created_at).toLocaleDateString() %></small>
-                    <small>Ends: <%= new Date(poll.end_date).toLocaleDateString() %> <%= new Date(poll.end_date).toLocaleTimeString() %></small>
+                    <small>Created: <%= formatDatePST(poll.created_at) %></small>
+                    <small>Ends: <%= formatDatePST(poll.end_date) %></small>
                 </div>
             </div>
         <% }) %>

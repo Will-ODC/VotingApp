@@ -8,6 +8,7 @@ const {
   CACHE_KEYS
 } = require('../config/constants');
 const cacheService = require('./CacheService');
+const { convertToPSTEndOfDay } = require('../utils/dateUtils');
 
 /**
  * PollService handles all poll-related business logic
@@ -92,8 +93,9 @@ class PollService {
       date.setDate(date.getDate() + DEFAULT_POLL_DURATION_DAYS);
       pollEndDate = date.toISOString();
     } else {
-      // Convert datetime-local format to ISO string
-      pollEndDate = new Date(endDate).toISOString();
+      // Convert the date-only input to 11:59:59 PM PST
+      // The date picker provides a date-only string (YYYY-MM-DD)
+      pollEndDate = convertToPSTEndOfDay(endDate);
     }
 
     // Filter valid options
@@ -193,7 +195,7 @@ class PollService {
       return false;
     }
 
-    const totalVotes = poll.options.reduce((sum, opt) => sum + opt.vote_count, 0);
+    const totalVotes = poll.options.reduce((sum, opt) => sum + parseInt(opt.vote_count, 10), 0);
     
     if (totalVotes >= poll.vote_threshold) {
       await this.pollRepository.markAsApproved(pollId);

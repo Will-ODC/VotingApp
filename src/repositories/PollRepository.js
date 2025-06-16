@@ -86,7 +86,7 @@ class PollRepository {
     `;
     
     poll.options = await this.db.all(optionsQuery, [pollId]);
-    poll.total_votes = poll.options.reduce((sum, opt) => sum + parseInt(opt.vote_count), 0);
+    poll.total_votes = poll.options.reduce((sum, opt) => sum + parseInt(opt.vote_count, 10), 0);
     
     return poll;
   }

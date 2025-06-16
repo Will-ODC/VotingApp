@@ -14,7 +14,7 @@ class BasePoll {
      */
     static normalizeVoteCount(count) {
         if (typeof count === 'string') {
-            const parsed = parseInt(count);
+            const parsed = parseInt(count, 10);
             return isNaN(parsed) ? 0 : parsed;
         }
         return typeof count === 'number' ? count : 0;

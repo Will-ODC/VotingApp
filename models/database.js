@@ -219,7 +219,8 @@ const checkPollThreshold = async (pollId) => {
     try {
         const sql = `SELECT p.vote_threshold, p.is_approved, COUNT(DISTINCT v.id) as vote_count
                      FROM polls p
-                     LEFT JOIN votes v ON p.id = v.poll_id
+                     LEFT JOIN options o ON p.id = o.poll_id
+                     LEFT JOIN votes v ON o.id = v.option_id
                      WHERE p.id = $1 AND p.vote_threshold IS NOT NULL AND p.is_approved = FALSE
                      GROUP BY p.id, p.vote_threshold, p.is_approved`;
         

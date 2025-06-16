@@ -341,7 +341,7 @@ footer {
 
 /* About Page Styles */
 .about-page {
-    max-width: 900px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 2rem;
     background: white;
@@ -431,10 +431,12 @@ footer {
     line-height: 2;
 }
 
+/* Comparison table styling with optimized width to reduce white space */
 .comparison-table {
     width: 100%;
+    /* max-width: 750px; */ /* Removed to allow full container width */
     border-collapse: collapse;
-    margin: 1rem 0;
+    margin: 1rem 0; /* Changed from auto to 0 to align with heading */
 }
 
 .comparison-table th,
@@ -442,6 +444,17 @@ footer {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid #ddd;
+}
+
+/* Set specific column widths for better content balance */
+.comparison-table th:first-child,
+.comparison-table td:first-child {
+    width: 45%; /* Traditional Platforms column */
+}
+
+.comparison-table th:last-child,
+.comparison-table td:last-child {
+    width: 55%; /* Online Democracy column - slightly wider for longer content */
 }
 
 .comparison-table th {

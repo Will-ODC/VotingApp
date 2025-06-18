@@ -40,13 +40,23 @@
 <% } else { %>
     <div class="polls-grid">
         <% polls.forEach(poll => { %>
-            <div class="poll-card <%= poll.status %>-poll">
+            <div class="poll-card <%= poll.status %>-poll <%= poll.is_action_initiative ? 'action-initiative' : '' %>">
                 <div class="poll-status">
+                    <% if (poll.is_action_initiative) { %>
+                        <span class="badge badge-action">⚡ Action Initiative</span>
+                        <% if (poll.action_status === 'stage2_voting') { %>
+                            <span class="badge badge-warning">Stage 2 Voting</span>
+                        <% } else if (poll.action_status === 'stage2_approved') { %>
+                            <span class="badge badge-success">Action Approved</span>
+                        <% } else if (poll.action_status === 'action_rejected') { %>
+                            <span class="badge badge-danger">Action Rejected</span>
+                        <% } %>
+                    <% } %>
                     <% if (poll.status === 'active') { %>
                         <span class="badge badge-success">Active</span>
                     <% } else if (poll.status === 'expired') { %>
                         <span class="badge badge-warning">Expired</span>
-                    <% } else { %>
+                    <% } else if (poll.status === 'deleted') { %>
                         <span class="badge badge-danger">Deleted</span>
                     <% } %>
                 </div>
@@ -149,5 +159,31 @@
     color: #666;
     display: flex;
     justify-content: space-between;
+}
+
+/* Action Initiative Styles */
+.poll-card.action-initiative {
+    border-left: 4px solid #28a745;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fff8 100%);
+}
+
+.badge-action {
+    background-color: #28a745;
+    color: white;
+    font-weight: 600;
+}
+
+.poll-status {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
 }
 </style>

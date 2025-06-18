@@ -77,7 +77,7 @@ class SearchService {
       FROM polls p
       LEFT JOIN votes v ON p.id = v.poll_id
       WHERE ${whereClause}
-      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category
+      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category, p.is_action_initiative, p.action_plan, p.action_deadline, p.action_status, p.stage2_deadline
       ${orderClause}
       LIMIT $${paramIndex}
     `;
@@ -122,7 +122,7 @@ class SearchService {
       LEFT JOIN users u ON p.created_by = u.id
       LEFT JOIN votes v ON p.id = v.poll_id
       WHERE ${whereClause}
-      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category, p.poll_type, u.username
+      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category, p.poll_type, p.is_action_initiative, p.action_plan, p.action_deadline, p.action_status, p.stage2_deadline, u.username
       ${orderClause}
       LIMIT 50
     `;
@@ -150,7 +150,7 @@ class SearchService {
       LEFT JOIN votes v ON p.id = v.poll_id
       WHERE p.created_by = $1 
         AND (p.title ILIKE $2 OR p.description ILIKE $3)
-      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category
+      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, p.category, p.is_action_initiative, p.action_plan, p.action_deadline, p.action_status, p.stage2_deadline
       ${orderClause}
       LIMIT 20
     `;

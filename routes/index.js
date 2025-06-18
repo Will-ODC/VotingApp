@@ -46,9 +46,10 @@ router.get('/', async (req, res) => {
         });
 
         // Get additional homepage data
-        const [stats, categories] = await Promise.all([
+        const [stats, categories, primaryActionInitiative] = await Promise.all([
             homeService.getHomepageStats(),
-            homeService.getCategories()
+            homeService.getCategories(),
+            homeService.getPrimaryActionInitiative()
         ]);
 
         res.render('index', {
@@ -58,7 +59,8 @@ router.get('/', async (req, res) => {
             searchQuery: params.search,
             currentCategory: params.category,
             stats,
-            categories
+            categories,
+            primaryActionInitiative
         });
     } catch (error) {
         console.error('Error fetching homepage data:', error);

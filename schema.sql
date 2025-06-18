@@ -24,6 +24,11 @@ CREATE TABLE IF NOT EXISTS polls (
     vote_threshold INTEGER DEFAULT NULL,
     is_approved BOOLEAN DEFAULT 0,
     approved_at TIMESTAMP DEFAULT NULL,
+    is_action_initiative BOOLEAN DEFAULT 0,
+    action_plan TEXT,
+    action_deadline TIMESTAMP,
+    action_status TEXT DEFAULT 'pending',
+    stage2_deadline TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
@@ -58,3 +63,22 @@ CREATE TABLE IF NOT EXISTS email_list (
     email TEXT UNIQUE NOT NULL,
     subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Stage 2 votes table for action plan approval
+CREATE TABLE IF NOT EXISTS stage2_votes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    poll_id INTEGER NOT NULL,
+    approval TEXT NOT NULL CHECK (approval IN ('approve', 'reject')),
+    voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, poll_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (poll_id) REFERENCES polls(id)
+);
+
+-- Indexes for performance optimization
+CREATE INDEX IF NOT EXISTS idx_polls_is_action_initiative ON polls(is_action_initiative);
+CREATE INDEX IF NOT EXISTS idx_polls_action_status ON polls(action_status);
+CREATE INDEX IF NOT EXISTS idx_polls_action_homepage ON polls(is_action_initiative, is_active, closes_at) 
+WHERE is_action_initiative = 1;
+CREATE INDEX IF NOT EXISTS idx_stage2_votes_poll_id ON stage2_votes(poll_id);

@@ -107,6 +107,44 @@ class HomeService {
   }
 
   /**
+   * Gets the primary action initiative for homepage display
+   * Returns the active action initiative with the most votes
+   * @returns {Object|null} Primary action initiative or null if none exist
+   */
+  async getPrimaryActionInitiative() {
+    try {
+      const query = `
+        SELECT 
+          p.*,
+          u.username as creator_username,
+          COALESCE(vote_counts.total_votes, 0) as vote_count
+        FROM polls p
+        INNER JOIN users u ON p.created_by = u.id
+        LEFT JOIN (
+          SELECT 
+            o.poll_id, 
+            COUNT(v.id) as total_votes
+          FROM options o
+          LEFT JOIN votes v ON o.id = v.option_id
+          GROUP BY o.poll_id
+        ) vote_counts ON p.id = vote_counts.poll_id
+        WHERE p.is_action_initiative = TRUE 
+          AND p.is_active = TRUE 
+          AND (p.end_date IS NULL OR p.end_date > CURRENT_TIMESTAMP)
+          AND p.action_status IN ('pending', 'stage2_voting')
+        ORDER BY vote_counts.total_votes DESC, p.created_at DESC
+        LIMIT 1
+      `;
+      
+      const actionInitiative = await this.pollRepository.db.get(query);
+      return actionInitiative || null;
+    } catch (error) {
+      console.error('Error fetching primary action initiative:', error);
+      return null;
+    }
+  }
+
+  /**
    * Validates search and filter parameters
    * Delegates to SearchService for consistent validation across the application
    * @param {Object} params - Request parameters

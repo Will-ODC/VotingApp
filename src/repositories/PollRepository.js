@@ -11,13 +11,26 @@ class PollRepository {
    * Creates a new poll with options
    */
   async create(pollData) {
-    const { title, description, creatorId, endDate, voteThreshold, category, pollType, options } = pollData;
+    const { 
+      title, 
+      description, 
+      creatorId, 
+      endDate, 
+      voteThreshold, 
+      category, 
+      pollType, 
+      options,
+      isActionInitiative,
+      actionPlan,
+      actionDeadline,
+      actionStatus
+    } = pollData;
     
     // Insert poll
     const pollQuery = `
-      INSERT INTO polls (title, description, created_by, end_date, vote_threshold, category, poll_type, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP)
-      RETURNING id, title, description, created_by, end_date, vote_threshold, category, poll_type, is_approved, created_at
+      INSERT INTO polls (title, description, created_by, end_date, vote_threshold, category, poll_type, is_action_initiative, action_plan, action_deadline, action_status, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP)
+      RETURNING id, title, description, created_by, end_date, vote_threshold, category, poll_type, is_approved, is_action_initiative, action_plan, action_deadline, action_status, created_at
     `;
     
     const poll = await this.db.run(pollQuery, [
@@ -27,7 +40,11 @@ class PollRepository {
       endDate, 
       voteThreshold,
       category,
-      pollType
+      pollType,
+      isActionInitiative || false,
+      actionPlan,
+      actionDeadline,
+      actionStatus || 'pending'
     ]);
 
     // Insert options

@@ -175,6 +175,35 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
 });
 
 /**
+ * POST /polls/:id/stage2-vote
+ * Submit Stage 2 vote (approve/reject action plan)
+ * Only Stage 1 voters can participate
+ * Requires authentication
+ */
+router.post('/:id/stage2-vote', requireAuth, async (req, res) => {
+    const pollId = req.params.id;
+    const { approval } = req.body;
+    const userId = req.session.user.id;
+
+    try {
+        // Validate approval value
+        if (!approval || !['approve', 'reject'].includes(approval)) {
+            throw new Error('Invalid approval value');
+        }
+
+        // Delegate to service layer
+        await pollService.submitStage2Vote(userId, pollId, approval);
+
+        // Redirect back to poll to see updated results
+        res.redirect(`/polls/${pollId}`);
+    } catch (error) {
+        console.error('Error voting in Stage 2:', error);
+        req.flash('error', error.message);
+        res.redirect(`/polls/${pollId}`);
+    }
+});
+
+/**
  * GET /polls/:id/delete
  * Soft delete a poll (admin only)
  * Sets is_active flag to 0 rather than removing from database

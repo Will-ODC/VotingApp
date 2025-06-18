@@ -58,9 +58,44 @@
             </div>
             <button type="button" id="add-option" class="btn btn-secondary">Add Option</button>
         </div>
+
+        <!-- Action Initiative Section -->
+        <div class="form-group action-initiative-section">
+            <div class="action-initiative-checkbox">
+                <input type="checkbox" id="is_action_initiative" name="is_action_initiative" value="1">
+                <label for="is_action_initiative">This is an Action Initiative - I commit to taking action if this poll is approved</label>
+                <button type="button" class="help-button" onclick="showActionHelp()">?</button>
+            </div>
+            
+            <div id="action-details" class="action-details" style="display: none;">
+                <div class="form-group">
+                    <label for="action_plan">Action Plan</label>
+                    <textarea id="action_plan" name="action_plan" rows="4" maxlength="500" placeholder="Describe what specific actions you will take to implement this initiative..."></textarea>
+                    <small class="form-text">Maximum 500 characters. This plan can be refined after the poll is approved.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="action_deadline">Action Completion Deadline</label>
+                    <input type="date" id="action_deadline" name="action_deadline">
+                    <small class="form-text">Deadline by which you commit to complete the action (11:59 PM PST)</small>
+                </div>
+            </div>
+        </div>
         
         <button type="submit" class="btn btn-primary">Submit Initiative</button>
     </form>
+</div>
+
+<!-- Action Initiative Help Modal -->
+<div id="actionHelpModal" class="help-modal">
+    <div class="help-modal-content">
+        <div class="help-modal-header">
+            <h3>Action Initiative</h3>
+            <span class="close-help" onclick="hideActionHelp()">&times;</span>
+        </div>
+        <p>Action Initiatives are commitments to take real action based on community voting results. You promise to implement the winning option if the poll is approved.</p>
+        <p>After your poll is approved by the community, voters will review and approve your specific action plan before you proceed.</p>
+    </div>
 </div>
 
 <style>
@@ -134,6 +169,112 @@
 .btn:hover {
     opacity: 0.9;
 }
+
+/* Action Initiative Styling */
+.action-initiative-section {
+    background-color: #f8fff8;
+    border: 2px solid #d4edda;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.action-initiative-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.action-initiative-checkbox input[type="checkbox"] {
+    width: auto;
+}
+
+.action-initiative-checkbox label {
+    flex: 1;
+    margin-bottom: 0;
+    font-weight: 600;
+    color: #155724;
+}
+
+.help-button {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.help-button:hover {
+    background-color: #138496;
+}
+
+.action-details {
+    border-top: 1px solid #c3e6cb;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.action-details .form-group {
+    margin-bottom: 1rem;
+}
+
+.action-details textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Help Modal Styles */
+.help-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.help-modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: none;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.help-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.help-modal-header h3 {
+    margin: 0;
+    color: #155724;
+}
+
+.close-help {
+    color: #999;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-help:hover {
+    color: #000;
+}
 </style>
 
 <script>
@@ -145,5 +286,59 @@ document.getElementById('add-option').addEventListener('click', function() {
     input.name = 'options[]';
     input.placeholder = 'Option ' + optionCount;
     container.appendChild(input);
+});
+
+// Action Initiative checkbox handler
+document.getElementById('is_action_initiative').addEventListener('change', function() {
+    const actionDetails = document.getElementById('action-details');
+    const actionPlan = document.getElementById('action_plan');
+    const actionDeadline = document.getElementById('action_deadline');
+    
+    if (this.checked) {
+        actionDetails.style.display = 'block';
+        actionPlan.required = true;
+        actionDeadline.required = true;
+    } else {
+        actionDetails.style.display = 'none';
+        actionPlan.required = false;
+        actionDeadline.required = false;
+        actionPlan.value = '';
+        actionDeadline.value = '';
+    }
+});
+
+// Help modal functions
+function showActionHelp() {
+    document.getElementById('actionHelpModal').style.display = 'block';
+}
+
+function hideActionHelp() {
+    document.getElementById('actionHelpModal').style.display = 'none';
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById('actionHelpModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Character counter for action plan
+document.getElementById('action_plan').addEventListener('input', function() {
+    const maxLength = 500;
+    const currentLength = this.value.length;
+    const remaining = maxLength - currentLength;
+    
+    // Find or create character counter
+    let counter = this.parentNode.querySelector('.char-counter');
+    if (!counter) {
+        counter = document.createElement('small');
+        counter.className = 'form-text char-counter';
+        this.parentNode.appendChild(counter);
+    }
+    
+    counter.textContent = `${remaining} characters remaining`;
+    counter.style.color = remaining < 50 ? '#dc3545' : '#666';
 });
 </script>

@@ -3,13 +3,13 @@
 ## Project Overview
 An Online Democratic Community (ODC) platform that enables transparent, community-controlled decision-making and ethical data monetization for collective wellbeing. Built as a Node.js web application using Express.js, PostgreSQL, and EJS templating.
 
-## 🎯 Current Status (June 13, 2025)
+## 🎯 Current Status (June 18, 2025)
 **✅ PRODUCTION READY** - Live at [www.onlinedemocracy.org](https://www.onlinedemocracy.org)
 
-- **Phase 0**: ✅ **COMPLETED** - Production deployment successful
+- **Phase 0**: ✅ **COMPLETED** - Production deployment successful with Action Initiative system
 - **Next Phase**: **Phase 1** - Foundation features and controlled community growth
-- **Current Focus**: Email invitation system and user contribution tracking
-- **Technical Status**: Stable PostgreSQL deployment with secure authentication
+- **Current Focus**: Community engagement with Action Initiatives and user contribution tracking
+- **Technical Status**: Stable PostgreSQL deployment with two-stage approval system and action commitments
 
 ### ODC Vision
 - **Core Mission**: Create a democratic platform where users control how their data is used and monetized, with all proceeds funding community-chosen wellbeing initiatives
@@ -19,7 +19,7 @@ An Online Democratic Community (ODC) platform that enables transparent, communit
 
 ## Architecture
 - **Backend**: Node.js with Express.js
-- **Database**: SQLite with custom schema
+- **Database**: PostgreSQL with advanced schema supporting two-stage approval
 - **Frontend**: EJS templates with embedded CSS
 - **Authentication**: Session-based with middleware
 - **File Structure**: MVC pattern with routes, models, views, middleware
@@ -45,6 +45,7 @@ Focus on core infrastructure for community understanding and organization.
 - [x] **About Page** (1 day) - Simple explanation of ODC concepts, vision, and how the platform works
 - [x] **Poll Categories/Tags** (2 days) - Organize polls by type (budget allocation, community rules, partnerships, wellbeing initiatives)
 - [x] **PostgreSQL Migration** (3-4 days) - Complete migration from SQLite to PostgreSQL for production scalability
+- [x] **Action Initiative System** (5-6 days) - Two-stage approval process with creator commitments, action plans, and automatic status transitions
 - [ ] **User Contribution & Initiative Tracking** (3-4 days) - Track polls created, votes cast, donations, and initiative completions with blog-style posts and community verification
 
 ### Phase 2: Trust & Transparency (Weeks 5-8)
@@ -193,6 +194,17 @@ Advanced features for community insights and rapid participation.
 - [x] **Status Badges** - Clear indicators for approved vs pending polls
 - [x] **Database Migration** - Seamless addition of threshold features to existing installations
 
+### 🚀 Action Initiative System
+- [x] **Two-Stage Approval Process** - Stage 1 (community voting) followed by Stage 2 (action plan approval)
+- [x] **Creator Commitment System** - Poll creators must commit to taking action when polls are approved
+- [x] **Action Plan Submission** - Detailed action plans with deadlines and implementation details
+- [x] **Homepage Featuring** - Primary action initiative prominently displayed on homepage
+- [x] **Automatic Status Transitions** - Seamless progression from Stage 1 to Stage 2 voting
+- [x] **Visual Status Indicators** - Clear badges and progress tracking throughout the process
+- [x] **Voting Eligibility Controls** - Stage 1 voters can participate in Stage 2 approval
+- [x] **Action Deadline Tracking** - Monitor and display action completion deadlines
+- [x] **Creator Accountability** - System ensures poll creators follow through on commitments
+
 ### 🎨 User Experience
 - [x] **Responsive Design** - Mobile-friendly layouts
 - [x] **Visual Feedback** - Clear status indicators and badges
@@ -206,12 +218,27 @@ Advanced features for community insights and rapid participation.
 ### Database Schema
 ```sql
 -- Core tables: users, polls, options, votes
--- New fields in polls table:
+-- Enhanced polls table with Action Initiative fields:
 --   vote_threshold: Minimum votes needed for approval (nullable)
 --   is_approved: Boolean flag indicating if threshold was met
 --   approved_at: Timestamp when poll was approved
--- Relationships: polls -> users (creator), votes -> users + options
--- Indexes: Optimized for common queries
+--   is_action_initiative: Boolean flag for action initiatives
+--   stage2_threshold: Minimum votes needed for Stage 2 approval (nullable)
+--   stage2_approved: Boolean flag for Stage 2 approval status
+--   stage2_approved_at: Timestamp when Stage 2 was approved
+--   action_plan: Text field containing creator's action plan
+--   action_deadline: Date when action should be completed
+--   action_status: Current status of action (pending, in_progress, completed, failed)
+
+-- New stage2_votes table:
+--   id: Primary key
+--   poll_id: Foreign key to polls table
+--   user_id: Foreign key to users table (must have voted in Stage 1)
+--   option_id: Foreign key to options table
+--   created_at: Timestamp of Stage 2 vote
+
+-- Relationships: polls -> users (creator), votes -> users + options, stage2_votes -> users + options
+-- Indexes: Optimized for common queries including Action Initiative filtering
 -- Migration system: Automatic column addition for existing databases
 
 -- User Contribution Tracking tables:
@@ -254,6 +281,15 @@ Advanced features for community insights and rapid participation.
 3. Execute query with proper sorting
 4. Render results with pagination
 
+### Action Initiative Flow
+1. **Stage 1 - Community Voting**: User creates action initiative poll with commitment to take action
+2. **Threshold Achievement**: Poll reaches minimum vote threshold and becomes approved
+3. **Action Planning**: Creator submits detailed action plan with implementation timeline
+4. **Stage 2 - Action Plan Approval**: Stage 1 voters approve or reject the action plan
+5. **Action Implementation**: Creator implements approved action plan within deadline
+6. **Progress Tracking**: System monitors action status and deadline compliance
+7. **Community Impact**: Completed initiatives contribute to community wellbeing metrics
+
 ### Initiative Completion Flow
 1. User completes approved poll action
 2. Creates blog-style post with evidence (photos, links, description)
@@ -269,14 +305,18 @@ Advanced features for community insights and rapid participation.
 - Breadcrumb navigation
 
 ### Forms
-- Poll creation form with dynamic options
-- Voting forms with radio buttons
+- Poll creation form with dynamic options and action initiative checkbox
+- Voting forms with radio buttons for both Stage 1 and Stage 2
+- Action plan submission form with deadline picker
 - Search forms with filters
 
 ### Data Display
-- Poll cards with metadata
-- Results visualization with progress bars
-- Status badges and indicators
+- Poll cards with metadata and action initiative badges
+- Results visualization with progress bars for both voting stages
+- Status badges and indicators including action status
+- Primary action initiative featured prominently on homepage
+- Action deadline countdown displays
+- Stage progression indicators
 - Pagination controls
 
 ## 🔧 Configuration
@@ -428,9 +468,10 @@ node server.js             # Start development server
 
 ### 🔄 Current Status
 - **Local Development:** ✅ Fully working with Docker PostgreSQL
-- **Database:** ✅ PostgreSQL with complete schema and all features working
+- **Database:** ✅ PostgreSQL with complete schema including Action Initiative tables
 - **Authentication:** ✅ Login, registration, password changes all working
 - **Poll System:** ✅ Creation, voting, viewing, approval thresholds all working
+- **Action Initiative System:** ✅ Two-stage approval, action plans, homepage featuring all working
 - **Profile System:** ✅ User profiles with voting history and created polls working
 
 ### 📋 Immediate Next Steps (Phase 0)
@@ -467,7 +508,7 @@ The application is successfully deployed and operational:
 
 ---
 
-*Last Updated: June 13, 2025*
-*Project Status: Production Deployed & Operational*
+*Last Updated: June 18, 2025*
+*Project Status: Production Deployed & Operational with Action Initiative System*
 *Live at: www.onlinedemocracy.org*
 *Documentation maintained by Claude Code Assistant*

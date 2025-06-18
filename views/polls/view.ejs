@@ -43,6 +43,108 @@
             <% } %>
         </div>
     <% } %>
+
+    <!-- Action Initiative Section -->
+    <% if (poll.is_action_initiative) { %>
+        <div class="action-initiative-info">
+            <div class="action-badge">⚡ Action Initiative</div>
+            <div class="action-commitment">
+                <strong>Creator Commitment:</strong> <%= poll.creator_name %> has committed to implementing the winning option if this initiative is approved.
+            </div>
+            
+            <% if (poll.action_plan) { %>
+                <div class="action-plan-section">
+                    <h4>Action Plan</h4>
+                    <div class="action-plan-content">
+                        <%= poll.action_plan %>
+                    </div>
+                    <% if (poll.action_deadline) { %>
+                        <p><strong>Completion Deadline:</strong> <%= formatDatePST(poll.action_deadline) %></p>
+                    <% } %>
+                </div>
+            <% } %>
+            
+            <!-- Stage 2 Voting Section -->
+            <% if (poll.action_status === 'stage2_voting') { %>
+                <div class="stage2-voting-section">
+                    <div class="stage2-header">
+                        <h3>🗳️ Stage 2: Action Plan Approval</h3>
+                        <p>Stage 1 voters are now voting to approve the specific action plan.</p>
+                        <% if (poll.stage2_deadline) { %>
+                            <p><strong>Voting ends:</strong> <%= formatDatePST(poll.stage2_deadline) %></p>
+                        <% } %>
+                    </div>
+                    
+                    <% if (user && stage1Voter && !stage2Vote) { %>
+                        <!-- Stage 2 voting form -->
+                        <form action="/polls/<%= poll.id %>/stage2-vote" method="POST" class="stage2-vote-form">
+                            <div class="stage2-options">
+                                <div class="stage2-option">
+                                    <label>
+                                        <input type="radio" name="approval" value="approve" required>
+                                        <span class="approve-option">✓ Approve Action Plan</span>
+                                        <small>The action plan is acceptable and should proceed</small>
+                                    </label>
+                                </div>
+                                <div class="stage2-option">
+                                    <label>
+                                        <input type="radio" name="approval" value="reject" required>
+                                        <span class="reject-option">✗ Reject Action Plan</span>
+                                        <small>The action plan needs revision or should not proceed</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-action-primary">Submit Action Plan Vote</button>
+                        </form>
+                    <% } else if (user && stage1Voter && stage2Vote) { %>
+                        <!-- Show Stage 2 vote result -->
+                        <div class="stage2-voted">
+                            <p><strong>Your Stage 2 Vote:</strong> 
+                                <span class="vote-choice <%= stage2Vote.approval %>">
+                                    <%= stage2Vote.approval === 'approve' ? '✓ Approved' : '✗ Rejected' %>
+                                </span>
+                            </p>
+                        </div>
+                    <% } else if (user && !stage1Voter) { %>
+                        <div class="stage2-ineligible">
+                            <p>Only Stage 1 voters can participate in action plan approval.</p>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Stage 2 Results -->
+                    <% if (stage2Results) { %>
+                        <div class="stage2-results">
+                            <h4>Action Plan Voting Results</h4>
+                            <div class="stage2-result-item">
+                                <span class="result-label">Approve:</span>
+                                <div class="result-bar">
+                                    <div class="result-fill approve" style="width: <%= stage2Results.approvePercentage %>%"></div>
+                                </div>
+                                <span class="result-count"><%= stage2Results.approveCount %> votes (<%= Math.round(stage2Results.approvePercentage) %>%)</span>
+                            </div>
+                            <div class="stage2-result-item">
+                                <span class="result-label">Reject:</span>
+                                <div class="result-bar">
+                                    <div class="result-fill reject" style="width: <%= stage2Results.rejectPercentage %>%"></div>
+                                </div>
+                                <span class="result-count"><%= stage2Results.rejectCount %> votes (<%= Math.round(stage2Results.rejectPercentage) %>%)</span>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            <% } else if (poll.action_status === 'stage2_approved') { %>
+                <div class="stage2-approved">
+                    <div class="approval-badge">✅ Action Plan Approved</div>
+                    <p>The community has approved the action plan. Implementation should begin soon!</p>
+                </div>
+            <% } else if (poll.action_status === 'action_rejected') { %>
+                <div class="stage2-rejected">
+                    <div class="rejection-badge">❌ Action Plan Rejected</div>
+                    <p>The community rejected the action plan. This initiative is now closed.</p>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
     
     <% if (!user) { %>
         <div class="alert alert-info">
@@ -374,6 +476,209 @@
 .change-vote-section h4 {
     margin-bottom: 1rem;
     color: #333;
+}
+
+/* Action Initiative Styles */
+.action-initiative-info {
+    background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+    border: 2px solid #28a745;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.action-initiative-info .action-badge {
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.action-commitment {
+    background-color: rgba(40, 167, 69, 0.1);
+    border-left: 4px solid #28a745;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0 6px 6px 0;
+    color: #155724;
+}
+
+.action-plan-section {
+    margin: 1.5rem 0;
+}
+
+.action-plan-section h4 {
+    color: #155724;
+    margin-bottom: 0.5rem;
+}
+
+.action-plan-content {
+    background-color: #f8fff8;
+    border: 1px solid #d4edda;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+/* Stage 2 Voting Styles */
+.stage2-voting-section {
+    background-color: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.stage2-header h3 {
+    color: #856404;
+    margin-bottom: 0.5rem;
+}
+
+.stage2-vote-form {
+    margin: 1rem 0;
+}
+
+.stage2-options {
+    margin: 1rem 0;
+}
+
+.stage2-option {
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    transition: border-color 0.3s ease;
+}
+
+.stage2-option:hover {
+    border-color: #ffc107;
+}
+
+.stage2-option label {
+    display: block;
+    cursor: pointer;
+    width: 100%;
+}
+
+.stage2-option input[type="radio"] {
+    margin-right: 0.5rem;
+}
+
+.approve-option {
+    color: #155724;
+    font-weight: 600;
+}
+
+.reject-option {
+    color: #721c24;
+    font-weight: 600;
+}
+
+.stage2-option small {
+    display: block;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.stage2-voted {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.vote-choice.approve {
+    color: #155724;
+    font-weight: 600;
+}
+
+.vote-choice.reject {
+    color: #721c24;
+    font-weight: 600;
+}
+
+.stage2-ineligible {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    padding: 1rem;
+    color: #721c24;
+}
+
+.stage2-results {
+    margin: 1.5rem 0;
+}
+
+.stage2-result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.5rem 0;
+}
+
+.result-label {
+    width: 80px;
+    font-weight: 600;
+}
+
+.result-bar {
+    flex: 1;
+    height: 20px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.result-fill.approve {
+    background: #28a745;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.result-fill.reject {
+    background: #dc3545;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.result-count {
+    width: 120px;
+    text-align: right;
+    font-size: 0.9rem;
+}
+
+/* Status Badges */
+.stage2-approved, .stage2-rejected {
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.stage2-approved {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.stage2-rejected {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.approval-badge, .rejection-badge {
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
 }
 </style>
 

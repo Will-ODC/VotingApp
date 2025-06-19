@@ -366,14 +366,17 @@ footer {
     }
     
     .poll-badges {
-        max-width: 100%; /* Full width on mobile */
+        width: 100%; /* Full width on mobile */
         justify-content: flex-start;
+        overflow-x: auto; /* Allow horizontal scroll if needed */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     }
     
     .poll-badges .action-badge,
     .poll-badges .category-badge {
         font-size: 0.75rem;
         padding: 0.2rem 0.6rem;
+        flex-shrink: 0; /* Prevent badge shrinking on mobile */
     }
 }
 
@@ -650,11 +653,11 @@ footer {
 .poll-badges {
     display: flex;
     gap: 0.5rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Prevent wrapping to keep badges on same line */
     align-items: center; /* Ensures vertical center alignment */
     justify-content: flex-start; /* Align badges to the left */
     flex-shrink: 0; /* Prevent badges from shrinking */
-    max-width: 45%; /* Limit width to prevent overflow */
+    min-width: max-content; /* Ensure badges have enough space */
 }
 
 .poll-badges .action-badge,

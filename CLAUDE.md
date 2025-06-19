@@ -212,6 +212,8 @@ Advanced features for community insights and rapid participation.
 - [x] **Error Handling** - Graceful error pages and messages
 - [x] **Performance** - Pagination prevents overwhelming data loads
 - [x] **Proper Pagination** - Navigate voting history in groups of 10 with forward/backward controls
+- [x] **Scrollable Polls Container** - Fixed-height scrollable area (500px desktop/400px mobile) with visual scroll indicators and smart hints
+- [x] **Fixed Header Overlaps** - Proper z-index hierarchy ensuring navigation stays on top (z-index: 100)
 
 ## 🛠️ Technical Implementation Details
 
@@ -260,6 +262,12 @@ Advanced features for community insights and rapid participation.
 - Efficient SQL queries with JOINs
 - Pagination to limit result sets
 - Promise-based async operations
+
+### UI/UX Technical Details
+- Z-index management for proper layering of UI elements (navigation: 100, badges: 10)
+- Scrollable container with custom scrollbar styling for better visual integration
+- Responsive design adjustments for mobile devices (400px height on mobile, 500px on desktop)
+- Visual scroll indicators with gradient overlays for improved user awareness
 
 ## 🔄 Data Flow
 
@@ -451,6 +459,11 @@ node server.js             # Start development server
   - ✅ Production environment variables configured properly
   - ✅ Debug logging cleaned up for production
 
+### ✅ UI Improvements Completed (June 18, 2025)
+- [x] **UI Fixes** - Enhanced user interface for better usability
+  - ✅ Fixed action badge header overlap issue with proper z-index management
+  - ✅ Implemented scrollable polls container for better homepage usability
+
 ### ✅ Completed Earlier (June 11, 2025)
 - [x] **Complete PostgreSQL Migration** - Full migration from hybrid SQLite/PostgreSQL to PostgreSQL-only
   - Fixed host binding to always use 0.0.0.0 for Railway compatibility
@@ -508,7 +521,7 @@ The application is successfully deployed and operational:
 
 ---
 
-*Last Updated: June 18, 2025*
+*Last Updated: June 19, 2025*
 *Project Status: Production Deployed & Operational with Action Initiative System*
 *Live at: www.onlinedemocracy.org*
 *Documentation maintained by Claude Code Assistant*

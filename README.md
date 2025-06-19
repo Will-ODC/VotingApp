@@ -47,6 +47,18 @@ A comprehensive web-based voting platform that enables democratic decision-makin
 - **Status Badges**: Clear "APPROVED FOR ACTION" vs "Pending Approval" indicators
 - **Future-Ready**: Framework for automated action triggers
 
+### 🚀 Action Initiative System
+- **Two-Stage Approval Process**: Community voting (Stage 1) followed by action plan approval (Stage 2)
+- **Creator Commitment**: Poll creators commit to taking action when initiatives are approved
+- **Action Plan Submission**: Detailed plans with implementation timelines and deadlines
+- **Homepage Featuring**: Primary action initiative prominently displayed on homepage
+- **Automatic Status Transitions**: Seamless progression from Stage 1 to Stage 2 voting
+- **Stage 2 Voting**: Stage 1 voters can approve or reject proposed action plans
+- **Action Deadline Tracking**: Monitor and display action completion deadlines
+- **Creator Accountability**: System ensures poll creators follow through on commitments
+- **Visual Status Indicators**: Clear badges and progress tracking throughout the process
+- **Action Status Management**: Track pending, in-progress, completed, or failed actions
+
 ## 🛠️ Tech Stack
 
 - **Backend**: Node.js, Express.js with comprehensive route handling
@@ -212,6 +224,8 @@ VotingApp/
    - Set title, description, and options
    - Optionally set vote thresholds for approval
    - Choose expiration dates
+   - Create Action Initiatives with commitment to take action
+   - Submit detailed action plans after Stage 1 approval
 4. **Vote & Change Votes**: Participate in active polls and modify votes until expiration
 5. **Track Activity**: Use your profile to see created polls and voting history with pagination
 
@@ -227,6 +241,8 @@ VotingApp/
 - **Sort**: Choose between Popular (most votes), Recent (newest), or Active (most recent activity)
 - **Thresholds**: Set vote requirements for poll approval and track progress visually
 - **Real-time Updates**: See live vote counts and approval status changes
+- **Action Initiatives**: Create polls with commitments to take action, submit detailed plans, and track implementation
+- **Two-Stage Voting**: Participate in both community approval and action plan approval phases
 
 ## 🌐 Live Deployment
 
@@ -294,6 +310,15 @@ npm start    # Standard start
 - **Schema**: Database structure documented in `schema.sql`
 
 ## 🎯 Recent Updates
+
+### June 18, 2025 - Action Initiative System Complete
+- ✅ **Action Initiative System**: Implemented comprehensive two-stage approval process for community actions
+- ✅ **Creator Commitment System**: Poll creators now commit to taking action when initiatives are approved
+- ✅ **Two-Stage Approval Workflow**: Stage 1 community voting followed by Stage 2 action plan approval
+- ✅ **Homepage Featuring**: Primary action initiative prominently displayed on homepage
+- ✅ **Action Plan Management**: Detailed action plans with deadlines and implementation tracking
+- ✅ **Automatic Status Transitions**: Seamless progression between voting stages
+- ✅ **Creator Accountability**: System tracks action deadlines and completion status
 
 ### June 13, 2025 - Production Deployment & Session Fix
 - ✅ **Live Deployment**: Successfully deployed to www.onlinedemocracy.org on Railway

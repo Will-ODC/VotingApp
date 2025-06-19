@@ -11,6 +11,11 @@ A comprehensive web-based voting platform that enables democratic decision-makin
 - **Admin System**: Administrative controls with role-based permissions
 - **Default Admin Account**: Auto-created admin user for immediate setup
 
+### 📧 Communication System
+- **Simple Contact System**: Direct mailto links for user communication with administrators
+- **Integrated Contact Access**: Contact functionality built into main navigation
+- **Administrator Communication**: Users can reach platform administrators at info@onlinedemocracy.org
+
 ### 📊 Poll Management System
 - **Poll Creation**: Create polls with multiple options and configurable settings
 - **Expiration Dates**: Set custom end dates or use 30-day default
@@ -195,7 +200,7 @@ VotingApp/
 │   ├── polls.js       # Poll creation, voting, and threshold checking
 │   └── profile.js     # User profiles with pagination
 ├── views/
-│   ├── layout.ejs     # Main layout template
+│   ├── layout.ejs     # Main layout template with contact navigation
 │   ├── index.ejs      # Homepage with search/sort controls
 │   ├── about.ejs      # About page
 │   ├── error.ejs      # Error page template
@@ -228,6 +233,7 @@ VotingApp/
    - Submit detailed action plans after Stage 1 approval
 4. **Vote & Change Votes**: Participate in active polls and modify votes until expiration
 5. **Track Activity**: Use your profile to see created polls and voting history with pagination
+6. **Contact Administrators**: Use the contact link in navigation to reach administrators at info@onlinedemocracy.org
 
 ### For Administrators
 1. **Poll Management**: View and manage all polls through filtering options
@@ -243,6 +249,7 @@ VotingApp/
 - **Real-time Updates**: See live vote counts and approval status changes
 - **Action Initiatives**: Create polls with commitments to take action, submit detailed plans, and track implementation
 - **Two-Stage Voting**: Participate in both community approval and action plan approval phases
+- **Simple Contact**: Direct email communication with administrators via integrated mailto links
 
 ## 🌐 Live Deployment
 
@@ -278,6 +285,7 @@ ADMIN_EMAIL=your-admin-email
 - **Password Policies**: Current system uses SHA-256; consider bcrypt for enhanced security
 - **SQL Injection Protection**: All queries use parameterized statements
 - **XSS Protection**: HTTP-only cookies and proper input sanitization
+- **Communication Security**: Contact system uses simple mailto links - no complex email server setup required
 
 ## 🔧 Development
 
@@ -310,6 +318,12 @@ npm start    # Standard start
 - **Schema**: Database structure documented in `schema.sql`
 
 ## 🎯 Recent Updates
+
+### June 19, 2025 - Documentation Update & Contact System
+- ✅ **Documentation Updated**: Comprehensive documentation update to reflect current simple contact system
+- ✅ **Contact System Documented**: Simple mailto contact system properly documented as completed feature
+- ✅ **Contact Integration**: Direct email communication with administrators via info@onlinedemocracy.org
+- ✅ **No Complex Setup**: Eliminated references to complex email server configurations
 
 ### June 18, 2025 - Action Initiative System Complete
 - ✅ **Action Initiative System**: Implemented comprehensive two-stage approval process for community actions

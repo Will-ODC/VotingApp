@@ -27,7 +27,7 @@ This document outlines the refactored architecture following Domain-Driven Desig
 - **Use Cases**: CreatePollUseCase, SubmitVoteUseCase, RegisterUserUseCase
 - **DTOs**: Request/Response objects for use cases
 - **Application Services**: Coordinate between domain services
-- **Interfaces**: External service contracts (email, notifications)
+- **Interfaces**: External service contracts (notifications, file storage)
 
 ### 3. Infrastructure Layer (External Concerns)
 - **Purpose**: Implements interfaces defined by domain/application layers
@@ -36,7 +36,7 @@ This document outlines the refactored architecture following Domain-Driven Desig
 
 #### Key Components:
 - **Repositories**: PostgreSQL implementations of repository interfaces
-- **External Services**: Email service, file storage
+- **External Services**: File storage (email handled via simple mailto links)
 - **Database**: Connection management, migrations
 - **Security**: Password hashing, session management
 
@@ -164,7 +164,6 @@ VotingApp/
 │   │   │   ├── CreatePollResponse.js
 │   │   │   └── ...
 │   │   ├── interfaces/
-│   │   │   ├── IEmailService.js
 │   │   │   └── INotificationService.js
 │   │   └── validators/
 │   │       ├── PollValidator.js
@@ -182,7 +181,6 @@ VotingApp/
 │   │   │   ├── BcryptPasswordHasher.js
 │   │   │   └── SessionManager.js
 │   │   ├── services/
-│   │   │   ├── SendGridEmailService.js
 │   │   │   └── ConsoleNotificationService.js
 │   │   └── config/
 │   │       ├── database.config.js

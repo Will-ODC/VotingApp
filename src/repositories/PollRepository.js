@@ -47,18 +47,18 @@ class PollRepository {
       actionStatus || 'pending'
     ]);
 
-    // Insert options
+    // Insert options sequentially to ensure consistent ordering
     if (options && options.length > 0) {
-      const optionPromises = options.map((optionText, index) => {
+      poll.options = [];
+      for (const optionText of options) {
         const optionQuery = `
           INSERT INTO options (poll_id, option_text)
           VALUES ($1, $2)
           RETURNING id, option_text
         `;
-        return this.db.run(optionQuery, [poll.id, optionText]);
-      });
-      
-      poll.options = await Promise.all(optionPromises);
+        const option = await this.db.run(optionQuery, [poll.id, optionText]);
+        poll.options.push(option);
+      }
     }
 
     return poll;
@@ -98,8 +98,8 @@ class PollRepository {
       FROM options o
       LEFT JOIN votes v ON o.id = v.option_id
       WHERE o.poll_id = $1
-      GROUP BY o.id, o.option_text
-      ORDER BY o.id
+      GROUP BY o.id, o.option_text, o.created_at
+      ORDER BY o.created_at, o.id
     `;
     
     poll.options = await this.db.all(optionsQuery, [pollId]);
@@ -241,6 +241,7 @@ class PollRepository {
     const query = `
       SELECT p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, 
              p.vote_threshold, p.is_approved, p.category, p.poll_type,
+             p.is_action_initiative, p.action_status,
              u.username as creator_name, COUNT(DISTINCT v.id) as vote_count,
              CASE 
                 WHEN p.end_date > CURRENT_TIMESTAMP AND p.is_active = TRUE THEN 'active'
@@ -253,7 +254,7 @@ class PollRepository {
       LEFT JOIN votes v ON o.id = v.option_id
       ${whereClause}${searchCondition}
       GROUP BY p.id, p.title, p.description, p.created_at, p.end_date, p.is_active, 
-               p.vote_threshold, p.is_approved, p.category, p.poll_type, u.username
+               p.vote_threshold, p.is_approved, p.category, p.poll_type, p.is_action_initiative, p.action_status, u.username
       ${orderClause}
     `;
 

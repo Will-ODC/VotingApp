@@ -104,7 +104,7 @@ class SimplePoll extends BasePoll {
              LEFT JOIN votes v ON o.id = v.option_id
              WHERE o.poll_id = $1
              GROUP BY o.id, o.option_text, o.created_at
-             ORDER BY o.id`,
+             ORDER BY o.created_at, o.id`,
             [this.id]
         );
 
@@ -166,7 +166,7 @@ class SimplePoll extends BasePoll {
              LEFT JOIN votes v ON o.id = v.option_id
              WHERE o.poll_id = $1
              GROUP BY o.id, o.poll_id, o.option_text, o.created_at
-             ORDER BY o.id`,
+             ORDER BY o.created_at, o.id`,
             [this.id]
         );
 

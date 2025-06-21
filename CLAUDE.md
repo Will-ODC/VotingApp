@@ -3,13 +3,15 @@
 ## Project Overview
 An Online Democratic Community (ODC) platform that enables transparent, community-controlled decision-making and ethical data monetization for collective wellbeing. Built as a Node.js web application using Express.js, PostgreSQL, and EJS templating.
 
-## 🎯 Current Status (June 18, 2025)
+## 🎯 Current Status (June 19, 2025)
 **✅ PRODUCTION READY** - Live at [www.onlinedemocracy.org](https://www.onlinedemocracy.org)
 
-- **Phase 0**: ✅ **COMPLETED** - Production deployment successful with Action Initiative system
+- **Phase 0**: ✅ **COMPLETED** - Production deployment successful with Action Initiative system  
 - **Next Phase**: **Phase 1** - Foundation features and controlled community growth
 - **Current Focus**: Community engagement with Action Initiatives and user contribution tracking
-- **Technical Status**: Stable PostgreSQL deployment with two-stage approval system and action commitments
+- **Technical Status**: Stable PostgreSQL deployment with two-stage approval system
+- **Platform**: Railway.app with PostgreSQL database, SSL/HTTPS, secure session management
+- **All Systems**: ✅ Authentication, polls, voting, action initiatives, profiles, contact system operational
 
 ### ODC Vision
 - **Core Mission**: Create a democratic platform where users control how their data is used and monetized, with all proceeds funding community-chosen wellbeing initiatives
@@ -45,7 +47,7 @@ Focus on core infrastructure for community understanding and organization.
 
 - [x] **About Page** (1 day) - Simple explanation of ODC concepts, vision, and how the platform works
 - [x] **Poll Categories/Tags** (2 days) - Organize polls by type (budget allocation, community rules, partnerships, wellbeing initiatives)
-- [x] **PostgreSQL Migration** (3-4 days) - Complete migration from SQLite to PostgreSQL for production scalability
+- [x] **PostgreSQL Migration** (3-4 days) - ✅ Complete migration from SQLite to PostgreSQL for production scalability
 - [x] **Action Initiative System** (5-6 days) - Two-stage approval process with creator commitments, action plans, and automatic status transitions
 - [ ] **User Contribution & Initiative Tracking** (3-4 days) - Track polls created, votes cast, donations, and initiative completions with blog-style posts and community verification
 
@@ -139,7 +141,7 @@ Advanced features for community insights and rapid participation.
 - [x] **Session Management** - Secure session handling with configurable secrets
 - [x] **MVC Architecture** - Clean separation of concerns
 - [x] **Comprehensive Comments** - All code files fully documented with JSDoc-style comments
-- [x] **PostgreSQL Migration** - Complete migration from SQLite to PostgreSQL with proper schema, query conversion, and deployment configuration
+- [x] **PostgreSQL Migration** - Complete migration from SQLite to PostgreSQL with proper schema, query conversion, deployment configuration, and production compatibility fixes
 
 ### 🔐 Authentication System
 - [x] **User Registration** - Account creation with email, username, and password validation
@@ -151,9 +153,8 @@ Advanced features for community insights and rapid participation.
 - [x] **Email Validation** - Email format validation and duplicate email prevention
 
 ### 📧 Contact System
-- [x] **Simple Contact System** - Direct mailto links for user communication with platform administrators
+- [x] **Simple Contact System** - Direct mailto communication with platform administrators (info@onlinedemocracy.org)
 - [x] **Contact Integration** - Contact link integrated into main navigation for easy access
-- [x] **Email Communication** - Users can reach administrators at info@onlinedemocracy.org
 
 ### 📊 Poll Management
 - [x] **Poll Creation** - Users can create polls with multiple options
@@ -224,37 +225,15 @@ Advanced features for community insights and rapid participation.
 ## 🛠️ Technical Implementation Details
 
 ### Database Schema
-```sql
--- Core tables: users, polls, options, votes
--- Enhanced polls table with Action Initiative fields:
---   vote_threshold: Minimum votes needed for approval (nullable)
---   is_approved: Boolean flag indicating if threshold was met
---   approved_at: Timestamp when poll was approved
---   is_action_initiative: Boolean flag for action initiatives
---   stage2_threshold: Minimum votes needed for Stage 2 approval (nullable)
---   stage2_approved: Boolean flag for Stage 2 approval status
---   stage2_approved_at: Timestamp when Stage 2 was approved
---   action_plan: Text field containing creator's action plan
---   action_deadline: Date when action should be completed
---   action_status: Current status of action (pending, in_progress, completed, failed)
+**Core Tables**: `users`, `polls`, `options`, `votes`, `stage2_votes`
 
--- New stage2_votes table:
---   id: Primary key
---   poll_id: Foreign key to polls table
---   user_id: Foreign key to users table (must have voted in Stage 1)
---   option_id: Foreign key to options table
---   created_at: Timestamp of Stage 2 vote
-
--- Relationships: polls -> users (creator), votes -> users + options, stage2_votes -> users + options
--- Indexes: Optimized for common queries including Action Initiative filtering
--- Migration system: Automatic column addition for existing databases
-
--- User Contribution Tracking tables:
--- contributions: Tracks all user contributions (polls, votes, donations, initiatives)
--- user_stats: Denormalized stats for fast profile loading
--- initiative_posts: Blog-style posts documenting completed initiatives
--- post_verifications: Community verifications of initiative completions
-```
+**Key Features**:
+- **Action Initiative Support**: Two-stage approval process with action plans and deadlines
+- **Vote Thresholds**: Configurable minimum votes for poll approval
+- **Stage 2 Voting**: Separate voting for action plan approval
+- **User Contribution Tracking**: Planned tables for tracking user contributions and initiative completions
+- **Optimized Indexes**: Performance-optimized for common queries
+- **Migration System**: Automatic schema updates for existing installations
 
 ### Security Features
 - Password hashing with SHA-256
@@ -355,7 +334,7 @@ Advanced features for community insights and rapid participation.
 VotingApp/
 ├── server.js              # Main application entry point
 ├── models/
-│   └── database.js         # Database connection and helpers
+│   └── database.js         # PostgreSQL connection and helpers
 ├── routes/
 │   ├── auth.js            # Authentication routes
 │   ├── index.js           # Homepage routes
@@ -372,8 +351,7 @@ VotingApp/
 ├── public/
 │   ├── css/               # Stylesheets
 │   └── js/                # Client-side JavaScript
-├── schema.sql             # Database schema
-├── voting.db              # SQLite database file
+├── schema.sql             # PostgreSQL database schema
 └── CLAUDE.md             # This documentation file
 ```
 
@@ -442,11 +420,9 @@ node server.js             # Start development server
 - RESTful route naming conventions
 
 ## 🐛 Known Issues & Limitations
-- ~~Single database file~~ ✅ **RESOLVED** - Now using PostgreSQL for production scalability
 - Basic password hashing (consider bcrypt for production - currently using SHA-256)
 - No email verification system (planned for Phase 1)
 - Limited file upload capabilities (planned for future phases)
-- ~~Basic error logging~~ ✅ **IMPROVED** - Production error handling with proper logging
 
 ## 📞 Support & Maintenance
 - All routes have comprehensive error handling
@@ -454,89 +430,17 @@ node server.js             # Start development server
 - Session management follows security best practices
 - Code is fully commented for future maintainers
 
-## 🚧 Current Development Status (June 2025)
+## 📋 Next Development Priorities
 
-### ✅ Production Launch Completed (June 13, 2025)
-- [x] **Live Production Deployment** - Successfully deployed to www.onlinedemocracy.org
-  - ✅ Railway deployment with PostgreSQL database fully operational
-  - ✅ Session persistence issues resolved with proxy trust configuration
-  - ✅ Authentication and login working correctly in production
-  - ✅ Clean architecture implemented with service layer pattern
-  - ✅ PostgreSQL GROUP BY compatibility issues fixed
-  - ✅ Production environment variables configured properly
-  - ✅ Debug logging cleaned up for production
-
-### ✅ UI Improvements Completed (June 18, 2025)
-- [x] **UI Fixes** - Enhanced user interface for better usability
-  - ✅ Fixed action badge header overlap issue with proper z-index management
-  - ✅ Implemented scrollable polls container for better homepage usability
-
-### ✅ Contact System Implemented
-- [x] **Simple Contact System** - Direct mailto communication with administrators
-  - ✅ Contact link integrated into main navigation
-  - ✅ Email address: info@onlinedemocracy.org
-  - ✅ No complex email server setup required
-  - ✅ Users can communicate directly with platform administrators
-
-### ✅ Completed Earlier (June 11, 2025)
-- [x] **Complete PostgreSQL Migration** - Full migration from hybrid SQLite/PostgreSQL to PostgreSQL-only
-  - Fixed host binding to always use 0.0.0.0 for Railway compatibility
-  - Converted all datetime() queries to PostgreSQL CURRENT_TIMESTAMP syntax
-  - Updated all SQL placeholders from ? to PostgreSQL numbered format ($1, $2, etc.)
-  - Implemented async database initialization to prevent blocking server startup
-  - Fixed all Promise wrapper patterns causing application hangs
-  - Resolved PostgreSQL GROUP BY clause issues for complex queries
-  - Fixed boolean comparisons (changed 1/0 to TRUE/FALSE)
-  - Updated column references from closes_at to end_date
-  - Added proper RETURNING clauses for INSERT operations
-- [x] **Local Development Working** - Application fully functional with Docker PostgreSQL
-- [x] **User Registration Enhanced** - Added email field with validation and duplicate checking
-- [x] **Database Schema Updated** - PostgreSQL-optimized schema with proper constraints and indexes
-
-### 🔄 Current Status
-- **Local Development:** ✅ Fully working with Docker PostgreSQL
-- **Database:** ✅ PostgreSQL with complete schema including Action Initiative tables
-- **Authentication:** ✅ Login, registration, password changes all working
-- **Poll System:** ✅ Creation, voting, viewing, approval thresholds all working
-- **Action Initiative System:** ✅ Two-stage approval, action plans, homepage featuring all working
-- **Profile System:** ✅ User profiles with voting history and created polls working
-- **Contact System:** ✅ Simple mailto contact system integrated into navigation
-
-### 📋 Immediate Next Steps (Phase 0)
-1. **Complete Production Deployment** (1-2 days)
-   - Deploy PostgreSQL-migrated application to Railway
-   - Verify all features work in production environment
-   - Test domain connectivity (www.onlinedemocracy.org)
-
-2. **Implement Email Invitation System** (2-3 days)
-   - Replace open registration with invite-only access
-   - Create email waitlist submission for interested users (currently handled via mailto contact)
-   - Admin dashboard for managing invitation requests
-   - Generate and send invitation codes/links
-
-### 🎯 Production Deployment Details
-The application is successfully deployed and operational:
-- **Live URL:** https://www.onlinedemocracy.org
-- **Platform:** Railway.app with PostgreSQL database
-- **Status:** ✅ Fully operational with secure authentication
-- **Performance:** Stable with proper session management and error handling
-
-### 🗄️ Database Configuration
-- **Production:** PostgreSQL on Railway with complete schema, indexes, and constraints  
-- **Development:** PostgreSQL via Docker (postgresql://postgres:postgres@localhost:5432/votingapp)
-- **Connection:** Secure connection pooling with auto-reconnection
-- **Backup:** Automatic backups via Railway PostgreSQL service
-
-### 🌐 Production Environment
-- **Domain:** www.onlinedemocracy.org with SSL/HTTPS
-- **Health Monitoring:** /health endpoint with 30-second timeout
-- **Session Storage:** PostgreSQL-backed sessions with secure cookies
-- **Error Handling:** Production-ready error logging and graceful failure handling
-- **Security:** Proxy trust configuration for Railway load balancer
+### Phase 1: Foundation Features
+**Email Invitation System** (2-3 days) - Replace open registration with invite-only access for controlled community growth
+- Create email waitlist submission for interested users
+- Admin dashboard for managing invitation requests  
+- Generate and send invitation codes/links
 
 ---
 
-*Last Updated: June 19, 2025*
-*Project Status: Production Deployed & Operational with Action Initiative System and Simple Contact System*
-*Live at: www.onlinedemocracy.org*
-*Documentation maintained by Claude Code Assistant*
+*Last Updated: June 19, 2025*  
+*Project Status: Production Deployed & Operational*  
+*Live at: www.onlinedemocracy.org*  
+*Documentation cleaned and consolidated June 19, 2025*

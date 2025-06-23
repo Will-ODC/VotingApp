@@ -39,10 +39,10 @@
                                                 <div class="result-item <%= primaryActionInitiative.userVote.optionId === option.id ? 'user-choice' : '' %>">
                                                     <div class="result-header">
                                                         <span class="option-text"><%= option.option_text %></span>
-                                                        <span class="vote-count"><%= option.vote_count %> votes (<%= option.percentage %>%)</span>
+                                                        <span class="vote-count"><%= option.vote_count %> votes (<%= Math.round(option.percentage) %>%)</span>
                                                     </div>
                                                     <div class="progress-bar">
-                                                        <div class="progress-fill" style="width: <%= option.percentage %>%"></div>
+                                                        <div class="progress-fill" style="width: <%= Math.round(option.percentage) %>%"></div>
                                                     </div>
                                                 </div>
                                             <% }) %>
@@ -980,10 +980,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="result-item ${result.optionId == votedOptionId ? 'user-choice' : ''}">
                             <div class="result-header">
                                 <span class="option-text">${result.optionText}</span>
-                                <span class="vote-count">${result.votes} votes (${result.percentage}%)</span>
+                                <span class="vote-count">${result.votes} votes (${Math.round(result.percentage)}%)</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${result.percentage}%"></div>
+                                <div class="progress-fill" style="width: ${Math.round(result.percentage)}%"></div>
                             </div>
                         </div>
                     `).join('')}

@@ -438,9 +438,93 @@ node server.js             # Start development server
 - Admin dashboard for managing invitation requests  
 - Generate and send invitation codes/links
 
+## 🚀 Action Initiative Enhancement Implementation (In Progress)
+
+### Overview
+Enhancing the action initiative feature to be the focal point of the website with inline voting, dynamic results display, and carousel navigation.
+
+### ✅ Phase 1: Backend API Extensions (COMPLETED - June 23, 2025)
+**Implemented:**
+- Created `/api/action-initiatives/active` endpoint for fetching multiple initiatives with user vote status
+- Added JSON response support to `/polls/:id/vote` and `/polls/:id/stage2-vote` endpoints
+- Integrated user vote status checking in all API responses
+- Added `getStage2VoteStats()` method to PollService
+- Updated database schema to include action initiative columns and stage2_votes table
+
+**Files Modified:**
+- `/routes/api.js` - New API routes file
+- `/routes/polls.js` - Added JSON content negotiation
+- `/src/services/PollService.js` - Added Stage 2 stats method
+- `/models/database.js` - Added action initiative columns to schema
+- `/server.js` - Registered API routes
+
+### ✅ Phase 2: Inline Voting Interface (COMPLETED - June 23, 2025)
+**Implemented:**
+1. ✅ Created inline voting section in primary action card with proper data attributes
+2. ✅ Implemented AJAX voting with fetch API - no page refresh needed
+3. ✅ Shows results immediately after voting with user's choice highlighted
+4. ✅ Added login/register prompts for non-authenticated users
+5. ✅ Added option search functionality for polls with >5 choices
+6. ✅ Enhanced HomeService to fetch poll options and user vote status
+7. ✅ Updated index route to pass user ID for vote checking
+8. ✅ Added comprehensive CSS styling for voting interface
+9. ✅ Implemented responsive design for mobile devices
+10. ✅ Added loading states and error handling
+
+**Files Modified:**
+- `/views/index.ejs` - Added inline voting section, CSS, and JavaScript
+- `/src/services/HomeService.js` - Enhanced `getPrimaryActionInitiative()` to include options and user vote
+- `/routes/index.js` - Updated to pass user ID to service method
+- `/routes/polls.js` - Enhanced JSON response format for voting endpoint
+
+### ✅ Phase 3: Carousel Structure Implementation (COMPLETED - June 23, 2025)
+**Implemented:**
+1. ✅ Created carousel container with navigation arrows (← and →)
+2. ✅ Added carousel track for holding multiple slides
+3. ✅ Implemented carousel indicators for visual feedback
+4. ✅ Added data attributes for tracking current position
+5. ✅ Created responsive CSS for carousel layout and transitions
+6. ✅ Added basic JavaScript for carousel navigation functionality
+7. ✅ Prepared structure for dynamic slide loading
+
+**Files Modified:**
+- `/views/index.ejs` - Added carousel HTML structure, CSS styles, and JavaScript navigation
+
+### 📋 Phase 4: Dynamic Carousel Loading (Next - 2 days)
+**Tasks:**
+1. Connect to `/api/action-initiatives/active` endpoint
+2. Dynamically load multiple action initiatives into carousel
+3. Add "Create Action Initiative" as final carousel item
+4. Implement prefetching for smooth transitions
+5. Maintain voting state across carousel navigation
+
+### 📋 Phase 5: Option Search Feature (Optional - 1 day)
+**Tasks:**
+1. Enhance search functionality within carousel context
+2. Ensure search works across all carousel slides
+3. Add keyboard navigation support
+4. Handle edge cases for polls with many options
+
+### 📋 Phase 5: Integration & Testing (2 days)
+**Tasks:**
+1. Connect all components with proper error handling
+2. Add loading states and graceful degradation
+3. Ensure accessibility with keyboard navigation
+4. Test across browsers and screen sizes
+5. Optimize performance
+
+### Key Technical Decisions:
+- Use vanilla JavaScript (no React migration needed)
+- Progressive enhancement approach
+- Reuse existing service layer functions
+- Focus on UX simplicity over technical complexity
+
 ---
 
-*Last Updated: June 19, 2025*  
+*Last Updated: June 23, 2025*  
 *Project Status: Production Deployed & Operational*  
 *Live at: www.onlinedemocracy.org*  
 *Documentation cleaned and consolidated June 19, 2025*
+*Action Initiative Enhancement Phase 1 (Backend API) completed June 23, 2025*
+*Action Initiative Enhancement Phase 2 (Inline Voting) completed June 23, 2025*
+*Action Initiative Enhancement Phase 3 (Carousel Structure) completed June 23, 2025*

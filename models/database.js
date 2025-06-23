@@ -134,7 +134,12 @@ const initializeDatabase = async () => {
                 is_approved BOOLEAN DEFAULT FALSE,
                 approved_at TIMESTAMP DEFAULT NULL,
                 category TEXT DEFAULT 'general',
-                poll_type TEXT DEFAULT 'simple'
+                poll_type TEXT DEFAULT 'simple',
+                is_action_initiative BOOLEAN DEFAULT FALSE,
+                action_plan TEXT,
+                action_deadline TIMESTAMP,
+                action_status TEXT DEFAULT 'pending',
+                stage2_deadline TIMESTAMP
             )`,
             
             // Options table
@@ -154,6 +159,16 @@ const initializeDatabase = async () => {
                 vote_data JSONB,
                 voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(user_id, poll_id)
+            )`,
+            
+            // Stage 2 votes table for action plan approval
+            `CREATE TABLE IF NOT EXISTS stage2_votes (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id),
+                poll_id INTEGER NOT NULL REFERENCES polls(id),
+                approval VARCHAR(10) NOT NULL CHECK (approval IN ('approve', 'reject')),
+                voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, poll_id)
             )`
         ];
         
@@ -168,7 +183,10 @@ const initializeDatabase = async () => {
             'CREATE INDEX IF NOT EXISTS idx_polls_is_active ON polls(is_active)',
             'CREATE INDEX IF NOT EXISTS idx_polls_end_date ON polls(end_date)',
             'CREATE INDEX IF NOT EXISTS idx_votes_user_id ON votes(user_id)',
-            'CREATE INDEX IF NOT EXISTS idx_votes_poll_id ON votes(poll_id)'
+            'CREATE INDEX IF NOT EXISTS idx_votes_poll_id ON votes(poll_id)',
+            'CREATE INDEX IF NOT EXISTS idx_polls_is_action_initiative ON polls(is_action_initiative)',
+            'CREATE INDEX IF NOT EXISTS idx_polls_action_status ON polls(action_status)',
+            'CREATE INDEX IF NOT EXISTS idx_stage2_votes_poll_id ON stage2_votes(poll_id)'
         ];
         
         for (const indexSQL of indexes) {

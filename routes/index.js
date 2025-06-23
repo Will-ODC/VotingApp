@@ -46,10 +46,11 @@ router.get('/', async (req, res) => {
         });
 
         // Get additional homepage data
+        const userId = req.session.user?.id || null;
         const [stats, categories, primaryActionInitiative] = await Promise.all([
             homeService.getHomepageStats(),
             homeService.getCategories(),
-            homeService.getPrimaryActionInitiative()
+            homeService.getPrimaryActionInitiative(userId)
         ]);
 
         res.render('index', {

@@ -652,6 +652,38 @@ class PollService {
   }
 
   /**
+   * Gets Stage 2 voting statistics for a poll
+   * @param {number} pollId - The poll ID
+   * @returns {Object} Stage 2 vote counts and percentages
+   */
+  async getStage2VoteStats(pollId) {
+    const stats = await this.pollRepository.db.get(`
+      SELECT 
+        COUNT(CASE WHEN approval = 'approve' THEN 1 END) as approve_count,
+        COUNT(CASE WHEN approval = 'reject' THEN 1 END) as reject_count,
+        COUNT(*) as total_votes
+      FROM stage2_votes
+      WHERE poll_id = ?
+    `, [pollId]);
+
+    const approvePercentage = stats.total_votes > 0 
+      ? ((stats.approve_count / stats.total_votes) * 100).toFixed(1)
+      : 0;
+    
+    const rejectPercentage = stats.total_votes > 0
+      ? ((stats.reject_count / stats.total_votes) * 100).toFixed(1)
+      : 0;
+
+    return {
+      approveCount: stats.approve_count || 0,
+      rejectCount: stats.reject_count || 0,
+      totalVotes: stats.total_votes || 0,
+      approvePercentage,
+      rejectPercentage
+    };
+  }
+
+  /**
    * Invalidates all poll-related cache entries
    * Used when major changes occur that affect multiple polls
    */

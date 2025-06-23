@@ -28,6 +28,7 @@ const indexRoutes = require('./routes/index');
 const pollRoutes = require('./routes/polls');
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
+const apiRoutes = require('./routes/api');
 
 // Initialize Express application
 const app = express();
@@ -94,6 +95,7 @@ app.use('/', indexRoutes);  // Home page and general routes
 app.use('/polls', pollRoutes);  // Poll creation, viewing, and voting
 app.use('/auth', authRoutes);  // Login, registration, and logout
 app.use('/profile', profileRoutes);  // User profile management
+app.use('/api', apiRoutes);  // API endpoints for AJAX/dynamic content
 
 // Import error handlers
 const { errorHandler, notFoundHandler } = require('./src/middleware/errorHandler');

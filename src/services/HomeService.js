@@ -109,9 +109,10 @@ class HomeService {
   /**
    * Gets the primary action initiative for homepage display
    * Returns the active action initiative with the most votes
+   * @param {number|null} userId - Current user ID for vote checking
    * @returns {Object|null} Primary action initiative or null if none exist
    */
-  async getPrimaryActionInitiative() {
+  async getPrimaryActionInitiative(userId = null) {
     try {
       const query = `
         SELECT 
@@ -137,7 +138,54 @@ class HomeService {
       `;
       
       const actionInitiative = await this.pollRepository.db.get(query);
-      return actionInitiative || null;
+      
+      if (!actionInitiative) {
+        return null;
+      }
+      
+      // Get poll options
+      const options = await this.pollRepository.db.all(`
+        SELECT 
+          o.id,
+          o.poll_id,
+          o.option_text,
+          o.created_at,
+          COUNT(v.id) as vote_count
+        FROM options o
+        LEFT JOIN votes v ON o.id = v.option_id
+        WHERE o.poll_id = $1
+        GROUP BY o.id, o.poll_id, o.option_text, o.created_at
+        ORDER BY o.id
+      `, [actionInitiative.id]);
+      
+      // Calculate percentages
+      const totalVotes = actionInitiative.vote_count;
+      const optionsWithPercentages = options.map(option => ({
+        ...option,
+        percentage: totalVotes > 0 ? ((option.vote_count / totalVotes) * 100).toFixed(1) : 0
+      }));
+      
+      // Get user's vote if logged in
+      let userVote = null;
+      if (userId) {
+        userVote = await this.pollRepository.db.get(`
+          SELECT v.*, o.option_text 
+          FROM votes v
+          JOIN options o ON v.option_id = o.id
+          WHERE v.user_id = $1 AND v.poll_id = $2
+        `, [userId, actionInitiative.id]);
+      }
+      
+      return {
+        ...actionInitiative,
+        options: optionsWithPercentages,
+        userVote: userVote ? {
+          optionId: userVote.option_id,
+          optionText: userVote.option_text,
+          votedAt: userVote.voted_at
+        } : null,
+        hasVoted: !!userVote
+      };
     } catch (error) {
       console.error('Error fetching primary action initiative:', error);
       return null;

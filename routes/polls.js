@@ -155,20 +155,55 @@ router.get('/:id', async (req, res) => {
  * - Allows vote changes until poll expires
  * - Records user's vote choice
  * - Requires authentication
+ * - Supports JSON responses for AJAX requests
  */
 router.post('/:id/vote', requireAuth, async (req, res) => {
     const pollId = req.params.id;
-    const { optionId } = req.body;
+    const { option_id, optionId } = req.body; // Support both option_id and optionId
+    const selectedOptionId = option_id || optionId;
     const userId = req.session.user.id;
 
     try {
         // Delegate to service layer
-        await pollService.submitVote(userId, pollId, optionId);
+        await pollService.submitVote(userId, pollId, selectedOptionId);
 
-        // Redirect back to poll to see updated results
+        // Check if client wants JSON response (for AJAX requests)
+        if (req.accepts('json') && !req.accepts('html')) {
+            // Get updated poll data for JSON response
+            const displayData = await pollService.getPollForDisplay(pollId, userId);
+            
+            return res.json({
+                success: true,
+                totalVotes: displayData.results.totalVotes,
+                voteThreshold: displayData.poll.vote_threshold,
+                results: displayData.options.map(opt => {
+                    const result = displayData.results.options.find(r => r.id === opt.id);
+                    return {
+                        optionId: opt.id,
+                        optionText: opt.option_text,
+                        votes: opt.vote_count || 0,
+                        percentage: result?.percentage || 0
+                    };
+                }),
+                userVote: displayData.userVote,
+                hasVoted: true
+            });
+        }
+
+        // Default behavior: redirect for traditional form submission
         res.redirect(`/polls/${pollId}`);
     } catch (error) {
         console.error('Error voting:', error);
+        
+        // Return JSON error for AJAX requests
+        if (req.accepts('json') && !req.accepts('html')) {
+            return res.status(400).json({
+                success: false,
+                error: error.message
+            });
+        }
+        
+        // Default behavior: flash message and redirect
         req.flash('error', error.message);
         res.redirect(`/polls/${pollId}`);
     }
@@ -179,6 +214,7 @@ router.post('/:id/vote', requireAuth, async (req, res) => {
  * Submit Stage 2 vote (approve/reject action plan)
  * Only Stage 1 voters can participate
  * Requires authentication
+ * Supports JSON responses for AJAX requests
  */
 router.post('/:id/stage2-vote', requireAuth, async (req, res) => {
     const pollId = req.params.id;
@@ -194,10 +230,42 @@ router.post('/:id/stage2-vote', requireAuth, async (req, res) => {
         // Delegate to service layer
         await pollService.submitStage2Vote(userId, pollId, approval);
 
-        // Redirect back to poll to see updated results
+        // Check if client wants JSON response (for AJAX requests)
+        if (req.accepts('json') && !req.accepts('html')) {
+            // Get updated poll data for JSON response
+            const displayData = await pollService.getPollForDisplay(pollId, userId);
+            
+            // Get stage 2 vote counts
+            const stage2Stats = await pollService.getStage2VoteStats(pollId);
+            
+            return res.json({
+                success: true,
+                poll: {
+                    id: displayData.poll.id,
+                    actionStatus: displayData.poll.action_status,
+                    stage2Stats: stage2Stats
+                },
+                userStage2Vote: {
+                    approval: approval,
+                    votedAt: new Date().toISOString()
+                }
+            });
+        }
+
+        // Default behavior: redirect for traditional form submission
         res.redirect(`/polls/${pollId}`);
     } catch (error) {
         console.error('Error voting in Stage 2:', error);
+        
+        // Return JSON error for AJAX requests
+        if (req.accepts('json') && !req.accepts('html')) {
+            return res.status(400).json({
+                success: false,
+                error: error.message
+            });
+        }
+        
+        // Default behavior: flash message and redirect
         req.flash('error', error.message);
         res.redirect(`/polls/${pollId}`);
     }

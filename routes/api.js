@@ -26,7 +26,9 @@ const homeService = new HomeService(pollRepository, null); // SearchService not 
  */
 router.get('/action-initiatives/active', async (req, res) => {
     try {
+        console.log('API: /action-initiatives/active called');
         const userId = req.session.user?.id || null;
+        console.log('User ID:', userId);
         
         // First, let's try a simpler query to see if it works
         let initiatives = [];
@@ -55,9 +57,11 @@ router.get('/action-initiatives/active', async (req, res) => {
                 LIMIT 10
             `;
             initiatives = await db.all(query);
+            console.log('Found initiatives:', initiatives.length);
         } catch (err) {
             // If action initiative columns don't exist, try fallback query
             console.error('Action initiative query failed:', err.message);
+            console.error('Full error:', err);
             // Try simpler query for active polls
             const fallbackQuery = `
                 SELECT 
@@ -91,14 +95,12 @@ router.get('/action-initiatives/active', async (req, res) => {
                         o.id,
                         o.poll_id,
                         o.option_text,
-                        o.created_by,
-                        o.is_approved,
                         o.created_at,
                         COUNT(v.id) as vote_count
                     FROM options o
                     LEFT JOIN votes v ON o.id = v.option_id
-                    WHERE o.poll_id = ?
-                    GROUP BY o.id, o.poll_id, o.option_text, o.created_by, o.is_approved, o.created_at
+                    WHERE o.poll_id = $1
+                    GROUP BY o.id, o.poll_id, o.option_text, o.created_at
                     ORDER BY o.id
                 `, [initiative.id]);
                 
@@ -116,7 +118,7 @@ router.get('/action-initiatives/active', async (req, res) => {
                         SELECT v.*, o.option_text 
                         FROM votes v
                         JOIN options o ON v.option_id = o.id
-                        WHERE v.user_id = ? AND v.poll_id = ?
+                        WHERE v.user_id = $1 AND v.poll_id = $2
                     `, [userId, initiative.id]);
                 }
                 
@@ -126,7 +128,7 @@ router.get('/action-initiatives/active', async (req, res) => {
                     try {
                         stage2Vote = await db.get(`
                             SELECT * FROM stage2_votes
-                            WHERE user_id = ? AND poll_id = ?
+                            WHERE user_id = $1 AND poll_id = $2
                         `, [userId, initiative.id]);
                     } catch (e) {
                         // Table might not exist yet, ignore error
@@ -175,6 +177,7 @@ router.get('/action-initiatives/active', async (req, res) => {
         
     } catch (error) {
         console.error('Error fetching action initiatives:', error);
+        console.error('Stack trace:', error.stack);
         res.status(500).json({
             success: false,
             error: 'Failed to fetch action initiatives',

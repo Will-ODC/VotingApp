@@ -10,6 +10,7 @@ const router = express.Router();
 const { db } = require('../models/database');
 const HomeService = require('../src/services/HomeService');
 const PollService = require('../src/services/PollService');
+const SearchService = require('../src/services/SearchService');
 const PollRepository = require('../src/repositories/PollRepository');
 const VoteRepository = require('../src/repositories/VoteRepository');
 
@@ -17,7 +18,8 @@ const VoteRepository = require('../src/repositories/VoteRepository');
 const pollRepository = new PollRepository(db);
 const voteRepository = new VoteRepository(db);
 const pollService = new PollService(pollRepository, voteRepository);
-const homeService = new HomeService(pollRepository, null); // SearchService not needed for these endpoints
+const searchService = new SearchService(pollRepository);
+const homeService = new HomeService(pollRepository, searchService);
 
 /**
  * GET /api/action-initiatives/active
@@ -238,6 +240,79 @@ router.get('/polls/:id', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Failed to fetch poll',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+
+/**
+ * GET /api/polls
+ * Returns paginated polls with filters and search
+ * 
+ * Query Parameters:
+ * - limit: Number of polls to return (default: 20, max: 100)
+ * - offset: Number of polls to skip (default: 0)
+ * - sort: Sort method (popular|recent|active|ending_soon)
+ * - category: Category filter (optional)
+ * - search: Search query (optional)
+ * - includeActionInitiatives: Whether to include action initiatives (default: true)
+ * 
+ * Response Format:
+ * {
+ *   success: true,
+ *   data: {
+ *     polls: [...],
+ *     hasMore: boolean,
+ *     totalCount: number,
+ *     nextOffset: number | null,
+ *     currentOffset: number,
+ *     limit: number
+ *   }
+ * }
+ */
+router.get('/polls', async (req, res) => {
+    try {
+        // Extract and parse query parameters
+        const {
+            limit,
+            offset,
+            sort,
+            category,
+            search,
+            includeActionInitiatives
+        } = req.query;
+
+        // Parse includeActionInitiatives as boolean
+        const includeInitiatives = includeActionInitiatives === 'false' ? false : true;
+
+        // Call SearchService with pagination options
+        const paginatedData = await searchService.getPaginatedPolls({
+            limit: parseInt(limit) || 20,
+            offset: parseInt(offset) || 0,
+            sort: sort || 'popular',
+            category: category || '',
+            search: search || '',
+            includeActionInitiatives: includeInitiatives
+        });
+
+        // Return successful response
+        res.json({
+            success: true,
+            data: {
+                polls: paginatedData.polls,
+                hasMore: paginatedData.hasMore,
+                totalCount: paginatedData.totalCount,
+                nextOffset: paginatedData.nextOffset,
+                currentOffset: paginatedData.currentOffset,
+                limit: paginatedData.limit
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in GET /api/polls:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch polls',
             details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }

@@ -22,51 +22,14 @@ const homeService = new HomeService(pollRepository, searchService);
 
 /**
  * GET /
- * Home page - displays polls sorted by popularity and activity
- * Supports sorting: ?sort=popular|recent|active
- * Supports search: ?search=query
- * Default shows most popular polls (by vote count)
- * Only shows polls that are:
- * - Active (not deleted)
- * - Not expired (end_date is in the future)
- * Includes vote count for each poll
- * 
- * Refactored to use HomeService for business logic
+ * Home page - redirects to /polls
+ * This is a permanent redirect (301) to the polls listing page
+ * Preserves any session messages that might be set
  */
-router.get('/', async (req, res) => {
-    try {
-        // Validate and sanitize parameters
-        const params = homeService.validateSearchParams(req.query);
-        
-        // Get polls using service layer
-        const polls = await homeService.getHomepagePolls({
-            sort: params.sort,
-            search: params.search,
-            category: params.category
-        });
-
-        // Get additional homepage data
-        const userId = req.session.user?.id || null;
-        const [stats, categories, primaryActionInitiative] = await Promise.all([
-            homeService.getHomepageStats(),
-            homeService.getCategories(),
-            homeService.getPrimaryActionInitiative(userId)
-        ]);
-
-        res.render('index', {
-            polls,
-            user: req.session.user || null,
-            currentSort: params.sort,
-            searchQuery: params.search,
-            currentCategory: params.category,
-            stats,
-            categories,
-            primaryActionInitiative
-        });
-    } catch (error) {
-        console.error('Error fetching homepage data:', error);
-        res.status(500).render('error', { message: 'Failed to load homepage' });
-    }
+router.get('/', (req, res) => {
+    // Perform a permanent redirect to /polls
+    // This will preserve session messages and any query parameters
+    res.redirect(301, '/polls');
 });
 
 
@@ -88,6 +51,89 @@ router.get('/api/search/suggestions', async (req, res) => {
     } catch (error) {
         console.error('Error fetching search suggestions:', error);
         res.status(500).json({ error: 'Failed to fetch suggestions' });
+    }
+});
+
+/**
+ * GET /polls
+ * Display all polls in a Reddit-style single column layout
+ * Supports infinite scroll and shows all poll types
+ * Includes placeholders for images/URLs
+ */
+router.get('/polls', async (req, res) => {
+    try {
+        // Get initial set of polls (first page)
+        const limit = 20;
+        const offset = 0;
+        
+        // Fetch polls with vote counts and creator info
+        const pollsQuery = `
+            SELECT 
+                p.*,
+                u.username as creator_name,
+                COUNT(DISTINCT v.id) as vote_count,
+                CASE 
+                    WHEN p.is_active = false THEN 'deleted'
+                    WHEN p.end_date < NOW() THEN 'expired'
+                    ELSE 'active'
+                END as status
+            FROM polls p
+            JOIN users u ON p.created_by = u.id
+            LEFT JOIN votes v ON p.id = v.poll_id
+            WHERE p.is_active = true
+            GROUP BY p.id, u.username
+            ORDER BY p.created_at DESC
+            LIMIT $1 OFFSET $2
+        `;
+        
+        const polls = await db.all(pollsQuery, [limit, offset]);
+        
+        // Get total count for pagination
+        const countQuery = `
+            SELECT COUNT(*) as total 
+            FROM polls 
+            WHERE is_active = true
+        `;
+        const { total } = await db.get(countQuery);
+        
+        res.render('all-polls', {
+            polls,
+            user: req.session.user || null,
+            hasMore: total > limit,
+            nextOffset: offset + limit
+        });
+    } catch (error) {
+        console.error('Error fetching all polls:', error);
+        res.status(500).render('error', { message: 'Failed to load polls' });
+    }
+});
+
+/**
+ * GET /action-initiatives
+ * Display all action initiatives in a carousel format
+ * Shows only active action initiatives with voting capability
+ */
+router.get('/action-initiatives', async (req, res) => {
+    try {
+        // Get the user ID for tracking voting status
+        const userId = req.session.user?.id || null;
+        
+        res.render('action-initiatives', { 
+            user: req.session.user || null,
+            formatDatePST: (date) => {
+                if (!date) return '';
+                const d = new Date(date);
+                return d.toLocaleDateString('en-US', {
+                    timeZone: 'America/Los_Angeles',
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric'
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Error loading action initiatives page:', error);
+        res.status(500).render('error', { message: 'Failed to load action initiatives' });
     }
 });
 

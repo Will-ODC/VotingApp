@@ -352,6 +352,112 @@ class SearchService {
     }
     return Math.min(parsedLimit, 100); // Max limit of 100
   }
+
+  /**
+   * Gets paginated polls with support for various filters and sorting
+   * @param {Object} options - Pagination and filter options
+   * @param {number} options.limit - Number of polls to return (default: 20, max: 100)
+   * @param {number} options.offset - Number of polls to skip (default: 0)
+   * @param {string} options.sort - Sort method (popular|recent|active|ending_soon)
+   * @param {string} options.category - Category filter (optional)
+   * @param {string} options.search - Search query (optional)
+   * @param {boolean} options.includeActionInitiatives - Whether to include action initiatives
+   * @returns {Object} Paginated response with polls, hasMore, totalCount, and nextOffset
+   */
+  async getPaginatedPolls(options = {}) {
+    const {
+      limit = 20,
+      offset = 0,
+      sort = 'popular',
+      category = '',
+      search = '',
+      includeActionInitiatives = true
+    } = options;
+
+    // Validate parameters
+    const validatedLimit = this._validateLimitParam(limit);
+    const validatedOffset = Math.max(0, parseInt(offset) || 0);
+    const validatedSort = this._validateSortParam(sort, 'all');
+
+    // Build query conditions
+    let conditions = [];
+    let queryParams = [];
+    let paramIndex = 1;
+
+    // Always filter for active polls
+    conditions.push('p.is_active = TRUE');
+    conditions.push('(p.end_date IS NULL OR p.end_date > CURRENT_TIMESTAMP)');
+
+    // Add search condition if provided
+    if (search && search.trim().length > 0) {
+      conditions.push(`(p.title ILIKE $${paramIndex++} OR p.description ILIKE $${paramIndex++})`);
+      const searchPattern = `%${search.trim()}%`;
+      queryParams.push(searchPattern, searchPattern);
+    }
+
+    // Add category filter if provided
+    if (category && category.trim().length > 0) {
+      conditions.push(`p.category = $${paramIndex++}`);
+      queryParams.push(category.trim());
+    }
+
+    // Add action initiative filter if needed
+    if (!includeActionInitiatives) {
+      conditions.push('(p.is_action_initiative = FALSE OR p.is_action_initiative IS NULL)');
+    }
+
+    const whereClause = conditions.join(' AND ');
+
+    // Get order clause based on sort parameter
+    const orderClause = this._getOrderClause(validatedSort, 'all');
+
+    // First, get the total count
+    const countSql = `
+      SELECT COUNT(DISTINCT p.id) as total
+      FROM polls p
+      WHERE ${whereClause}
+    `;
+    
+    const countResult = await this.pollRepository.db.get(countSql, queryParams);
+    const totalCount = countResult.total || 0;
+
+    // Then get the paginated results
+    const pollsSql = `
+      SELECT p.*, 
+             u.username as creator_username,
+             COUNT(DISTINCT v.id) as vote_count,
+             MAX(v.voted_at) as last_vote_time
+      FROM polls p
+      LEFT JOIN users u ON p.created_by = u.id
+      LEFT JOIN votes v ON p.id = v.poll_id
+      WHERE ${whereClause}
+      GROUP BY p.id, p.title, p.description, p.created_by, p.created_at, p.end_date, 
+               p.is_active, p.is_deleted, p.vote_threshold, p.is_approved, p.approved_at, 
+               p.category, p.poll_type, p.is_action_initiative, p.action_plan, 
+               p.action_deadline, p.action_status, p.stage2_deadline, u.username
+      ${orderClause}
+      LIMIT $${paramIndex++} OFFSET $${paramIndex++}
+    `;
+
+    // Add limit and offset as the last parameters
+    queryParams.push(validatedLimit, validatedOffset);
+
+    const polls = await this.pollRepository.db.all(pollsSql, queryParams);
+    const enrichedPolls = this._enrichPollResults(polls, 'api');
+
+    // Calculate if there are more results
+    const hasMore = validatedOffset + polls.length < totalCount;
+    const nextOffset = hasMore ? validatedOffset + validatedLimit : null;
+
+    return {
+      polls: enrichedPolls,
+      hasMore,
+      totalCount,
+      nextOffset,
+      currentOffset: validatedOffset,
+      limit: validatedLimit
+    };
+  }
 }
 
 module.exports = SearchService;

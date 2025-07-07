@@ -5,26 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Democratic Community</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Profile icon styles */
+        .profile-icon {
+            vertical-align: middle;
+            margin-right: 0.5rem;
+            opacity: 0.8;
+        }
+        
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .dropdown-toggle:hover .profile-icon {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <a href="/" class="logo">Online Democratic Community</a>
+            
+            <!-- Mobile menu toggle -->
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
             <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="/about">About</a>
-                <a href="mailto:info@onlinedemocracy.org?subject=Contact%20from%20ODC%20Platform">Contact</a>
+                <a href="/polls">Browse</a>
+                <a href="/action-initiatives">Action Initiatives</a>
+                
                 <% if (user) { %>
                     <a href="/polls/create">Create Poll</a>
-                    <a href="/polls/all">All Polls</a>
-                    <a href="/profile">Profile</a>
-                    <% if (user.is_admin) { %>
-                        <span class="admin-badge">Admin</span>
-                    <% } %>
-                    <a href="/auth/logout">Logout</a>
+                    <!-- User dropdown menu -->
+                    <div class="dropdown">
+                        <button class="dropdown-toggle">
+                            <svg class="profile-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                            </svg>
+                            <%= user.username %>
+                            <% if (user.is_admin) { %>
+                                <span class="admin-badge">Admin</span>
+                            <% } %>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="/profile">Profile</a>
+                            <a href="/polls/all">Manage</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="/auth/logout">Logout</a>
+                        </div>
+                    </div>
                 <% } else { %>
-                    <a href="/auth/login">Login</a>
-                    <a href="/auth/register">Register</a>
+                    <a href="/auth/login" class="btn btn-primary nav-login">Login</a>
                 <% } %>
             </div>
         </div>
@@ -36,8 +74,53 @@
     </main>
     <footer>
         <div class="container">
-            <p>&copy; 2024 Online Democratic Community. All rights reserved.</p>
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="/about">About</a>
+                    <a href="mailto:info@onlinedemocracy.org?subject=Contact%20from%20ODC%20Platform">Contact</a>
+                    <% if (!user) { %>
+                        <a href="/auth/register">Register</a>
+                    <% } %>
+                </div>
+                <p>&copy; 2024 Online Democratic Community. All rights reserved.</p>
+            </div>
         </div>
     </footer>
+    
+    <script>
+        // Mobile menu toggle
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        const body = document.body;
+        
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', function() {
+                this.classList.toggle('active');
+                navLinks.classList.toggle('active');
+                body.classList.toggle('menu-open');
+            });
+            
+            // Close menu when clicking overlay
+            document.addEventListener('click', function(e) {
+                if (body.classList.contains('menu-open') && 
+                    !navLinks.contains(e.target) && 
+                    !mobileMenuToggle.contains(e.target)) {
+                    mobileMenuToggle.classList.remove('active');
+                    navLinks.classList.remove('active');
+                    body.classList.remove('menu-open');
+                }
+            });
+        }
+        
+        // Mobile dropdown toggle
+        const dropdown = document.querySelector('.dropdown');
+        if (dropdown && window.innerWidth <= 768) {
+            const dropdownToggle = dropdown.querySelector('.dropdown-toggle');
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                dropdown.classList.toggle('active');
+            });
+        }
+    </script>
 </body>
 </html>

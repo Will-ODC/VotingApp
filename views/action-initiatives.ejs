@@ -1,0 +1,2000 @@
+<!-- Action Initiatives Page -->
+<div class="action-initiatives-container">
+        <!-- Primary Action Initiative Section -->
+        <div class="primary-action-section">
+            <!-- Carousel Container -->
+            <div class="action-carousel" role="region" aria-label="Action Initiatives Carousel">
+                <!-- Navigation Arrows -->
+                <button class="carousel-arrow carousel-arrow-left" aria-label="Previous action initiative" tabindex="0">
+                    <span class="arrow-icon">←</span>
+                </button>
+                <button class="carousel-arrow carousel-arrow-right" aria-label="Next action initiative" tabindex="0">
+                    <span class="arrow-icon">→</span>
+                </button>
+                
+                <!-- Carousel Slides Wrapper -->
+                <div class="carousel-slides-wrapper">
+                    <div class="carousel-slides">
+                        <!-- Slides will be dynamically loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Carousel Indicators -->
+                <div class="carousel-indicators" role="tablist" aria-label="Action initiative slides">
+                    <!-- Indicators will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="action-initiatives-info">
+            <h2>What are Action Initiatives?</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon">🎯</div>
+                    <h3>Creator Commitment</h3>
+                    <p>Creators pledge to implement the winning option if the initiative reaches its approval threshold.</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">🗳️</div>
+                    <h3>Community Voting</h3>
+                    <p>All community members can vote on the options and help shape the direction of the initiative.</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">✅</div>
+                    <h3>Two-Stage Approval</h3>
+                    <p>Once vote threshold is met, action plans are reviewed and approved by the participating voters.</p>
+                </div>
+            </div>
+        </div>
+</div>
+
+<style>
+/* Page-specific styles */
+.action-initiatives-container {
+    min-height: calc(100vh - 60px); /* Assuming 60px header */
+    display: flex;
+    flex-direction: column;
+    margin-top: -1rem; /* Pull content up closer to nav */
+}
+
+.action-initiatives-info {
+    max-width: 1160px;
+    margin: 4rem auto 2rem;
+    padding: 0 20px;
+}
+
+.action-initiatives-info h2 {
+    text-align: center;
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.info-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.info-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.info-card h3 {
+    font-size: 1.25rem;
+    color: #333;
+    margin-bottom: 0.75rem;
+}
+
+.info-card p {
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Primary Action Initiative Styles */
+.primary-action-section {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0.5rem 20px 1rem;
+    position: relative;
+    z-index: 5;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 120px); /* Full viewport minus header/footer */
+}
+
+.primary-action-card {
+    background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+    border: 2px solid #28a745;
+    border-radius: 12px;
+    padding: 2.5rem;
+    padding-top: 3rem;
+    position: relative;
+    box-shadow: 0 8px 30px rgba(40, 167, 69, 0.15);
+    overflow: visible;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.primary-action-card > .action-badge {
+    position: absolute;
+    top: 0;
+    left: 16px;
+    background: #28a745;
+    color: white;
+    padding: 0.3rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+    z-index: 20;
+    transform: translateY(-50%);
+}
+
+.primary-action-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    gap: 0.75rem;
+}
+
+.primary-action-header .poll-badges {
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.primary-action-header h2 {
+    margin: 0;
+    flex: 1;
+    color: #155724;
+    font-size: 1.75rem;
+    line-height: 1.3;
+}
+
+.primary-action-header h2 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.primary-action-header h2 a:hover {
+    text-decoration: underline;
+}
+
+.primary-action-description {
+    font-size: 1.1rem;
+    color: #155724;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.action-commitment {
+    background-color: rgba(40, 167, 69, 0.1);
+    border-left: 3px solid #28a745;
+    padding: 1rem;
+    margin: 0.75rem 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.85rem;
+    color: #155724;
+}
+
+.primary-action-meta {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.75rem 0;
+    flex-wrap: wrap;
+}
+
+.primary-action-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #155724;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.primary-action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.btn-action-primary {
+    background: #28a745;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-action-primary:hover {
+    background: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(40, 167, 69, 0.25);
+}
+
+.btn-action-secondary {
+    background: white;
+    color: #28a745;
+    border: 1.5px solid #28a745;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-action-secondary:hover {
+    background: #28a745;
+    color: white;
+}
+
+.no-action-initiative {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px dashed #6c757d;
+    border-radius: 12px;
+    padding: 3rem;
+    text-align: center;
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+.no-action-content h2 {
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.no-action-content p {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Carousel Styles */
+.action-carousel {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+    padding: 0 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.carousel-slides-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding-top: 14px;
+}
+
+.carousel-slides {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    will-change: transform;
+}
+
+.carousel-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.95);
+}
+
+.carousel-slide.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.carousel-slide.adjacent {
+    opacity: 0;
+    transform: scale(0.98);
+}
+
+/* Carousel Navigation Arrows */
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 2px solid #28a745;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-arrow:hover {
+    background: #28a745;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.carousel-arrow:hover .arrow-icon {
+    color: white;
+}
+
+.carousel-arrow:active {
+    transform: translateY(-50%) scale(1.05);
+}
+
+.carousel-arrow-left {
+    left: -30px;
+}
+
+.carousel-arrow-right {
+    right: -30px;
+}
+
+.arrow-icon {
+    font-size: 24px;
+    font-weight: bold;
+    color: #28a745;
+    line-height: 1;
+}
+
+/* Carousel Indicators */
+.carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 0;
+}
+
+.carousel-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #28a745;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.carousel-indicator:hover {
+    background: rgba(40, 167, 69, 0.3);
+    transform: scale(1.2);
+}
+
+.carousel-indicator.active {
+    background: #28a745;
+}
+
+.carousel-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.carousel-arrow:disabled:hover {
+    background: white;
+    transform: translateY(-50%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Action Plan Modal */
+.action-plan-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.action-plan-modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border: none;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-plan-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 1rem;
+}
+
+.action-plan-modal-header h3 {
+    margin: 0;
+    color: #155724;
+}
+
+.close-action-plan {
+    color: #999;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-action-plan:hover {
+    color: #000;
+}
+
+.action-plan-content {
+    background-color: #f8fff8;
+    border: 1px solid #d4edda;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+    line-height: 1.6;
+}
+
+/* Inline Voting Styles */
+.inline-voting-section {
+    margin: 1rem 0;
+    padding: 1.5rem;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    border: 1px solid rgba(40, 167, 69, 0.2);
+    overflow-y: auto;
+}
+
+.voting-options h4,
+.voting-results h4,
+.login-prompt h4 {
+    margin: 0 0 0.75rem 0;
+    color: #155724;
+    font-size: 1rem;
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+}
+
+.vote-option-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: white;
+    border: 1.5px solid #e9ecef;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+}
+
+.vote-option-btn:hover {
+    border-color: #28a745;
+    background-color: #f8fff8;
+    transform: translateX(3px);
+}
+
+.vote-option-btn:active {
+    transform: translateX(2px);
+}
+
+.option-count {
+    font-size: 0.8rem;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.option-search {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.loading-message {
+    text-align: center;
+    color: #28a745;
+    font-weight: 500;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.error-message {
+    text-align: center;
+    color: #dc3545;
+    font-weight: 500;
+    padding: 0.75rem;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+}
+
+/* Results Display */
+.results-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+}
+
+.result-item {
+    background: white;
+    padding: 0.6rem 0.8rem;
+    border-radius: 5px;
+    border: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.result-item:hover {
+    border-color: #28a745;
+    background-color: #f8fff8;
+    transform: translateX(3px);
+}
+
+.result-item:active {
+    transform: translateX(2px);
+}
+
+.result-item.user-choice {
+    border: 1.5px solid #28a745;
+    background-color: #f8fff8;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+}
+
+.progress-bar {
+    height: 14px;
+    background-color: #e9ecef;
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #28a745;
+    transition: width 0.3s ease;
+}
+
+.result-item.user-choice .progress-fill {
+    background-color: #218838;
+}
+
+.vote-info {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-align: center;
+}
+
+/* Login Prompt */
+.login-prompt {
+    text-align: center;
+    padding: 0.5rem 0;
+}
+
+.login-prompt p {
+    margin: 0.75rem 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+/* Loading skeleton styles */
+.skeleton-loading {
+    animation: shimmer 2s ease-in-out infinite;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    position: relative;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-badge {
+    width: 120px;
+    height: 24px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.skeleton-title {
+    width: 70%;
+    height: 32px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.skeleton-description {
+    width: 100%;
+    height: 60px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.skeleton-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.skeleton-meta-item {
+    width: 120px;
+    height: 20px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: 4px;
+}
+
+/* Error state styles */
+.error-state {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.error-state h2 {
+    color: #dc3545;
+    margin-bottom: 1rem;
+}
+
+.error-state p {
+    color: #6c757d;
+    margin-bottom: 2rem;
+}
+
+/* Create Action Initiative Card Styles */
+.create-action-card {
+    background: linear-gradient(135deg, #fff8f0 0%, #ffe8d0 100%);
+    border: 2px dashed #ff6b35;
+    border-radius: 8px;
+    padding: 1.5rem;
+    padding-top: 2rem;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.1);
+    overflow: visible;
+    text-align: center;
+    min-height: auto;
+}
+
+.create-action-content {
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+}
+
+.create-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #ff6b35;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.create-action-content h2 {
+    color: #ff6b35;
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.create-description {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.benefits-list {
+    text-align: left;
+    margin: 2rem auto;
+    max-width: 600px;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+.benefit-icon {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.btn-large {
+    font-size: 1.1rem;
+    padding: 0.75rem 2rem;
+    margin: 1.5rem 0;
+}
+
+.create-note {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 1.5rem;
+    line-height: 1.5;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateX(-50%) translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-50%) translateY(100%);
+        opacity: 0;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .info-card {
+        padding: 1.5rem;
+    }
+    
+    .info-icon {
+        font-size: 2.5rem;
+    }
+    
+    .carousel-arrow {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .action-carousel {
+        padding: 0 20px;
+    }
+    
+    .carousel-arrow-left {
+        left: 10px;
+    }
+    
+    .carousel-arrow-right {
+        right: 10px;
+    }
+    
+    .arrow-icon {
+        font-size: 20px;
+    }
+    
+    .carousel-indicators {
+        margin-top: 15px;
+    }
+    
+    .carousel-indicator {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .primary-action-section {
+        margin: 0 auto 0.75rem auto;
+        padding: 0 15px;
+    }
+    
+    .primary-action-card {
+        padding: 1rem;
+        padding-top: 1.5rem;
+    }
+    
+    .primary-action-card > .action-badge {
+        top: 0;
+        left: 12px;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        transform: translateY(-50%);
+    }
+    
+    .primary-action-header h2 {
+        font-size: 1.4rem;
+    }
+    
+    .primary-action-description {
+        font-size: 1rem;
+    }
+    
+    .action-commitment {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .primary-action-meta {
+        flex-direction: row;
+        gap: 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .primary-action-meta span {
+        font-size: 0.8rem;
+    }
+    
+    .primary-action-buttons {
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+    
+    .btn-action-primary {
+        padding: 0.4rem 0.9rem;
+        font-size: 0.85rem;
+    }
+    
+    .btn-action-secondary {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    .action-plan-modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+    
+    .inline-voting-section {
+        padding: 1rem;
+        margin: 0.75rem 0;
+    }
+    
+    .voting-options h4,
+    .voting-results h4,
+    .login-prompt h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .vote-option-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .vote-option-btn:hover {
+        transform: none;
+    }
+    
+    .option-count {
+        font-size: 0.75rem;
+    }
+    
+    .result-item {
+        padding: 0.5rem 0.6rem;
+    }
+    
+    .result-header {
+        font-size: 0.8rem;
+    }
+    
+    .progress-bar {
+        height: 12px;
+    }
+    
+    .auth-buttons {
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+    
+    .auth-buttons .btn {
+        flex: 1;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+    
+    .skeleton-title {
+        width: 90%;
+    }
+    
+    .skeleton-meta {
+        flex-wrap: wrap;
+    }
+    
+    .error-state {
+        padding: 2rem 1rem;
+    }
+    
+    .create-action-card {
+        padding: 1rem;
+        padding-top: 1.5rem;
+    }
+    
+    .create-icon {
+        font-size: 3rem;
+    }
+    
+    .create-action-content h2 {
+        font-size: 1.4rem;
+        white-space: normal;
+    }
+    
+    .create-description {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .benefits-list {
+        margin: 1.5rem auto;
+    }
+    
+    .benefit-item {
+        font-size: 0.9rem;
+    }
+    
+    .btn-large {
+        font-size: 1rem;
+        padding: 0.6rem 1.5rem;
+    }
+    
+    .create-note {
+        font-size: 0.8rem;
+        margin-top: 1rem;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .carousel-slides,
+    .carousel-slide,
+    .carousel-arrow,
+    .carousel-indicator,
+    .vote-option-btn,
+    .result-item,
+    .progress-fill {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .carousel-arrow {
+        border-width: 3px;
+    }
+    
+    .carousel-indicator {
+        border-width: 3px;
+    }
+    
+    .carousel-indicator.active {
+        background: #000;
+        border-color: #000;
+    }
+}
+</style>
+
+<!-- Action Plan Modal Container -->
+<div id="actionPlanModalContainer"></div>
+
+<script>
+// Global action plan functions
+let actionPlans = {};
+
+function showActionPlan(pollId) {
+    const modal = document.getElementById(`actionPlanModal-${pollId}`);
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+function hideActionPlan(pollId) {
+    const modal = document.getElementById(`actionPlanModal-${pollId}`);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    if (event.target.classList.contains('action-plan-modal')) {
+        event.target.style.display = 'none';
+    }
+}
+</script>
+
+<!-- Inline Voting JavaScript -->
+<script>
+// Global function to format dates for display
+function formatDateForDisplay(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    
+    // Options for PST timezone formatting
+    const options = {
+        timeZone: 'America/Los_Angeles',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric'
+    };
+    
+    return date.toLocaleDateString('en-US', options);
+}
+
+// Global function to attach vote change handlers (used by both inline voting and carousel)
+function attachVoteChangeHandlers(resultItems, pollId, votingSection) {
+    resultItems.forEach(item => {
+        item.addEventListener('click', async function() {
+            const newOptionId = this.dataset.optionId;
+            const newOptionText = this.dataset.optionText;
+            
+            // Don't do anything if clicking on current choice
+            if (this.classList.contains('user-choice')) {
+                return;
+            }
+            
+            // Disable all items during submission
+            resultItems.forEach(resultItem => {
+                resultItem.style.pointerEvents = 'none';
+                resultItem.style.opacity = '0.6';
+            });
+            
+            try {
+                const response = await fetch(`/polls/${pollId}/vote`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ optionId: newOptionId })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Update the UI immediately with new results
+                    updateVotingUI(data, newOptionId, newOptionText, votingSection);
+                    
+                    // Show a temporary success notification
+                    const successNotification = document.createElement('div');
+                    const isMobile = window.innerWidth <= 768;
+                    successNotification.style.cssText = `
+                        position: fixed;
+                        ${isMobile ? 'bottom: 20px; left: 50%; transform: translateX(-50%);' : 'top: 20px; right: 20px;'}
+                        background: #28a745;
+                        color: white;
+                        padding: ${isMobile ? '0.75rem 1.25rem' : '1rem 1.5rem'};
+                        border-radius: 5px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                        z-index: 1000;
+                        font-weight: 600;
+                        animation: ${isMobile ? 'slideUp' : 'slideIn'} 0.3s ease;
+                        max-width: ${isMobile ? '90%' : 'auto'};
+                        text-align: center;
+                    `;
+                    successNotification.textContent = '✓ Vote changed successfully!';
+                    document.body.appendChild(successNotification);
+                    
+                    // Remove notification after 3 seconds
+                    setTimeout(() => {
+                        successNotification.style.animation = `${isMobile ? 'slideDown' : 'slideOut'} 0.3s ease`;
+                        setTimeout(() => {
+                            if (document.body.contains(successNotification)) {
+                                document.body.removeChild(successNotification);
+                            }
+                        }, 300);
+                    }, 3000);
+                } else {
+                    throw new Error(data.error || 'Failed to change vote');
+                }
+            } catch (error) {
+                console.error('Vote change error:', error);
+                
+                // Re-enable items on error
+                resultItems.forEach(resultItem => {
+                    resultItem.style.pointerEvents = '';
+                    resultItem.style.opacity = '';
+                });
+                
+                // Show error notification
+                const errorNotification = document.createElement('div');
+                const isMobile = window.innerWidth <= 768;
+                errorNotification.style.cssText = `
+                    position: fixed;
+                    ${isMobile ? 'bottom: 20px; left: 50%; transform: translateX(-50%);' : 'top: 20px; right: 20px;'}
+                    background: #dc3545;
+                    color: white;
+                    padding: ${isMobile ? '0.75rem 1.25rem' : '1rem 1.5rem'};
+                    border-radius: 5px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                    font-weight: 600;
+                    animation: ${isMobile ? 'slideUp' : 'slideIn'} 0.3s ease;
+                    max-width: ${isMobile ? '90%' : 'auto'};
+                    text-align: center;
+                `;
+                errorNotification.textContent = error.message || 'An error occurred while changing your vote. Please try again.';
+                document.body.appendChild(errorNotification);
+                
+                // Remove error notification after 5 seconds
+                setTimeout(() => {
+                    errorNotification.style.animation = `${isMobile ? 'slideDown' : 'slideOut'} 0.3s ease`;
+                    setTimeout(() => {
+                        if (document.body.contains(errorNotification)) {
+                            document.body.removeChild(errorNotification);
+                        }
+                    }, 300);
+                }, 5000);
+            }
+        });
+    });
+}
+
+// Define updateVotingUI in the global scope so it can be called from attachVoteChangeHandlers
+function updateVotingUI(data, votedOptionId, votedOptionText, targetVotingSection) {
+    // Use provided voting section or default to the first one
+    const votingSection = targetVotingSection || document.querySelector('.inline-voting-section');
+    if (!votingSection) {
+        console.error('Voting section not found');
+        return;
+    }
+    
+    const pollId = votingSection.dataset.pollId;
+    
+    // Validate data
+    if (!data || !data.results) {
+        console.error('Invalid data received:', data);
+        return;
+    }
+    
+    // Check if we're in the voting options view
+    const optionsContainer = votingSection.querySelector('.options-container');
+    const voteButtons = votingSection.querySelectorAll('.vote-option-btn');
+    
+    if (optionsContainer && voteButtons.length > 0) {
+        // We're in voting options view - update it instead of showing results
+        
+        // First, show success message on the clicked option
+        voteButtons.forEach(btn => {
+            if (btn.dataset.optionId === votedOptionId.toString()) {
+                // This is the button that was clicked
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = `<span style="color: #28a745;">✓ Vote changed successfully</span>`;
+                btn.style.backgroundColor = '#f8fff8';
+                btn.style.borderColor = '#28a745';
+                btn.disabled = true;
+                
+                // After 2 seconds, restore the voting options with updated counts
+                setTimeout(() => {
+                    // Update all vote counts from the results data
+                    voteButtons.forEach(button => {
+                        const buttonOptionId = button.dataset.optionId;
+                        const resultData = data.results.find(r => r.optionId == buttonOptionId);
+                        if (resultData) {
+                            const optionText = button.dataset.optionText;
+                            button.innerHTML = `
+                                ${optionText}
+                                <span class="option-count">(${resultData.votes} votes)</span>
+                            `;
+                            button.disabled = false;
+                            button.style.backgroundColor = '';
+                            button.style.borderColor = '';
+                        }
+                    });
+                    
+                    // Re-enable all buttons
+                    voteButtons.forEach(btn => {
+                        btn.style.pointerEvents = '';
+                        btn.style.opacity = '';
+                    });
+                    
+                    // Reset loading state if container exists
+                    if (optionsContainer) {
+                        optionsContainer.dataset.loading = 'false';
+                    }
+                }, 2000);
+            } else {
+                // Update vote count for other options immediately
+                const resultData = data.results.find(r => r.optionId == btn.dataset.optionId);
+                if (resultData) {
+                    const optionText = btn.dataset.optionText;
+                    btn.innerHTML = `
+                        ${optionText}
+                        <span class="option-count">(${resultData.votes} votes)</span>
+                    `;
+                }
+            }
+        });
+        
+    } else {
+        // We're in results view - show updated results as before
+        const resultsHTML = `
+            <div class="voting-results">
+                <h4>You voted for: <strong>${votedOptionText}</strong></h4>
+                <div class="results-container">
+                    ${data.results && data.results.map(result => `
+                        <div class="result-item ${result.optionId == votedOptionId ? 'user-choice' : ''}" 
+                             data-option-id="${result.optionId}" 
+                             data-option-text="${result.optionText.replace(/"/g, '&quot;')}">
+                            <div class="result-header">
+                                <span class="option-text">${result.optionText}</span>
+                                <span class="vote-count">${result.votes} votes (${Math.round(result.percentage)}%)</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${Math.round(result.percentage)}%"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <p class="vote-info">You can change your vote at any time before the poll ends.</p>
+            </div>
+        `;
+        
+        votingSection.innerHTML = resultsHTML;
+        
+        // Add click handlers to result items for vote changing
+        const resultItems = votingSection.querySelectorAll('.result-item');
+        attachVoteChangeHandlers(resultItems, pollId, votingSection);
+    }
+    
+    // Update the participant count in the same container
+    const container = votingSection.closest('.primary-action-card') || votingSection.closest('.carousel-slide');
+    if (container) {
+        const participantSpan = container.querySelector('.participants');
+        if (participantSpan && data.totalVotes) {
+            participantSpan.innerHTML = `👥 ${data.totalVotes} participants`;
+        }
+        
+        // Update the threshold display
+        const thresholdSpan = container.querySelector('.threshold');
+        if (thresholdSpan && data.voteThreshold) {
+            thresholdSpan.innerHTML = `🎯 ${data.totalVotes}/${data.voteThreshold} votes for approval`;
+        }
+    }
+}
+
+// Carousel functionality with enhancements
+document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.querySelector('.action-carousel');
+    if (!carousel) return;
+    
+    const slidesContainer = document.querySelector('.carousel-slides');
+    const leftArrow = document.querySelector('.carousel-arrow-left');
+    const rightArrow = document.querySelector('.carousel-arrow-right');
+    const indicatorsContainer = document.querySelector('.carousel-indicators');
+    
+    let currentSlide = 0;
+    let totalSlides = 0;
+    let slides = [];
+    let indicators = [];
+    let loadAttempts = 0;
+    const MAX_LOAD_ATTEMPTS = 3;
+    
+    // Function to update carousel state with performance optimizations
+    function updateCarousel() {
+        // Batch DOM updates for better performance
+        requestAnimationFrame(() => {
+            // Update slide positions and mark adjacent slides
+            slides.forEach((slide, index) => {
+                const isActive = index === currentSlide;
+                const isAdjacent = Math.abs(index - currentSlide) === 1;
+                
+                slide.classList.toggle('active', isActive);
+                slide.classList.toggle('adjacent', isAdjacent);
+                
+                // Optimize visibility for performance
+                if (Math.abs(index - currentSlide) > 1) {
+                    slide.style.visibility = 'hidden';
+                } else {
+                    slide.style.visibility = 'visible';
+                }
+            });
+            
+            // Update transform for slide animation
+            slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            // Update indicators
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+                indicator.setAttribute('aria-selected', index === currentSlide);
+            });
+            
+            // Update arrow states
+            leftArrow.disabled = currentSlide === 0;
+            rightArrow.disabled = currentSlide === totalSlides - 1;
+            
+            // Update ARIA live region for screen readers
+            carousel.setAttribute('aria-label', `Action Initiative ${currentSlide + 1} of ${totalSlides}`);
+            
+            // Hide controls if only one slide
+            if (totalSlides <= 1) {
+                leftArrow.style.display = 'none';
+                rightArrow.style.display = 'none';
+                indicatorsContainer.style.display = 'none';
+            } else {
+                leftArrow.style.display = '';
+                rightArrow.style.display = '';
+                indicatorsContainer.style.display = '';
+            }
+            
+            // Prefetch adjacent slide data
+            prefetchAdjacentSlides();
+        });
+    }
+    
+    // Prefetch adjacent slides for smoother transitions
+    function prefetchAdjacentSlides() {
+        const prevIndex = currentSlide - 1;
+        const nextIndex = currentSlide + 1;
+        
+        // Preload images in adjacent slides if any
+        [prevIndex, nextIndex].forEach(index => {
+            if (index >= 0 && index < totalSlides) {
+                const slide = slides[index];
+                const images = slide.querySelectorAll('img[data-src]');
+                images.forEach(img => {
+                    if (!img.src && img.dataset.src) {
+                        img.src = img.dataset.src;
+                    }
+                });
+            }
+        });
+    }
+    
+    // Arrow navigation
+    leftArrow.addEventListener('click', () => {
+        if (currentSlide > 0) {
+            currentSlide--;
+            updateCarousel();
+        }
+    });
+    
+    rightArrow.addEventListener('click', () => {
+        if (currentSlide < totalSlides - 1) {
+            currentSlide++;
+            updateCarousel();
+        }
+    });
+    
+    // Enhanced keyboard navigation
+    carousel.addEventListener('keydown', (e) => {
+        switch(e.key) {
+            case 'ArrowLeft':
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateCarousel();
+                }
+                break;
+            case 'ArrowRight':
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateCarousel();
+                }
+                break;
+            case 'Home':
+                currentSlide = 0;
+                updateCarousel();
+                break;
+            case 'End':
+                currentSlide = totalSlides - 1;
+                updateCarousel();
+                break;
+        }
+    });
+    
+    // Touch/swipe support for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    carousel.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    carousel.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0 && currentSlide < totalSlides - 1) {
+                // Swipe left - next slide
+                currentSlide++;
+                updateCarousel();
+            } else if (diff < 0 && currentSlide > 0) {
+                // Swipe right - previous slide
+                currentSlide--;
+                updateCarousel();
+            }
+        }
+    }
+    
+    // Function to create enhanced loading skeleton
+    function createLoadingSkeleton() {
+        return `
+            <div class="carousel-slide active" data-slide="0">
+                <div class="primary-action-card">
+                    <div class="skeleton-badge"></div>
+                    <div class="skeleton-title"></div>
+                    <div class="skeleton-description"></div>
+                    <div class="skeleton-meta">
+                        <div class="skeleton-meta-item"></div>
+                        <div class="skeleton-meta-item"></div>
+                        <div class="skeleton-meta-item"></div>
+                    </div>
+                    <div class="skeleton-description" style="height: 120px; margin-top: 1rem;"></div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Function to create error state with retry
+    function createErrorState(message, canRetry = true) {
+        return `
+            <div class="carousel-slide active" data-slide="0">
+                <div class="primary-action-card error-state">
+                    <h2>Unable to Load Action Initiatives</h2>
+                    <p>${message}</p>
+                    ${canRetry ? `
+                        <button class="btn btn-action-primary" onclick="window.carouselRetryLoad()">Retry</button>
+                        <p style="margin-top: 1rem; font-size: 0.9rem; color: #6c757d;">
+                            Attempt ${loadAttempts} of ${MAX_LOAD_ATTEMPTS}
+                        </p>
+                    ` : `
+                        <a href="/" class="btn btn-action-secondary">Refresh Page</a>
+                    `}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Global retry function
+    window.carouselRetryLoad = function() {
+        loadActionInitiatives();
+    };
+    
+    // Function to create empty state
+    function createEmptyState() {
+        const isAuthenticated = <%= locals.user ? 'true' : 'false' %>;
+        return `
+            <div class="carousel-slide active" data-slide="0">
+                <div class="no-action-initiative">
+                    <div class="no-action-content">
+                        <h2>No Active Action Initiatives</h2>
+                        <p>Action Initiatives are community-driven proposals where creators commit to taking real action based on the results.</p>
+                        ${isAuthenticated 
+                            ? '<a href="/polls/create" class="btn btn-action-primary">Create First Action Initiative</a>'
+                            : '<a href="/auth/login" class="btn btn-action-primary">Login to Create Action Initiative</a>'
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Function to create initiative slide HTML
+    function createInitiativeSlide(initiative, slideIndex) {
+        const isAuthenticated = initiative.isAuthenticated;
+        const hasVoted = initiative.hasVoted;
+        
+        let votingContent = '';
+        
+        if (isAuthenticated) {
+            if (hasVoted) {
+                // Show results
+                votingContent = `
+                    <div class="voting-results">
+                        <h4>You voted for: <strong>${initiative.userVote.optionText}</strong></h4>
+                        <div class="results-container">
+                            ${initiative.options.map(option => `
+                                <div class="result-item ${initiative.userVote.optionId === option.id ? 'user-choice' : ''}"
+                                     data-option-id="${option.id}"
+                                     data-option-text="${option.option_text.replace(/"/g, '&quot;')}">
+                                    <div class="result-header">
+                                        <span class="option-text">${option.option_text}</span>
+                                        <span class="vote-count">${option.vote_count} votes (${Math.round(option.percentage)}%)</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${Math.round(option.percentage)}%"></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <p class="vote-info">You can change your vote at any time before the poll ends.</p>
+                    </div>
+                `;
+            } else {
+                // Show voting options
+                const showSearch = initiative.options.length > 5;
+                votingContent = `
+                    <div class="voting-options">
+                        <h4>Cast your vote:</h4>
+                        ${showSearch ? '<input type="text" class="option-search" placeholder="Search options..." style="display: block;">' : ''}
+                        <div class="options-container" data-loading="false">
+                            ${initiative.options.map(option => `
+                                <button class="vote-option-btn" data-option-id="${option.id}" data-option-text="${option.option_text}">
+                                    ${option.option_text}
+                                    <span class="option-count">(${option.vote_count} votes)</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="loading-message" style="display: none;">Submitting your vote...</div>
+                        <div class="error-message" style="display: none;"></div>
+                    </div>
+                `;
+            }
+        } else {
+            // Show login prompt
+            votingContent = `
+                <div class="login-prompt">
+                    <h4>Join the discussion!</h4>
+                    <p>Login or create an account to vote on this important community decision.</p>
+                    <div class="auth-buttons">
+                        <a href="/auth/login" class="btn btn-action-primary">Login</a>
+                        <a href="/auth/register" class="btn btn-action-secondary">Create Account</a>
+                    </div>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="carousel-slide ${slideIndex === 0 ? 'active' : ''}" data-slide="${slideIndex}">
+                <div class="primary-action-card">
+                    <div class="action-badge">⚡ Action Initiative</div>
+                    <div class="primary-action-header">
+                        <h2><a href="/polls/${initiative.id}">${initiative.title}</a></h2>
+                        <div class="poll-badges">
+                            <span class="category-badge category-${initiative.category || 'general'}">
+                                ${(initiative.category || 'general').charAt(0).toUpperCase() + (initiative.category || 'general').slice(1)}
+                            </span>
+                        </div>
+                    </div>
+                    <p class="primary-action-description">${initiative.description}</p>
+                    
+                    <div class="action-commitment">
+                        <strong>Creator Commitment:</strong> ${initiative.creatorUsername} will implement the winning option if this initiative is approved.
+                    </div>
+                    
+                    <div class="primary-action-meta">
+                        <span class="participants">👥 ${initiative.voteCount} participants</span>
+                        ${initiative.endDate ? `<span class="deadline">⏱️ Ends: ${formatDateForDisplay(initiative.endDate)}</span>` : ''}
+                        ${initiative.voteThreshold ? `<span class="threshold">🎯 ${initiative.voteCount}/${initiative.voteThreshold} votes for approval</span>` : ''}
+                    </div>
+                    
+                    <!-- Inline Voting Section -->
+                    <div class="inline-voting-section" data-poll-id="${initiative.id}">
+                        ${votingContent}
+                    </div>
+                    
+                    <div class="primary-action-buttons">
+                        <a href="/polls/${initiative.id}" class="btn btn-action-primary">View Full Poll</a>
+                        ${initiative.actionPlan ? `<button class="btn btn-action-secondary" onclick="showActionPlan(${initiative.id})">View Action Plan</button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Function to attach voting handlers to a slide
+    function attachVotingHandlers(slide) {
+        const votingSection = slide.querySelector('.inline-voting-section');
+        if (!votingSection) return;
+        
+        const pollId = votingSection.dataset.pollId;
+        
+        // Attach vote change handlers for results
+        const resultItems = votingSection.querySelectorAll('.result-item');
+        if (resultItems.length > 0) {
+            attachVoteChangeHandlers(resultItems, pollId, votingSection);
+        }
+        
+        // Handle option search
+        const optionSearch = votingSection.querySelector('.option-search');
+        if (optionSearch) {
+            const voteButtons = votingSection.querySelectorAll('.vote-option-btn');
+            
+            optionSearch.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                voteButtons.forEach(button => {
+                    const optionText = button.dataset.optionText.toLowerCase();
+                    if (optionText.includes(searchTerm)) {
+                        button.style.display = 'flex';
+                    } else {
+                        button.style.display = 'none';
+                    }
+                });
+                
+                // Check if no results
+                const visibleButtons = Array.from(voteButtons).filter(btn => btn.style.display !== 'none');
+                let noResults = votingSection.querySelector('.no-results');
+                
+                if (visibleButtons.length === 0) {
+                    if (!noResults) {
+                        noResults = document.createElement('div');
+                        noResults.className = 'no-results';
+                        noResults.textContent = 'No options match your search';
+                        noResults.style.textAlign = 'center';
+                        noResults.style.color = '#6c757d';
+                        noResults.style.padding = '1rem';
+                        votingSection.querySelector('.options-container').appendChild(noResults);
+                    }
+                } else {
+                    if (noResults) noResults.remove();
+                }
+            });
+        }
+        
+        // Handle voting
+        const voteButtons = votingSection.querySelectorAll('.vote-option-btn');
+        voteButtons.forEach(button => {
+            button.addEventListener('click', async function() {
+                const optionId = this.dataset.optionId;
+                const optionText = this.dataset.optionText;
+                const loadingMessage = votingSection.querySelector('.loading-message');
+                const errorMessage = votingSection.querySelector('.error-message');
+                const optionsContainer = votingSection.querySelector('.options-container');
+                
+                // Disable all buttons and set visual loading state
+                voteButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.6';
+                    btn.style.pointerEvents = 'none';
+                });
+                
+                // Mark container as loading
+                if (optionsContainer) {
+                    optionsContainer.dataset.loading = 'true';
+                }
+                
+                // Show loading
+                if (loadingMessage) loadingMessage.style.display = 'block';
+                if (errorMessage) errorMessage.style.display = 'none';
+                
+                try {
+                    const response = await fetch(`/polls/${pollId}/vote`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ optionId: optionId })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        // Successfully voted - update the UI
+                        // Hide loading message before updating UI
+                        if (loadingMessage) loadingMessage.style.display = 'none';
+                        updateVotingUI(data, optionId, optionText, votingSection);
+                    } else {
+                        throw new Error(data.error || 'Failed to submit vote');
+                    }
+                } catch (error) {
+                    console.error('Voting error:', error);
+                    if (errorMessage) {
+                        errorMessage.textContent = error.message || 'An error occurred while voting. Please try again.';
+                        errorMessage.style.display = 'block';
+                    }
+                    // Re-enable buttons on error
+                    voteButtons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = '';
+                        btn.style.pointerEvents = '';
+                    });
+                    if (optionsContainer) {
+                        optionsContainer.dataset.loading = 'false';
+                    }
+                } finally {
+                    if (loadingMessage) loadingMessage.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    
+    // Load action initiatives from API with retry logic
+    async function loadActionInitiatives() {
+        loadAttempts++;
+        
+        // Show loading skeleton
+        slidesContainer.innerHTML = createLoadingSkeleton();
+        
+        try {
+            // Add timeout for slow connections
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+            
+            const response = await fetch('/api/action-initiatives/active', {
+                signal: controller.signal,
+                headers: {
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Failed to load initiatives');
+            }
+            
+            if (data.initiatives && data.initiatives.length > 0) {
+                // Clear existing content
+                slidesContainer.innerHTML = '';
+                indicatorsContainer.innerHTML = '';
+                const modalContainer = document.getElementById('actionPlanModalContainer');
+                modalContainer.innerHTML = '';
+                
+                // Create slides for each initiative
+                data.initiatives.forEach((initiative, index) => {
+                    const slideHTML = createInitiativeSlide(initiative, index);
+                    slidesContainer.insertAdjacentHTML('beforeend', slideHTML);
+                    
+                    // Create action plan modal if initiative has one
+                    if (initiative.actionPlan) {
+                        const modalHTML = `
+                            <div id="actionPlanModal-${initiative.id}" class="action-plan-modal">
+                                <div class="action-plan-modal-content">
+                                    <div class="action-plan-modal-header">
+                                        <h3>Action Plan</h3>
+                                        <span class="close-action-plan" onclick="hideActionPlan(${initiative.id})">&times;</span>
+                                    </div>
+                                    <div class="action-plan-content">
+                                        ${initiative.actionPlan}
+                                    </div>
+                                    <p><strong>Deadline:</strong> ${initiative.actionDeadline ? formatDateForDisplay(initiative.actionDeadline) : 'Not set'}</p>
+                                </div>
+                            </div>
+                        `;
+                        modalContainer.insertAdjacentHTML('beforeend', modalHTML);
+                    }
+                    
+                    // Create indicator
+                    const indicator = document.createElement('button');
+                    indicator.className = 'carousel-indicator' + (index === 0 ? ' active' : '');
+                    indicator.dataset.slide = index;
+                    indicator.setAttribute('role', 'tab');
+                    indicator.setAttribute('aria-selected', index === 0);
+                    indicator.setAttribute('aria-label', `Go to slide ${index + 1}`);
+                    indicatorsContainer.appendChild(indicator);
+                });
+                
+                // Add "Create Your Own" slide for authenticated users
+                const isAuthenticated = <%= locals.user ? 'true' : 'false' %>;
+                if (isAuthenticated) {
+                    const createSlideIndex = data.initiatives.length;
+                    const createSlideHTML = `
+                        <div class="carousel-slide" data-slide="${createSlideIndex}">
+                            <div class="primary-action-card create-action-card">
+                                <div class="create-action-content">
+                                    <div class="create-icon">⚡</div>
+                                    <h2>Create Your Own Action Initiative</h2>
+                                    <p class="create-description">
+                                        Have an idea that needs community action? Start an Action Initiative and commit to implementing the community's decision.
+                                    </p>
+                                    <div class="benefits-list">
+                                        <div class="benefit-item">
+                                            <span class="benefit-icon">✓</span>
+                                            <span>Get community input on important decisions</span>
+                                        </div>
+                                        <div class="benefit-item">
+                                            <span class="benefit-icon">✓</span>
+                                            <span>Demonstrate your commitment to action</span>
+                                        </div>
+                                        <div class="benefit-item">
+                                            <span class="benefit-icon">✓</span>
+                                            <span>Build trust through transparency</span>
+                                        </div>
+                                    </div>
+                                    <a href="/polls/create" class="btn btn-action-primary btn-large">
+                                        Start Your Initiative
+                                    </a>
+                                    <p class="create-note">
+                                        Action Initiatives require you to commit to implementing the winning option if your poll reaches the approval threshold.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    slidesContainer.insertAdjacentHTML('beforeend', createSlideHTML);
+                    
+                    // Create indicator for the create slide
+                    const createIndicator = document.createElement('button');
+                    createIndicator.className = 'carousel-indicator';
+                    createIndicator.dataset.slide = createSlideIndex;
+                    createIndicator.setAttribute('role', 'tab');
+                    createIndicator.setAttribute('aria-selected', false);
+                    createIndicator.setAttribute('aria-label', `Go to create initiative slide`);
+                    indicatorsContainer.appendChild(createIndicator);
+                }
+                
+                // Update references
+                slides = document.querySelectorAll('.carousel-slide');
+                indicators = document.querySelectorAll('.carousel-indicator');
+                totalSlides = slides.length;
+                
+                // Attach voting handlers to all slides (except create slide)
+                slides.forEach(slide => {
+                    if (!slide.querySelector('.create-action-card')) {
+                        attachVotingHandlers(slide);
+                    }
+                });
+                
+                // Attach indicator click handlers
+                indicators.forEach((indicator, index) => {
+                    indicator.addEventListener('click', () => {
+                        currentSlide = index;
+                        updateCarousel();
+                    });
+                });
+                
+                // Initialize carousel
+                updateCarousel();
+                
+            } else {
+                // Show empty state
+                slidesContainer.innerHTML = createEmptyState();
+                slides = document.querySelectorAll('.carousel-slide');
+                totalSlides = 1;
+                updateCarousel();
+            }
+            
+        } catch (error) {
+            console.error('Failed to load action initiatives:', error);
+            
+            let errorMessage = 'Please check your connection and try again.';
+            let canRetry = loadAttempts < MAX_LOAD_ATTEMPTS;
+            
+            if (error.name === 'AbortError') {
+                errorMessage = 'The request timed out. Please check your internet connection.';
+            } else if (!navigator.onLine) {
+                errorMessage = 'You appear to be offline. Please check your internet connection.';
+                canRetry = false;
+            }
+            
+            slidesContainer.innerHTML = createErrorState(errorMessage, canRetry);
+            slides = document.querySelectorAll('.carousel-slide');
+            totalSlides = 1;
+            updateCarousel();
+            
+            // Auto-retry for temporary failures
+            if (canRetry && loadAttempts < MAX_LOAD_ATTEMPTS) {
+                setTimeout(() => {
+                    loadActionInitiatives();
+                }, 3000); // Retry after 3 seconds
+            }
+        }
+    }
+    
+    // Monitor online/offline status
+    window.addEventListener('online', () => {
+        if (slides.length === 1 && slides[0].querySelector('.error-state')) {
+            loadAttempts = 0;
+            loadActionInitiatives();
+        }
+    });
+    
+    // Load initiatives on page load with performance optimization
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => loadActionInitiatives(), { timeout: 1000 });
+    } else {
+        setTimeout(() => loadActionInitiatives(), 100);
+    }
+    
+    // Optimize carousel for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (prefersReducedMotion.matches) {
+        // Reduce transition duration for accessibility
+        document.documentElement.style.setProperty('--carousel-transition-duration', '0.1s');
+    }
+});
+
+</script>

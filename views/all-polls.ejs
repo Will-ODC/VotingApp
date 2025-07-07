@@ -1,0 +1,641 @@
+<!-- All Polls - Reddit Style Layout -->
+<div class="all-polls-container">
+    <div class="header-section">
+        <h1>All Community Polls</h1>
+        <p class="subtitle">Explore all ongoing discussions and initiatives</p>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="reddit-layout">
+        <!-- Posts Column -->
+        <div class="posts-column" id="pollsContainer">
+            <% if (polls.length === 0) { %>
+                <div class="no-polls-message">
+                    <p>No polls found. Be the first to start a discussion!</p>
+                    <% if (user) { %>
+                        <a href="/polls/create" class="btn btn-primary">Create Poll</a>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <% polls.forEach(poll => { %>
+                    <div class="reddit-post <%= poll.is_action_initiative ? 'action-initiative-post' : '' %>">
+                        <!-- Vote Section -->
+                        <div class="vote-section">
+                            <div class="vote-count"><%= poll.vote_count || 0 %></div>
+                            <div class="vote-label">votes</div>
+                        </div>
+
+                        <!-- Post Content -->
+                        <div class="post-content">
+                            <!-- Post Header -->
+                            <div class="post-header">
+                                <% if (poll.is_action_initiative) { %>
+                                    <span class="action-badge">⚡ Action Initiative</span>
+                                <% } %>
+                                <span class="category-badge category-<%= poll.category || 'general' %>">
+                                    <%= (poll.category || 'general').charAt(0).toUpperCase() + (poll.category || 'general').slice(1) %>
+                                </span>
+                                <span class="post-meta">
+                                    Posted by <span class="username"><%= poll.creator_name %></span>
+                                    <span class="time-separator">•</span>
+                                    <span class="timestamp" data-created="<%= poll.created_at %>"><%= getRelativeTime(poll.created_at) %></span>
+                                </span>
+                            </div>
+
+                            <!-- Post Title -->
+                            <h2 class="post-title">
+                                <a href="/polls/<%= poll.id %>"><%= poll.title %></a>
+                            </h2>
+
+                            <!-- Post Description -->
+                            <p class="post-description"><%= poll.description %></p>
+
+                            <!-- Image/URL Placeholder -->
+                            <% if (poll.image_url) { %>
+                                <div class="post-media">
+                                    <% if (poll.image_url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) { %>
+                                        <img src="<%= poll.image_url %>" alt="Poll image" class="post-image" loading="lazy">
+                                    <% } else { %>
+                                        <a href="<%= poll.image_url %>" target="_blank" class="external-link">
+                                            <span class="link-icon">🔗</span>
+                                            <span class="link-text"><%= poll.image_url %></span>
+                                        </a>
+                                    <% } %>
+                                </div>
+                            <% } else { %>
+                                <div class="post-media-placeholder">
+                                    <!-- Placeholder for future image/media content -->
+                                </div>
+                            <% } %>
+
+                            <!-- Post Footer -->
+                            <div class="post-footer">
+                                <a href="/polls/<%= poll.id %>" class="action-link">
+                                    <span class="icon">💬</span> Discuss
+                                </a>
+                                <% if (poll.status === 'active' && !poll.is_action_initiative) { %>
+                                    <a href="/polls/<%= poll.id %>" class="action-link">
+                                        <span class="icon">🗳️</span> Vote
+                                    </a>
+                                <% } %>
+                                <% if (poll.end_date) { %>
+                                    <span class="end-date">
+                                        <% if (poll.status === 'expired') { %>
+                                            Ended <%= formatDatePST(poll.end_date) %>
+                                        <% } else { %>
+                                            Ends <%= formatDatePST(poll.end_date) %>
+                                        <% } %>
+                                    </span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+
+        <!-- Sidebar (for future use) -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>Community Stats</h3>
+                <p>Coming soon...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner for Infinite Scroll -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading more polls...</p>
+    </div>
+
+    <!-- No More Content Message -->
+    <div id="noMoreContent" class="no-more-content" style="display: none;">
+        <p>You've reached the end!</p>
+    </div>
+</div>
+
+<style>
+/* Reddit-style Layout */
+.all-polls-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header-section {
+    margin-bottom: 2rem;
+}
+
+.header-section h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: #1a1a1b;
+}
+
+.subtitle {
+    color: #7c7c7d;
+    margin-top: 0.5rem;
+}
+
+.reddit-layout {
+    display: flex;
+    gap: 2rem;
+}
+
+.posts-column {
+    flex: 1;
+    max-width: 800px;
+}
+
+.sidebar {
+    width: 300px;
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+}
+
+.sidebar-section {
+    background: #f6f7f8;
+    border: 1px solid #edeff1;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Reddit-style Post Card */
+.reddit-post {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    display: flex;
+    transition: border-color 0.2s;
+    overflow: hidden;
+}
+
+.reddit-post:hover {
+    border-color: #898989;
+}
+
+.action-initiative-post {
+    border-color: #28a745;
+    border-width: 2px;
+}
+
+/* Vote Section */
+.vote-section {
+    background: #f8f9fa;
+    padding: 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+}
+
+.vote-count {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1a1a1b;
+}
+
+.vote-label {
+    font-size: 0.75rem;
+    color: #7c7c7d;
+    text-transform: uppercase;
+}
+
+/* Post Content */
+.post-content {
+    flex: 1;
+    padding: 8px 16px;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
+    color: #787c7e;
+}
+
+.action-badge {
+    background: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.category-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: white;
+}
+
+.category-general { background: #6c757d; }
+.category-budget { background: #28a745; }
+.category-rules { background: #dc3545; }
+.category-partnerships { background: #17a2b8; }
+.category-wellbeing { background: #ffc107; color: #212529; }
+.category-platform { background: #6f42c1; }
+.category-governance { background: #fd7e14; }
+
+.username {
+    font-weight: 500;
+    color: #1a1a1b;
+}
+
+.time-separator {
+    margin: 0 4px;
+}
+
+.post-title {
+    margin: 0 0 8px 0;
+    font-size: 1.25rem;
+    line-height: 1.4;
+}
+
+.post-title a {
+    color: #1a1a1b;
+    text-decoration: none;
+}
+
+.post-title a:hover {
+    color: #0079d3;
+}
+
+.post-description {
+    color: #1c1c1c;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+/* Post Media */
+.post-media {
+    margin: 12px 0;
+}
+
+.post-image {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+.external-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f6f7f8;
+    border: 1px solid #edeff1;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #0079d3;
+    font-size: 0.9rem;
+}
+
+.external-link:hover {
+    background: #e9ebee;
+}
+
+.post-media-placeholder {
+    /* Empty placeholder for future use */
+}
+
+/* Post Footer */
+.post-footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+    font-size: 0.875rem;
+}
+
+.action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #878a8c;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.action-link:hover {
+    background: #f6f7f8;
+    color: #1a1a1b;
+}
+
+.icon {
+    font-size: 1rem;
+}
+
+.end-date {
+    color: #7c7c7d;
+    margin-left: auto;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+}
+
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0079d3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.no-more-content {
+    text-align: center;
+    padding: 2rem;
+    color: #7c7c7d;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .reddit-layout {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        position: static;
+    }
+    
+    .vote-section {
+        min-width: 50px;
+    }
+    
+    .post-content {
+        padding: 8px 12px;
+    }
+    
+    .post-title {
+        font-size: 1.1rem;
+    }
+    
+    .post-footer {
+        flex-wrap: wrap;
+    }
+}
+
+/* No Polls Message */
+.no-polls-message {
+    text-align: center;
+    padding: 3rem;
+    background: #f6f7f8;
+    border-radius: 8px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #0079d3;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0060a8;
+}
+</style>
+
+<script>
+// Get relative time function
+function getRelativeTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    const intervals = {
+        year: 31536000,
+        month: 2592000,
+        week: 604800,
+        day: 86400,
+        hour: 3600,
+        minute: 60
+    };
+    
+    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+        const interval = Math.floor(seconds / secondsInUnit);
+        if (interval >= 1) {
+            return interval === 1 ? `1 ${unit} ago` : `${interval} ${unit}s ago`;
+        }
+    }
+    
+    return 'just now';
+}
+
+// Update all timestamps on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const timestamps = document.querySelectorAll('.timestamp');
+    timestamps.forEach(element => {
+        const created = element.getAttribute('data-created');
+        if (created) {
+            element.textContent = getRelativeTime(created);
+        }
+    });
+});
+
+// Infinite scroll setup
+let isLoading = false;
+let hasMore = <%= hasMore %>;
+let currentOffset = <%= nextOffset %>;
+
+window.addEventListener('scroll', function() {
+    if (isLoading || !hasMore) return;
+    
+    const scrollHeight = document.documentElement.scrollHeight;
+    const scrollTop = document.documentElement.scrollTop;
+    const clientHeight = document.documentElement.clientHeight;
+    
+    if (scrollTop + clientHeight >= scrollHeight - 200) {
+        loadMorePolls();
+    }
+});
+
+// Load more polls via API
+async function loadMorePolls() {
+    if (isLoading || !hasMore) return;
+    
+    isLoading = true;
+    document.getElementById('loadingSpinner').style.display = 'block';
+    
+    try {
+        const response = await fetch(`/api/polls?offset=${currentOffset}&limit=20`);
+        const data = await response.json();
+        
+        if (data.success && data.data.polls.length > 0) {
+            const container = document.getElementById('pollsContainer');
+            
+            // Create and append new poll elements
+            data.data.polls.forEach(poll => {
+                const pollElement = createPollElement(poll);
+                container.appendChild(pollElement);
+            });
+            
+            // Update timestamps for new elements
+            const newTimestamps = container.querySelectorAll('.timestamp:not([data-processed])');
+            newTimestamps.forEach(element => {
+                const created = element.getAttribute('data-created');
+                if (created) {
+                    element.textContent = getRelativeTime(created);
+                    element.setAttribute('data-processed', 'true');
+                }
+            });
+            
+            // Update state
+            hasMore = data.data.hasMore;
+            currentOffset = data.data.nextOffset || currentOffset;
+            
+            if (!hasMore) {
+                document.getElementById('noMoreContent').style.display = 'block';
+            }
+        } else {
+            hasMore = false;
+            document.getElementById('noMoreContent').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error loading more polls:', error);
+    } finally {
+        isLoading = false;
+        document.getElementById('loadingSpinner').style.display = 'none';
+    }
+}
+
+// Create poll element from data
+function createPollElement(poll) {
+    const div = document.createElement('div');
+    div.className = `reddit-post ${poll.is_action_initiative ? 'action-initiative-post' : ''}`;
+    
+    const voteCount = poll.vote_count || 0;
+    const category = poll.category || 'general';
+    const categoryCapitalized = category.charAt(0).toUpperCase() + category.slice(1);
+    
+    div.innerHTML = `
+        <div class="vote-section">
+            <div class="vote-count">${voteCount}</div>
+            <div class="vote-label">votes</div>
+        </div>
+        <div class="post-content">
+            <div class="post-header">
+                ${poll.is_action_initiative ? '<span class="action-badge">⚡ Action Initiative</span>' : ''}
+                <span class="category-badge category-${category}">
+                    ${categoryCapitalized}
+                </span>
+                <span class="post-meta">
+                    Posted by <span class="username">${poll.creator_name}</span>
+                    <span class="time-separator">•</span>
+                    <span class="timestamp" data-created="${poll.created_at}">${getRelativeTime(poll.created_at)}</span>
+                </span>
+            </div>
+            <h2 class="post-title">
+                <a href="/polls/${poll.id}">${poll.title}</a>
+            </h2>
+            <p class="post-description">${poll.description}</p>
+            ${poll.image_url ? createMediaElement(poll.image_url) : '<div class="post-media-placeholder"></div>'}
+            <div class="post-footer">
+                <a href="/polls/${poll.id}" class="action-link">
+                    <span class="icon">💬</span> Discuss
+                </a>
+                ${poll.status === 'active' && !poll.is_action_initiative ? 
+                    `<a href="/polls/${poll.id}" class="action-link">
+                        <span class="icon">🗳️</span> Vote
+                    </a>` : ''}
+                ${poll.end_date ? 
+                    `<span class="end-date">
+                        ${poll.status === 'expired' ? 'Ended' : 'Ends'} ${formatDateJS(poll.end_date)}
+                    </span>` : ''}
+            </div>
+        </div>
+    `;
+    
+    return div;
+}
+
+// Create media element for images/URLs
+function createMediaElement(url) {
+    if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+        return `<div class="post-media">
+            <img src="${url}" alt="Poll image" class="post-image" loading="lazy">
+        </div>`;
+    } else {
+        return `<div class="post-media">
+            <a href="${url}" target="_blank" class="external-link">
+                <span class="link-icon">🔗</span>
+                <span class="link-text">${url}</span>
+            </a>
+        </div>`;
+    }
+}
+
+// Format date in JavaScript (similar to server-side formatDatePST)
+function formatDateJS(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    const options = {
+        timeZone: 'America/Los_Angeles',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric'
+    };
+    
+    return date.toLocaleDateString('en-US', options);
+}
+</script>
+
+<%
+// Helper function defined in the view
+function getRelativeTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    const intervals = {
+        year: 31536000,
+        month: 2592000,
+        week: 604800,
+        day: 86400,
+        hour: 3600,
+        minute: 60
+    };
+    
+    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+        const interval = Math.floor(seconds / secondsInUnit);
+        if (interval >= 1) {
+            return interval === 1 ? `1 ${unit} ago` : `${interval} ${unit}s ago`;
+        }
+    }
+    
+    return 'just now';
+}
+%>

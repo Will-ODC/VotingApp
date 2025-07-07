@@ -1,6 +1,6 @@
-# VotingApp - Democratic Community Decision Platform
+# VotingApp - Online Democratic Community Platform
 
-A comprehensive web-based voting platform that enables democratic decision-making through community polls and initiatives with advanced features for search, filtering, vote management, and approval workflows.
+A comprehensive web-based voting platform that enables transparent, community-controlled decision-making and ethical data monetization for collective wellbeing. Features include democratic polls, action initiatives, dynamic carousels, and advanced search/filtering capabilities.
 
 ## 🚀 Features
 
@@ -27,9 +27,12 @@ A comprehensive web-based voting platform that enables democratic decision-makin
 ### 🗳️ Advanced Voting System
 - **Democratic Voting**: One vote per user per poll
 - **Vote Changing**: Users can modify votes until poll expires
+- **Inline Voting**: Vote directly from homepage carousel without navigation
+- **One-Click Vote Changes**: Instantly change votes with real-time updates
 - **Vote Validation**: Prevent voting on expired or inactive polls
-- **Real-time Results**: Live vote counts with percentage breakdowns
+- **Real-time Results**: Live vote counts with percentage breakdowns via AJAX
 - **Visual Progress**: Progress bars showing votes toward approval thresholds
+- **Performance Optimized**: Efficient API endpoints for dynamic updates
 
 ### 🔍 Search & Discovery
 - **Text Search**: Search polls by title and description across all pages
@@ -44,6 +47,10 @@ A comprehensive web-based voting platform that enables democratic decision-makin
 - **Intuitive Navigation**: Logical page flow with breadcrumb navigation
 - **Rich Metadata**: Creator info, vote counts, timestamps, and approval status
 - **Performance Optimized**: Pagination prevents overwhelming data loads
+- **Dynamic Content Loading**: AJAX-powered interfaces for seamless interactions
+- **Loading States**: Visual feedback during data operations
+- **Error Handling**: Graceful error messages with retry options
+- **Z-index Management**: Proper layering of UI elements for optimal experience
 
 ### 🎯 Approval & Action System
 - **Vote Thresholds**: Set minimum votes needed for poll approval
@@ -57,12 +64,16 @@ A comprehensive web-based voting platform that enables democratic decision-makin
 - **Creator Commitment**: Poll creators commit to taking action when initiatives are approved
 - **Action Plan Submission**: Detailed plans with implementation timelines and deadlines
 - **Homepage Featuring**: Primary action initiative prominently displayed on homepage
+- **Dynamic Carousel Navigation**: Navigate through multiple initiatives with smooth transitions
+- **Inline Voting Interface**: Vote directly from carousel without page navigation
+- **Real-time Results Display**: View vote counts and percentages without refresh
 - **Automatic Status Transitions**: Seamless progression from Stage 1 to Stage 2 voting
 - **Stage 2 Voting**: Stage 1 voters can approve or reject proposed action plans
 - **Action Deadline Tracking**: Monitor and display action completion deadlines
 - **Creator Accountability**: System ensures poll creators follow through on commitments
 - **Visual Status Indicators**: Clear badges and progress tracking throughout the process
 - **Action Status Management**: Track pending, in-progress, completed, or failed actions
+- **Quick Action Creation**: "Create Your Own Initiative" card in carousel for easy access
 
 ## 🛠️ Tech Stack
 
@@ -186,7 +197,6 @@ VotingApp/
 ├── server.js           # Main application entry point with middleware setup
 ├── schema.sql          # Database schema with threshold support
 ├── voting.db          # SQLite database (auto-created on first run)
-├── CLAUDE.md          # Comprehensive development documentation
 ├── README.md          # This file
 ├── .env               # Environment variables (not in git)
 ├── package.json       # Dependencies and npm scripts
@@ -309,15 +319,26 @@ npm start    # Standard start
 2. **New Features**: Follow MVC pattern with proper route, model, and view separation
 3. **Testing**: Verify functionality across authentication states and user roles
 4. **Security**: Always use parameterized queries and validate user input
+5. **API Development**: Create RESTful endpoints for dynamic features
+6. **Frontend Integration**: Use AJAX for seamless user interactions
 
 ## 📚 Documentation
 
 - **README.md**: This overview and setup guide
-- **CLAUDE.md**: Comprehensive technical documentation and feature tracker
 - **Code Comments**: JSDoc comments throughout all source files
 - **Schema**: Database structure documented in `schema.sql`
+- **API Documentation**: RESTful endpoints documented in route files
 
 ## 🎯 Recent Updates
+
+### December 29, 2024 - Dynamic Carousel & Inline Voting
+- ✅ **Dynamic Carousel System**: Implemented smooth navigation between action initiatives
+- ✅ **Inline Voting Interface**: Vote directly from carousel without page refresh
+- ✅ **Real-time Results**: AJAX-powered vote updates with instant feedback
+- ✅ **One-Click Vote Changes**: Change votes instantly with optimized API calls
+- ✅ **Create Initiative Card**: Quick access to create new initiatives from carousel
+- ✅ **Performance Optimization**: Efficient data loading and caching
+- ✅ **Enhanced Error Handling**: Graceful fallbacks and user-friendly error messages
 
 ### June 19, 2025 - Documentation Update & Contact System
 - ✅ **Documentation Updated**: Comprehensive documentation update to reflect current simple contact system

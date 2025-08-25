@@ -331,7 +331,7 @@ npm start    # Standard start
 
 ## 🎯 Recent Updates
 
-### June 29, 2024 - Dynamic Carousel & Inline Voting
+### June 29, 2025 - Dynamic Carousel & Inline Voting
 - ✅ **Dynamic Carousel System**: Implemented smooth navigation between action initiatives
 - ✅ **Inline Voting Interface**: Vote directly from carousel without page refresh
 - ✅ **Real-time Results**: AJAX-powered vote updates with instant feedback
